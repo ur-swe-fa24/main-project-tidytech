@@ -1,0 +1,2 @@
+# Caroline's Sprint 0 Contributions
+I worked on creating a few of the user stories for the product backlog, and I added acceptance criteria for half of them. I also contributed to the staffing document. 
