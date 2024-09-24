@@ -1,0 +1,29 @@
+@startuml ABasicSeqDiagram
+
+actor SeniorManager
+participant UI #FBCBC9
+participant SystemManager #d69cbc
+database Database as DB 
+' participant SimulationEngine #a2d5c6
+
+SeniorManager -> UI: requestBusinessAnalysis
+activate UI 
+UI -> SystemManager: requestReport
+activate SystemManager
+SystemManager -> DB: retrieveRobotPerformanceData
+activate DB
+
+DB --> SystemManager: returnRobotPermanceData
+deactivate DB
+SystemManager -> SystemManager: analyzeData
+SystemManager --> UI: returnReport
+deactivate SystemManager
+
+UI --> SeniorManager: displayReport
+deactivate UI
+
+
+
+
+
+@enduml
