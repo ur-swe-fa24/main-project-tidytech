@@ -1,0 +1,26 @@
+@startuml ABasicUseDiagram
+
+actor "Building Operator" as BO
+actor "Senior Manager" as SM
+actor "Building Manager" as BM
+actor "Field Engineer" as FE
+
+
+rectangle "Cleaning Robot System" {
+    usecase "Task robots" as U1
+    usecase "Know business analytics" as U2
+    usecase "Restrict certain room access for robots" as U3
+    usecase "Set robot cleaning schedule" as U4
+    usecase "View robot location" as U5
+    usecase "Receive notifications/alerts" as U6
+}
+
+BO --> U1
+SM --> U2
+BM --> U1
+BM --> U3
+BM --> U4 
+FE --> U5 
+FE --> U6
+
+@enduml
