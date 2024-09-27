@@ -1,0 +1,262 @@
+@startuml ClassBasics
+skinparam dpi 200
+skinparam DefaultFontName Inconsolata
+
+package SimulationEngine{
+    class Simulator {
+        - clock : int
+        - robots : list[Robot]
+        - floorplan : FloorPlan
+
+        + getClock() : int
+        + setClock(time : int)
+        + getRobots() : list[Robot]
+        + setRobots(robots : list[Robot])
+        + getFloorplan() : FloorPlan
+        + setFloorplan(floorplan : FloorPlan)
+
+        + reset()
+        + addRobot(bot : Robot)
+        + removeRobot(bot : Robot)
+        + addFloorplan(floorplan : FloorPlan)
+        + removeFloorplan(floorplan : FloorPlan)
+        + assignTask(floor : FloorNode, robot : Robot)
+        + assignMultiTask(floors : FloorPlan, robots : list[Robot])
+    }
+
+    Simulator "1" o---> "1" FloorPlan : requires
+    Simulator "1" o---> "1,...n" Robot : requires
+
+    abstract Robot {
+        # uniqueID : string
+        # size : string = "S"
+        # basePosition : FloorNode
+        # currentPosition : FloorNode
+        # batteryPercentage : int = 100
+        # tasks : list[FloorNode]
+        # status : bool
+
+        + getSize() : string
+        + setSize(size : string)
+        + getBasePosition() : node
+        + setBasePosition(base : node)
+        + getCurrentPosition() : node
+        + setCurrentPosition(position : node)
+        + getBatteryPercentage() : int
+        + setBatteryPercentage(battery : int)
+        + getTasks() : list[FloorNode]
+        + setTasks(floors : list[FloorNode])
+        + getStatus() : bool
+        + setStatus() : bool
+
+        + canMove(destination : node) : bool
+        + move(destination : node)
+        + atBase() : bool
+        + returnBase()
+        + addTask(floor : FloorNode)
+        + removeTask()
+        + taskStatus() : list[FloorNode]
+        + chargeRobot()
+        + robotCharged() : bool
+        - reportLog() : string
+        - batteryUsage(used : int)
+        - throwError() : string
+    }
+
+    class VacuumRobot {
+        - dirtCapacity : int = 100
+
+        + getDirtCapacity() : int
+        + setDirtCapacity(dirt : int)
+
+        + vacuum()
+    }
+
+    class ShampooRobot {
+        - shampooCapacity : int = 100
+
+        + getShampooCapacity() : int
+        + setShampooCapacity(shampoo : int)
+
+        + shampoo()
+    }
+
+    class ScrubberRobot {
+        - waterCapacity : int = 100
+
+        + getWaterCapacity() : int
+        + setWaterCapacity(water : int)
+
+        + scrub()
+    }
+
+    Robot <|-- VacuumRobot : is-a
+    Robot <|-- ShampooRobot : is-a
+    Robot <|-- ScrubberRobot : is-a
+
+    class FloorNode {
+        - locationId : string
+        - connections : list[FloorNode]
+        - nodeType : string = 'room'
+        - type : string = 'carpet'
+        - numRobots : int = 0
+        - maxRobots : int = 5
+        - dirtiness : int = 100
+        - interactionLevel : int
+
+        + getLocationId() : string
+        + setLocationId(id : string)
+        + getConnections() : list[FloorNode]
+        + setConnections(nodes : list[FloorNode])
+        + getType() : string
+        + setType(type : string)
+        + getNumRobots() : int
+        + setNumRobots(numRobots : int)
+        + getDirtiness() : int
+        + setDirtiness(dirtyLevel : int)
+        + getInteractionLevel() : int
+        + setInteractionLevel(intLevel : int)
+
+        - dirtSimulation()
+        + addRobot(bot : Robot)
+        + removeRobot(bot : Robot)
+        + isClean() : bool
+        + getClean(bot : Robot)
+        
+    }
+
+    Class FloorPlan {
+        - floors : list[FloorNode]
+
+        + getFloors() : list[FloorNode]
+        + setFloors(floors : list[FloorNode])
+
+        + removeFloor(floor : FloorNode)
+        + addFloor(floor : FloorNode)
+        + getDirtyFloors(type : string): list[FloorNode]
+    }
+
+    FloorPlan "1" o---> "0..n" FloorNode : manages
+
+
+}
+
+package Database {
+    class Database {
+        - database : MongoDB
+
+        + storeCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+        + accessCleanData()
+        + removeCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+        + modifyCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+        
+        + addError(robotID : string, location : FloorNode, time : int, status : bool)
+        + accessError()
+        + removeError(robotID : string, location : FloorNode, time : int, status : bool)
+        + modifyError(robotID : string, location : FloorNode, time : int, status : bool)
+    }
+}
+
+package Users{
+    abstract User {
+        # userId : string
+    }
+
+    class BuildingOperator {
+        - assignedRobot : Robot
+
+        + getUserId() : string
+        + setUserId(id : string)
+        + getAssignedRobot() : Robot
+        + setAssignedRobot(bot : Robot)
+
+        + assignTask(floors : list[FloorNode])
+        + viewTasks() : list[FloorNode]
+        + removeTask(floors : list[FloorNode])
+        + checkStatus() : string
+        + setNotification() : string
+    }
+
+    class BuildingManager {
+        - assignedRobots : list[Robot]
+
+        + getUserId() : string
+        + setUserId(id : string)
+        + getAssignedRobots() : list[Robot]
+        + setAssignedRobots(bots : list[Robot])
+
+        + setFloorPlan(floorplan : FloorPlan)
+        + assignTask(bots : list[Robot], floors : list[FloorNode])
+        + viewTasks() : list[FloorNode]
+        + removeTask(bots : list[Robot], floors : list[FloorNode])
+        + checkStatus() : list[string]
+        + setNotification(bots : list[Robot]) : list[string]
+    }
+
+    class FieldEngineer {
+        - issues : list[string]
+
+        + getUserId() : string
+        + setUserId(id : string)
+        + getIssues() : list[string]
+        + setIssues(issues : list[string])
+
+        + addIssue(issue : string)
+        + errorStatus(bot : Robot) : string
+        + troubleshoot(issue : string)        
+
+    }
+
+    class SeniorManager {
+
+        + getUserId() : string
+        + setUserId(id : string)
+
+        + getCurrentRobotsUsed() : double
+        + getCompletionRate() : double
+        + getErrorRate() : double
+        + getRobotsUsedOverTime() : double
+        + getBatteryToRoomsCleaned(bot : Robots) : double
+    }
+
+    User <|-- BuildingOperator : is-a
+    User <|-- BuildingManager : is-a
+    User <|-- FieldEngineer : is-a
+    User <|-- SeniorManager : is-a
+
+}
+
+package ManagementSystem {
+    class FleetManager {
+        - siumlator : Simulator
+        - database : Database
+        - currUser : User
+
+        + getSimulator() : Simulator
+        + setSimulator(sim : Simulator)
+        + getDatabase() : Database
+        + setDatabase(db : Database)
+
+        + addRobots(bots : list[Robots])
+        + removeRobots(bots : list[Robots])
+        + updateFloorPlan(floorplan : FloorPlan)
+        + assignTask(bot : Robot, tasks : list[Floors])
+        + assignTasks(bots : list[Robots], tasks : list[Floors])
+        + updateDatabase()
+        + accessDatabase(dataType : string) : string
+        + receiveData()
+        + sendReport()
+        + getCurrentRobotsUsed() : double
+        + getCompletionRate() : double
+        + getErrorRate() : double
+        + getRobotsUsedOverTime() : double
+
+
+        - retrieveRobotPerformanceData(performanceType : string)
+        - checkUserType(user : string) : bool
+        - throwError() : string
+    }
+}
+
+
+@enduml
