@@ -1,11 +1,11 @@
 # Design Document
 
-## Use Case Diagram
+## [Use Case Diagram](./use_case_diagram/use_cases.md)
 ![Use Case Diagram](./use_case_diagram/use_case_diagram.png)
 
 The use case diagram illustrates how the Senior Manager, Building Operator, Building Manager, and Field Engineer interact with the cleaning robot fleet management system. Each user has specific functionalities, such as assigns tasks to robots, setting a cleaning schedule or tracking robot location. Some functions are shared between roles.
 
-## Architectural Design
+## [Architectural Design](./architecture/ARCHITECTURE.md)
 ![Architectural Design](./architecture/architecture.png)
 
 There are 4 main components that make up the architecture: user interface, fleet manager, simulation, and database. There are sub-components in each that interact with other sub-components from the main components.
@@ -26,7 +26,7 @@ Below, we have the UI designs for the four different user roles.
 ![UI FM](./ui_wireframes/field_engineer_wireframe.png)
 
 
-## Sequence Diagrams
+## [Sequence Diagrams](./seq_diagrams/SEQUENCE.md)
 
 ![SD1](./seq_diagrams/bm1.png)
 This sequence diagram above shows the interactions between the building manager and each of the main components when the building manager is trying to change the schedule of the robots or update the floorpan.
@@ -45,7 +45,7 @@ This sequence diagram above shows how the system components interact when a fiel
 ![SD5](./seq_diagrams/sm.png)
 This sequence diagram above depicts how the system components interact when a senior manager requests a business analysis of robots, starting with the request through the UI and ending with the UI displaying the report after the system manager retrieves and processes the data from the database.
 
-## UML Classes
+## [UML Classes](./uml_class_diagrams/CLASSES.md)
 The system consists of four main components: the **Simulation Engine** simulates a cleaning environment, the **Database** manages data interactions with MongoDB, the **Users** component defines various roles with specific permissions, and the **Management System** coordinates all interactions between the simulation, database, and user interface.
 
 ![Uml1](./uml_class_diagrams/SimulationEngine.png)
