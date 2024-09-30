@@ -1,0 +1,33 @@
+@startuml 1
+skinparam dpi 150
+skinparam DefaultFontName Courier
+actor Building_Manager
+participant UI
+participant Fleet_Manager
+database DB
+participant Simulator
+
+
+Building_Manager -> UI : update schedule/floorplan
+activate UI
+UI -> Fleet_Manager : send updated data
+deactivate UI
+activate Fleet_Manager
+Fleet_Manager -> DB : update robot/floor info
+loop indefinitely
+    alt time to clean
+        Fleet_Manager -> Simulator : send task
+        activate Simulator
+        Simulator -> Simulator : clean
+        Simulator --> Fleet_Manager : send post-clean data
+        deactivate Simulator
+        Fleet_Manager -> DB : update post-clean data
+        Fleet_Manager --> UI : send report
+        deactivate Fleet_Manager
+        activate UI
+        UI --> Building_Manager : display report
+        deactivate UI
+    end
+end
+
+@enduml
