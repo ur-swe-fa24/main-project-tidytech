@@ -1,6 +1,7 @@
-@startuml ClassBasics
+@startuml Classes
 skinparam dpi 200
 skinparam DefaultFontName Inconsolata
+' Entire class diagrams
 
 package SimulationEngine{
     class Simulator {
@@ -98,6 +99,7 @@ package SimulationEngine{
         - locationId : string
         - connections : list[FloorNode]
         - nodeType : string = 'room'
+        - size : int
         - type : string = 'carpet'
         - numRobots : int = 0
         - maxRobots : int = 5
@@ -110,6 +112,8 @@ package SimulationEngine{
         + setConnections(nodes : list[FloorNode])
         + getType() : string
         + setType(type : string)
+        + getSize() : int
+        + setSize(size : int)
         + getNumRobots() : int
         + setNumRobots(numRobots : int)
         + getDirtiness() : int
@@ -160,13 +164,14 @@ package Database {
 package Users{
     abstract User {
         # userId : string
+
+        + getUserId() : string
+        + setUserId(id : string)
     }
 
     class BuildingOperator {
         - assignedRobot : Robot
 
-        + getUserId() : string
-        + setUserId(id : string)
         + getAssignedRobot() : Robot
         + setAssignedRobot(bot : Robot)
 
@@ -180,8 +185,6 @@ package Users{
     class BuildingManager {
         - assignedRobots : list[Robot]
 
-        + getUserId() : string
-        + setUserId(id : string)
         + getAssignedRobots() : list[Robot]
         + setAssignedRobots(bots : list[Robot])
 
@@ -193,11 +196,18 @@ package Users{
         + setNotification(bots : list[Robot]) : list[string]
     }
 
+    class SeniorManager {
+
+        + getCurrentRobotsUsed() : double
+        + getCompletionRate() : double
+        + getErrorRate() : double
+        + getRobotsUsedOverTime() : double
+        + getBatteryToRoomsCleaned(bot : Robots) : double
+    }
+
     class FieldEngineer {
         - issues : list[string]
 
-        + getUserId() : string
-        + setUserId(id : string)
         + getIssues() : list[string]
         + setIssues(issues : list[string])
 
@@ -207,21 +217,9 @@ package Users{
 
     }
 
-    class SeniorManager {
-
-        + getUserId() : string
-        + setUserId(id : string)
-
-        + getCurrentRobotsUsed() : double
-        + getCompletionRate() : double
-        + getErrorRate() : double
-        + getRobotsUsedOverTime() : double
-        + getBatteryToRoomsCleaned(bot : Robots) : double
-    }
-
     User <|-- BuildingOperator : is-a
     User <|-- BuildingManager : is-a
-    User <|-- FieldEngineer : is-a
+    BuildingManager <|-- FieldEngineer : is-a
     User <|-- SeniorManager : is-a
 
 }
