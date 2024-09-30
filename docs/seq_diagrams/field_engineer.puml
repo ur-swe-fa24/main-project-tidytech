@@ -8,6 +8,7 @@ database Database as DB
 
 
 activate SimulationEngine
+SimulationEngine -> SimulationEngine: detectIssue
 SimulationEngine -> SystemManager: robotNeedsMaintenance
 deactivate SimulationEngine
 activate SystemManager
