@@ -1,0 +1,20 @@
+@startuml Database
+skinparam dpi 200
+skinparam DefaultFontName Inconsolata
+' To produce the UML png
+
+class Database {
+    - database : MongoDB
+
+    + storeCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+    + accessCleanData()
+    + removeCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+    + modifyCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+    
+    + addError(robotID : string, location : FloorNode, time : int, status : bool)
+    + accessError()
+    + removeError(robotID : string, location : FloorNode, time : int, status : bool)
+    + modifyError(robotID : string, location : FloorNode, time : int, status : bool)
+}
+
+@enduml

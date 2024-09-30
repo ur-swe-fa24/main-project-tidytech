@@ -1,0 +1,66 @@
+@startuml Users
+skinparam dpi 200
+skinparam DefaultFontName Inconsolata
+' To produce the UML png
+
+abstract User {
+    # userId : string
+
+    + getUserId() : string
+    + setUserId(id : string)
+}
+
+class BuildingOperator {
+    - assignedRobot : Robot
+
+    + getAssignedRobot() : Robot
+    + setAssignedRobot(bot : Robot)
+
+    + assignTask(floors : list[FloorNode])
+    + viewTasks() : list[FloorNode]
+    + removeTask(floors : list[FloorNode])
+    + checkStatus() : string
+    + setNotification() : string
+}
+
+class BuildingManager {
+    - assignedRobots : list[Robot]
+
+    + getAssignedRobots() : list[Robot]
+    + setAssignedRobots(bots : list[Robot])
+
+    + setFloorPlan(floorplan : FloorPlan)
+    + assignTask(bots : list[Robot], floors : list[FloorNode])
+    + viewTasks() : list[FloorNode]
+    + removeTask(bots : list[Robot], floors : list[FloorNode])
+    + checkStatus() : list[string]
+    + setNotification(bots : list[Robot]) : list[string]
+}
+
+class SeniorManager {
+
+    + getCurrentRobotsUsed() : double
+    + getCompletionRate() : double
+    + getErrorRate() : double
+    + getRobotsUsedOverTime() : double
+    + getBatteryToRoomsCleaned(bot : Robots) : double
+}
+
+class FieldEngineer {
+    - issues : list[string]
+
+    + getIssues() : list[string]
+    + setIssues(issues : list[string])
+
+    + addIssue(issue : string)
+    + errorStatus(bot : Robot) : string
+    + troubleshoot(issue : string)        
+
+}
+
+User <|-- BuildingOperator : is-a
+User <|-- BuildingManager : is-a
+BuildingManager <|-- FieldEngineer : is-a
+User <|-- SeniorManager : is-a
+
+@enduml
