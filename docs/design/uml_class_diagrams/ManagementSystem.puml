@@ -1,0 +1,36 @@
+@startuml ManagementSystem
+skinparam dpi 200
+skinparam DefaultFontName Inconsolata
+' Entire class diagrams
+
+class FleetManager {
+    - siumlator : Simulator
+    - database : Database
+    - currUser : User
+
+    + getSimulator() : Simulator
+    + setSimulator(sim : Simulator)
+    + getDatabase() : Database
+    + setDatabase(db : Database)
+
+    + addRobots(bots : list[Robots])
+    + removeRobots(bots : list[Robots])
+    + updateFloorPlan(floorplan : FloorPlan)
+    + assignTask(bot : Robot, tasks : list[Floors])
+    + assignTasks(bots : list[Robots], tasks : list[Floors])
+    + updateDatabase()
+    + accessDatabase(dataType : string) : string
+    + receiveData()
+    + sendReport()
+    + getCurrentRobotsUsed() : double
+    + getCompletionRate() : double
+    + getErrorRate() : double
+    + getRobotsUsedOverTime() : double
+
+
+    - retrieveRobotPerformanceData(performanceType : string)
+    - checkUserType(user : string) : bool
+    - throwError() : string
+}
+
+@enduml

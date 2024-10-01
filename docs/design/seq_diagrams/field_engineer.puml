@@ -1,0 +1,26 @@
+@startuml ABasicSeqDiagram
+
+actor FieldEngineer
+participant UI #FBCBC9
+participant SystemManager #d69cbc
+participant SimulationEngine #a2d5c6
+database Database as DB 
+
+
+activate SimulationEngine
+SimulationEngine -> SimulationEngine: detectIssue
+SimulationEngine -> SystemManager: robotNeedsMaintenance
+deactivate SimulationEngine
+activate SystemManager
+
+SystemManager -> DB: updateRobotStatus
+activate DB
+SystemManager <-- DB: returnRobotInfo
+deactivate DB
+SystemManager --> UI: notifyMaintenanceNeeds
+deactivate SystemManager
+activate UI
+UI --> FieldEngineer: displayAlert
+
+
+@enduml
