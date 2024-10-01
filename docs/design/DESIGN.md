@@ -3,14 +3,14 @@
 ## [Use Case Diagram](./use_case_diagram/use_cases.md)
 ![Use Case Diagram](./use_case_diagram/use_case_diagram.png)
 
-The use case diagram illustrates how the Senior Manager, Building Operator, Building Manager, and Field Engineer interact with the cleaning robot fleet management system. Each user has specific functionalities, such as assigns tasks to robots, setting a cleaning schedule or tracking robot location. Some functions are shared between roles.
+The use case diagram illustrates how the Senior Manager, Building Operator, Building Manager, and Field Engineer interact with the cleaning robot fleet management system. Each user has specific functionalities, such as assigning tasks to robots, setting a cleaning schedule or tracking robot location. Some functions are shared between roles.
 
 ## [Architectural Design](./architecture/ARCHITECTURE.md)
 ![Architectural Design](./architecture/architecture.png)
 
 There are 4 main components that make up the architecture: user interface, fleet manager, simulation, and database. There are sub-components in each that interact with other sub-components from the main components.
 
-## User Interface
+## [User Interface](./ui_wireframes/user_interface.md)
 Below, we have the UI designs for the four different user roles.
 
 ### UI Senior Manager
@@ -19,17 +19,17 @@ Below, we have the UI designs for the four different user roles.
 ### UI Building Operator
 ![UI BO](./ui_wireframes/building_operator.png)
 
-### UI Building Manager/Field Manager
-![UI BM](./ui_wireframes/field_engineer_wireframe.png)
+### UI Building Manager/Field Engineer
+![UI BM](./ui_wireframes/building_manager.png)
 
-### UI Field Manager
+### UI Field Engineer
 ![UI FM](./ui_wireframes/field_engineer_wireframe.png)
 
 
 ## [Sequence Diagrams](./seq_diagrams/SEQUENCE.md)
 
 ![SD1](./seq_diagrams/bm1.png)
-This sequence diagram above shows the interactions between the building manager and each of the main components when the building manager is trying to change the schedule of the robots or update the floorpan.
+This sequence diagram above shows the interactions between the building manager and each of the main components when the building manager is trying to change the schedule of the robots or update the floorplan.
 
 
 ![SD2](./seq_diagrams/bm2.png)
