@@ -4,17 +4,36 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+using namespace std;
 
 class Database {
     public:
         Database() {};
-        void add_robot(std::string id, std::string type, std::string available, std::string location);
-        void add_floor(std::string id, std::string name, std::string type);
-        void add_task(std::string id, std::string robot_assigned, std::string room_assigned, std::string status);
+        
+        // Create
+        void add_robot(int id, const string& type, int available, int location);
+        void add_floor(int id, const string& name, const string& type);
+        void add_task(int id, const vector<int>& robot_assigned, const vector<int>& room_assigned, const string& status);
+        
+        // Read
+        vector<string> get_robot(int id);
+        vector<string> get_floor(int id);
+        vector<string> get_task(int id);
+        
+        // Update 
+        void update_robot(int id, const string& type, int available, int location);
+        void update_floor(int id, const string& name, const string& type);
+        void update_task(int id, const vector<int>& robot_assigned, const vector<int>& room_assigned, const string& status);
+        
+        // Delete
+        void delete_robot(int id);
+        void delete_floor(int id);
+        void delete_task(int id);
+        
     private:
-        std::unordered_map<std::string, std::vector<std::string>> robots_;
-        std::unordered_map<std::string, std::vector<std::string>> floors_;
-        std::unordered_map<std::string, std::vector<std::string>> tasks_;
+        unordered_map<int, vector<string>> robots_;  
+        unordered_map<int, vector<string>> floors_;  
+        unordered_map<int, vector<string>> tasks_;  
 };
 
 #endif
