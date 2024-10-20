@@ -11,7 +11,7 @@ class Robot {
         enum class Status {Available, Cleaning, Charging, Unavailable}; // You can task a robot if it is Available or Cleaning; but you cannot task it if it is unavailable
 
         Robot(std::string id, std::string size, std::string type, std::string base, std::string curr); // Constructor
-        ~Robot() {robotCount--;}; // Destructor
+        ~Robot() {}; // Destructor
 
         void setSize(std::string size);
         void setType(std::string type);
@@ -36,8 +36,6 @@ class Robot {
         
 
     private:
-        static int robotCount;
-
         std::string id_;
         Robot::Size size_; 
         Robot::Type type_;
