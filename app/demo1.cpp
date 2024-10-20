@@ -118,6 +118,5 @@ int main() {
             std::cout << entry << std::endl;
         }
     }
-
-    return 0;
 }
+
