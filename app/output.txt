@@ -1,0 +1,1 @@
+Robot: R1 has cleaned room: Bathroom

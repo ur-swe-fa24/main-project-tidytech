@@ -11,8 +11,8 @@
 class Fleet_manager {
     public:
         enum class UserType { SM, BM, BO, FE };
-        void read_ui_input(std::string filepath);
-        void retrive_status(); // outputs to a file
+        vector<vector<string>> read_ui_input(std::string filepath);
+        void retrive_status(std::string filepath, std::string robot_name, std::string room_name); // outputs to a file
     private:
         Simulator simulator_;
         UserType user_type_;
