@@ -19,6 +19,7 @@ add_library(fleet_manager
 
 add_library(simulator
     src/simulator.cpp
+    src/robot.cpp
 )
 
 
@@ -36,6 +37,10 @@ target_include_directories(fleet_manager
 target_include_directories(simulator
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+
+target_link_libraries(simulator
+    spdlog::spdlog
 )
 
 # creates app subdirectory
