@@ -2,12 +2,12 @@
 #include "spdlog/spdlog.h"
 #include <iostream> // For testing
 
-Simulator::Simulator() : ticking_(true), sim_thread_(), clock_{0} {};
+Simulator::Simulator() : ticking_(false), clock_{0} {};
 
 Simulator::~Simulator() {
     // Stop the clock thread when the Simulator is destroyed
     ticking_ = false;
-    sim_thread_.join();
+    if (sim_thread_.joinable()) {sim_thread_.join();}
 }
 
 void Simulator::simulate() {
@@ -40,7 +40,7 @@ void Simulator::simulate() {
         // Report status every 5 ticks
         if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
-                robot.toString();
+                std::cout<< robot.toString() << std::endl << std::endl;
             }
         }
 
@@ -102,15 +102,3 @@ std::string Simulator::status_report(std::string robot_id) {
     }
     return robot_id + " not found.";
 }
-
-// Testing
-// int main() {
-//     Simulator sim1{};
-//     sim1.add_robot("R1", "small", "vaccum", "base", "base");
-//     sim1.add_robot("R2", "large", "shampoo", "base", "base");
-//     std::cout << sim1.clean("R1", "Hallway1") << std::endl;
-//     std::cout << sim1.clean("R1", "Hallway2") << std::endl;
-//     sim1.start_simulation();
-//     std::this_thread::sleep_for(std::chrono::seconds(10));
-//     sim1.reset_simulation();
-// }
