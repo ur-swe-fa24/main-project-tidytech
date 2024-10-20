@@ -113,8 +113,8 @@ std::string Robot::toString() {
             ", Type: " + str_type + "\n" +
             "Status: " + str_status +
             ", Battery: " + std::to_string(battery_) + "\n" +
-            "Base Location: " + base_ +
-            "Current Location: " + curr_ +
+            "Base Location: " + base_ + "\n"
+            "Current Location: " + curr_ + "\n"
             "Tasks: " + str_tasks;
 }
 

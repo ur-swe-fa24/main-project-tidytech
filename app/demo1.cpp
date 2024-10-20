@@ -123,3 +123,15 @@ int main() {
         }
     }
 }
+
+//Testing
+// int main() {
+//     Simulator sim1{};
+//     sim1.add_robot("R1", "small", "vaccum", "base", "base");
+//     sim1.add_robot("R2", "large", "shampoo", "base", "base");
+//     std::cout << sim1.clean("R1", "Hallway1") << std::endl;
+//     std::cout << sim1.clean("R1", "Hallway2") << std::endl;
+//     sim1.start_simulation();
+//     std::this_thread::sleep_for(std::chrono::seconds(10));
+//     sim1.reset_simulation();
+// }
