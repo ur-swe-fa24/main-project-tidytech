@@ -4,7 +4,7 @@ Robot 3 V 1 40
 
 Floor 32 Hallway C 
 Floor 35 Office W 
-Floor Garage T 
+Floor 40 Garage T 
 
 Tasks 100 1 32 1
 Tasks 101 2 35 0

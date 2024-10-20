@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 
+Fleet_manager::Fleet_manager(Database db) {
+    database_ = db;
+};
+
 void Fleet_manager::retrive_status(std::string filepath, std::string robot_name, std::string room_name) {
     ofstream myfile(filepath);
     if (myfile.is_open()) {
@@ -31,13 +35,26 @@ vector<vector<string>> Fleet_manager::read_ui_input(std::string filepath) {
         ss >> word;
 
         if (word == "Robot") {
-            info_lists[0].push_back(line);
-        } 
-        else if (word == "Floor") {
-            info_lists[1].push_back(line);
-        } 
-        else if (word == "Tasks") {
-            info_lists[2].push_back(line);
+            int id, available, location;
+            string type;
+            ss >> id >> type >> available >> location;
+            this->database_.add_robot(id, type, available, location);
+        } else if (word == "Floor") {
+            int id;
+            string name, type;
+            ss >> id >> name >> type;
+            this->database_.add_floor(id, name, type);
+        } else if (word == "Tasks") {
+            vector<int> robot_assigned_vector;
+            vector<int> room_assigned_vector;
+            int id;
+            int robot_assigned;
+            int room_assigned;
+            string status;
+            ss >> id >> robot_assigned >> room_assigned >> status;
+            robot_assigned_vector.push_back(robot_assigned);
+            room_assigned_vector.push_back(room_assigned);
+            this->database_.add_task(id, robot_assigned_vector, room_assigned_vector, status);
         }
     }
     
