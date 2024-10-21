@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-Fleet_manager::Fleet_manager(Database db) {
+Fleet_manager::Fleet_manager(Database db) : simulator_(this) {
     database_ = db;
 };
 
@@ -19,14 +19,13 @@ void Fleet_manager::write_output(std::string filepath, std::string message) {
     }
 }
 
-vector<vector<string>> Fleet_manager::read_ui_input(std::string filepath) {
+void Fleet_manager::read_ui_input(std::string filepath) {
     ifstream file(filepath);
     string line;
     vector<vector<string>> info_lists(3);
     
     if (!file.is_open()) {
         throw std::invalid_argument("invalid file path.");
-        return info_lists;
     }
 
     while (getline(file, line)) {
@@ -63,5 +62,4 @@ vector<vector<string>> Fleet_manager::read_ui_input(std::string filepath) {
     }
     
     file.close();
-    return info_lists;
 }

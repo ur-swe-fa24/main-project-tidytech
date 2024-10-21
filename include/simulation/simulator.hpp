@@ -12,8 +12,6 @@
 #include "simulation/robot.hpp"
 #include "sys_manager/fleet_manager.hpp"
 
-class Fleet_manager;  // Forward declaration
-
 class Simulator {
     public:
         static const int MAX_SIM_TIME = 100; //Max simulation time
