@@ -4,8 +4,8 @@
 #include "sys_manager/fleet_manager.hpp"
 
 int main() {
+    // ========= START DB UNIT TESTING =================
     Database db;
-    Database db2;
 
     // Adding robots, included all 3 types (vacuum, scrubber, shampoo)
     db.add_robot(1, "Vacuum", 1, 3); 
@@ -109,24 +109,11 @@ int main() {
     }
 
 
-    // Integration Test
+    // ========= START INTEGRATION TESTING ==================
+    Simulator simulation;
+    Database db2;
+    Fleet_manager fleet_manager(&simulation, &db2);
 
-    Fleet_manager fm(db2);
-    Simulator sim{};
-    string filename = "../app/input.txt";
-
-    sim.add_subs(fm);
-    fm.add_subs(sim);
-    
-
-    fm.read_ui_input(filename);
-    sim.start_simulation();
-
-
-    // for (int i = 0; i < inputData.size(); i++) {
-    //     for (std::string entry : inputData[i]) {
-    //         std::cout << entry << std::endl;
-    //     }
-    // }
+    simulation.start_simulation();
 }
 

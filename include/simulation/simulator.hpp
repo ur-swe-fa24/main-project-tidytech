@@ -11,13 +11,12 @@
 // #include "spdlog/spdlog.h"
 
 #include "simulation/robot.hpp"
-#include "sys_manager/fleet_manager.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 
-class Simulator : public Publisher, public Subscriber{
+class Simulator : public Publisher {
     public:
-        static const int MAX_SIM_TIME = 60; //Max simulation time
+        static const int MAX_SIM_TIME = 10; //Max simulation time
 
         Simulator(); // Default constructor
         ~Simulator(); // Destructor
@@ -29,9 +28,10 @@ class Simulator : public Publisher, public Subscriber{
         void add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr);
         std::string status_report(std::string robot_id);
         std::string clean(std::string robot_id, std::string floor_id);
-        void notify(vector<string> outputs) override;
-        void add_subs(Subscriber& sub) override;
-        void update(vector<string> inputs) override;
+
+        void subscribe(Subscriber* subscriber, const std::string& event) override;
+        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
+        void notify(const std::string& event, const std::string& data) override;
     private:
         std::vector<std::string> floors_;
         std::vector<Robot> robots_;
@@ -41,7 +41,7 @@ class Simulator : public Publisher, public Subscriber{
         std::atomic<bool> ticking_;  // Atomic flag to control the clock since it prevents other threads from interfering 
 
         void simulate(); // Start the ticking thread
-        vector<Subscriber> subscribers_;
+        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers;
 
 
 };

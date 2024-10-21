@@ -7,11 +7,9 @@ using namespace std;
 
 class Publisher {
     public:
-        virtual ~Publisher() {};
-        virtual void notify(vector<string> outputs);
-        virtual void add_subs(Subscriber& sub);
-    private:
-        vector<Subscriber> subscribers_;
+        virtual void subscribe(Subscriber* subscriber, const std::string& event) = 0;
+        virtual void unsubscribe(Subscriber* subscriber, const std::string& event) = 0;
+        virtual void notify(const std::string& event, const std::string& data) = 0;
         
 };
 

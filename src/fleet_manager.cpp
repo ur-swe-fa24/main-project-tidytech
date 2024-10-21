@@ -4,11 +4,12 @@
 #include <sstream>
 #include <vector>
 #include <string>
-using namespace std;
 
-Fleet_manager::Fleet_manager(Database db) {
-    database_ = db;
-};
+Fleet_manager::Fleet_manager(Simulator* simulation, Database* db)
+    : simulator_(simulation), database_(db) {
+    subscribe("five_sec_ping");
+    subscribe("finished_ping");
+}
 
 void Fleet_manager::write_output(string filepath, string message) {
     ofstream myfile(filepath);
@@ -38,16 +39,15 @@ void Fleet_manager::read_ui_input(string filepath) {
             int id, available, location;
             string type;
             ss >> id >> type >> available >> location;
-            this->database_.add_robot(id, type, available, location);
-            this->notify({to_string(id), "small", type, to_string(location), to_string(location)});
+            database_->add_robot(id, type, available, location);
         } else if (word == "Floor") {
             int id;
             string name, type;
             ss >> id >> name >> type;
-            this->database_.add_floor(id, name, type);
+            database_->add_floor(id, name, type);
         } else if (word == "Tasks") {
-            vector<int> robot_assigned_vector;
-            vector<int> room_assigned_vector;
+            vector<int> robot_assigned_vector; // TODO: change this
+            vector<int> room_assigned_vector; // TODO: change this
             int id;
             int robot_assigned;
             int room_assigned;
@@ -55,25 +55,33 @@ void Fleet_manager::read_ui_input(string filepath) {
             ss >> id >> robot_assigned >> room_assigned >> status;
             robot_assigned_vector.push_back(robot_assigned);
             room_assigned_vector.push_back(room_assigned);
-            this->database_.add_task(id, robot_assigned_vector, room_assigned_vector, status);
+            database_->add_task(id, robot_assigned_vector, room_assigned_vector, status);
         }
-        // Change for future
     }
     
     file.close();
 }
 
-void Fleet_manager::update(vector<string> inputs) {
-    Fleet_manager::write_output("../app/status_report.txt", inputs[0]);
+void Fleet_manager::subscribe(const std::string& event) {
+    simulator_->subscribe(this, event);
 }
 
+void Fleet_manager::unsubscribe(const std::string& event) {
+    simulator_->unsubscribe(this, event);
+}
 
-void Fleet_manager::notify(vector<string> outputs) {
-    for (auto& sub : subscribers_) {
-        sub.update(outputs);
+void Fleet_manager::update(const std::string& event, const std::string& data) {
+    if (event == "five_sec_ping") {
+        handle_five_sec_ping(data);
+    } else if (event == "finished_ping") {
+        handle_finished_ping(data);
     }
 }
 
-void Fleet_manager::add_subs(Subscriber& sub) {
-    subscribers_.push_back(sub);
+void Fleet_manager::handle_five_sec_ping(const std::string& data) {
+    std::cout << "5 sec ping" + data << std::endl;
+}
+
+void Fleet_manager::handle_finished_ping(const std::string& data) {
+    std::cout << "Finished ping" + data << std::endl;
 }

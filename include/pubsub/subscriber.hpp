@@ -6,8 +6,8 @@ using namespace std;
 
 class Subscriber {
     public:
-        virtual ~Subscriber() {};
-        virtual void update(vector<string> inputs);
+        virtual ~Subscriber() {}
+        virtual void update(const std::string& event, const std::string& data) = 0;
 };
 
 #endif
