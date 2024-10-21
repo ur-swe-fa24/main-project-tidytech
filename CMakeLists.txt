@@ -21,8 +21,12 @@ add_library(simulator
     src/robot.cpp
 )
 
+# add_library(pubsub
+#     src/simulator.cpp
+#     src/fleet_manager.cpp
+# )
 
-# include the headers for both adapters
+
 target_include_directories(database
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -38,6 +42,12 @@ target_include_directories(simulator
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
+# target_include_directories(pubsub
+#     PUBLIC
+#         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+# )
+
+# link spdlog to adapters
 target_link_libraries(simulator
     spdlog::spdlog
 )

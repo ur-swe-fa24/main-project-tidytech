@@ -111,11 +111,17 @@ int main() {
 
     // Integration Test
 
-    Fleet_manager fm(db);
+    Fleet_manager fm(db2);
+    Simulator sim{};
     string filename = "../app/input.txt";
 
-    vector<vector<string>> inputData = fm.read_ui_input(filename);
+    sim.add_subs(fm);
+    fm.add_subs(sim);
     
+
+    fm.read_ui_input(filename);
+    sim.start_simulation();
+
 
     // for (int i = 0; i < inputData.size(); i++) {
     //     for (std::string entry : inputData[i]) {

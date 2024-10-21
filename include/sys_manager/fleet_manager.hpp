@@ -7,18 +7,23 @@
 
 #include "../simulation/simulator.hpp"
 #include "../database/database.hpp"
+#include "pubsub/publisher.hpp"
+#include "pubsub/subscriber.hpp"
 
-class Fleet_manager {
+class Fleet_manager : public Publisher, public Subscriber{
     public:
         Fleet_manager(Database db);
         enum class UserType { SM, BM, BO, FE };
         void read_ui_input(std::string filepath);
-        void notify(std::string status) {write_output("../app/status_report.txt", status);};
         void write_output(std::string filepath, std::string message); // outputs to a file
+        void notify(vector<string> outputs) override;
+        void add_subs(Subscriber& sub) override;
+        void update(vector<string> inputs) override;
     private:
-        Simulator simulator_;
+        // Simulator simulator_;
         UserType user_type_;
         Database database_;
+        vector<Subscriber> subscribers_;
 };
 
 #endif

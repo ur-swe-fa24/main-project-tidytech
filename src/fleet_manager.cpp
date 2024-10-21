@@ -4,28 +4,29 @@
 #include <sstream>
 #include <vector>
 #include <string>
+using namespace std;
 
-Fleet_manager::Fleet_manager(Database db) : simulator_(this) {
+Fleet_manager::Fleet_manager(Database db) {
     database_ = db;
 };
 
-void Fleet_manager::write_output(std::string filepath, std::string message) {
+void Fleet_manager::write_output(string filepath, string message) {
     ofstream myfile(filepath);
     if (myfile.is_open()) {
         myfile << message + "\n";
         myfile.close();
     } else {
-        throw std::invalid_argument("invalid file path.");
+        throw invalid_argument("invalid file path.");
     }
 }
 
-void Fleet_manager::read_ui_input(std::string filepath) {
+void Fleet_manager::read_ui_input(string filepath) {
     ifstream file(filepath);
     string line;
     vector<vector<string>> info_lists(3);
     
     if (!file.is_open()) {
-        throw std::invalid_argument("invalid file path.");
+        throw invalid_argument("invalid file path.");
     }
 
     while (getline(file, line)) {
@@ -38,7 +39,7 @@ void Fleet_manager::read_ui_input(std::string filepath) {
             string type;
             ss >> id >> type >> available >> location;
             this->database_.add_robot(id, type, available, location);
-            this->simulator_.add_robot(std::to_string(id), "small", type, std::to_string(location), std::to_string(location));
+            this->notify({to_string(id), "small", type, to_string(location), to_string(location)});
         } else if (word == "Floor") {
             int id;
             string name, type;
@@ -55,11 +56,24 @@ void Fleet_manager::read_ui_input(std::string filepath) {
             robot_assigned_vector.push_back(robot_assigned);
             room_assigned_vector.push_back(room_assigned);
             this->database_.add_task(id, robot_assigned_vector, room_assigned_vector, status);
-            this->simulator_.clean(std::to_string(robot_assigned), std::to_string(room_assigned));
         }
         // Change for future
-        simulator_.start_simulation();
     }
     
     file.close();
+}
+
+void Fleet_manager::update(vector<string> inputs) {
+    Fleet_manager::write_output("../app/status_report.txt", inputs[0]);
+}
+
+
+void Fleet_manager::notify(vector<string> outputs) {
+    for (auto& sub : subscribers_) {
+        sub.update(outputs);
+    }
+}
+
+void Fleet_manager::add_subs(Subscriber& sub) {
+    subscribers_.push_back(sub);
 }

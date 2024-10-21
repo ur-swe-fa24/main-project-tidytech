@@ -1,8 +1,8 @@
 #include "simulation/simulator.hpp"
-#include "spdlog/spdlog.h"
-#include <iostream> // For testing
 
-Simulator::Simulator(Fleet_manager* fm) : fm_(fm), ticking_(false), clock_{0} {};
+
+// Simulator::Simulator(Fleet_manager* fm) : fm_(fm), ticking_(false), clock_{0} {};
+Simulator::Simulator() : ticking_(false), clock_{0} {};
 
 Simulator::~Simulator() {
     // Stop the clock thread when the Simulator is destroyed
@@ -40,7 +40,7 @@ void Simulator::simulate() {
         // Report status every 5 ticks
         if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
-                fm_->notify(Simulator::status_report(robot.getId()));
+                Simulator::notify({Simulator::status_report(robot.getId())});
             }
         }
 
@@ -55,9 +55,9 @@ void Simulator::start_simulation() {
     if (!ticking_) {
         ticking_ = true;
         sim_thread_ = std::thread(&Simulator::simulate, this);
-        spdlog::info("Simulation started!");
+        //spdlog::info("Simulation started!");
     } else {
-        spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
+        //spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
     }
 }
 
@@ -65,10 +65,10 @@ void Simulator::reset_simulation() {
     if (ticking_) {
         ticking_ = false;
         sim_thread_.join();  // Wait for the thread to finish to join
-        spdlog::info("Simulation reset! Total time: {} ticks", clock_);
+        //spdlog::info("Simulation reset! Total time: {} ticks", clock_);
         clock_ = 0;  // Reset clock
     } else {
-        spdlog::warn("No simulation to reset!");
+        //spdlog::warn("No simulation to reset!");
     }
 }
 
@@ -101,4 +101,18 @@ std::string Simulator::status_report(std::string robot_id) {
         }
     }
     return robot_id + " not found.";
+}
+
+void Simulator::notify(vector<string> outputs) {
+    for (auto& sub : subscribers_) {
+        sub.update(outputs);
+    }
+}
+
+void Simulator::add_subs(Subscriber& sub) {
+    subscribers_.push_back(sub);
+}
+
+void Simulator::update(vector<string> inputs) {
+    Simulator::add_robot(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4]);
 }
