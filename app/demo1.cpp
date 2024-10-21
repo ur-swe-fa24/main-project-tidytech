@@ -5,6 +5,7 @@
 
 int main() {
     Database db;
+    Database db2;
 
     // Adding robots, included all 3 types (vacuum, scrubber, shampoo)
     db.add_robot(1, "Vacuum", 1, 3); 
@@ -107,16 +108,19 @@ int main() {
         std::cout << "Task 3 still exists." << std::endl;
     }
 
+
+    // Integration Test
+
     Fleet_manager fm(db);
-    fm.retrive_status("../app/output.txt", "R1", "Bathroom");
     string filename = "../app/input.txt";
 
     vector<vector<string>> inputData = fm.read_ui_input(filename);
+    
 
-    for (int i = 0; i < inputData.size(); i++) {
-        for (std::string entry : inputData[i]) {
-            std::cout << entry << std::endl;
-        }
-    }
+    // for (int i = 0; i < inputData.size(); i++) {
+    //     for (std::string entry : inputData[i]) {
+    //         std::cout << entry << std::endl;
+    //     }
+    // }
 }
 

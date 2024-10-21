@@ -2,7 +2,7 @@
 #include "spdlog/spdlog.h"
 #include <iostream> // For testing
 
-Simulator::Simulator() : ticking_(false), clock_{0} {};
+Simulator::Simulator(Fleet_manager* fm) : fm_(fm), ticking_(false), clock_{0} {};
 
 Simulator::~Simulator() {
     // Stop the clock thread when the Simulator is destroyed
@@ -40,7 +40,7 @@ void Simulator::simulate() {
         // Report status every 5 ticks
         if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
-                std::cout<< robot.toString() << std::endl << std::endl;
+                fm_->notify(Simulator::status_report(robot.getId()));
             }
         }
 

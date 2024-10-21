@@ -13,9 +13,10 @@ class Fleet_manager {
         Fleet_manager(Database db);
         enum class UserType { SM, BM, BO, FE };
         vector<vector<string>> read_ui_input(std::string filepath);
-        void retrive_status(std::string filepath, std::string robot_name, std::string room_name); // outputs to a file
+        void notify(std::string status) {write_output("../app/status_report.txt", status);};
+        void write_output(std::string filepath, std::string message); // outputs to a file
     private:
-        Simulator simulator_{};
+        Simulator simulator_{this};
         UserType user_type_;
         Database database_;
 };

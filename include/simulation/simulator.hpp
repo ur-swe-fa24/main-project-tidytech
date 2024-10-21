@@ -10,12 +10,15 @@
 #include <mutex>
 
 #include "simulation/robot.hpp"
+#include "sys_manager/fleet_manager.hpp"
+
+class Fleet_manager;  // Forward declaration
 
 class Simulator {
     public:
         static const int MAX_SIM_TIME = 100; //Max simulation time
 
-        Simulator(); // Default constructor
+        Simulator(Fleet_manager* fm); // Default constructor
         ~Simulator(); // Destructor
 
         void start_simulation(); // Start the sim_thread_
@@ -26,6 +29,7 @@ class Simulator {
         std::string status_report(std::string robot_id);
         std::string clean(std::string robot_id, std::string floor_id);
     private:
+        Fleet_manager* fm_;
         std::vector<std::string> floors_;
         std::vector<Robot> robots_;
         std::mutex robots_mutex_; // Mutex to protect robots_
