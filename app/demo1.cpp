@@ -114,6 +114,7 @@ int main() {
     Database db2;
     Fleet_manager fleet_manager(&simulation, &db2);
 
+    fleet_manager.read_ui_input("../app/input.txt");
     simulation.start_simulation();
 }
 

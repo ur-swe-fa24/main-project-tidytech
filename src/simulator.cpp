@@ -17,40 +17,43 @@ void Simulator::simulate() {
         clock_++;
 
         // Drain power accordingly
-        // std::lock_guard<std::mutex> lock(robots_mutex_);
-        // for (Robot& robot : robots_) {
-        //     switch (robot.getStatus()) {
-        //         case Robot::Status::Available:
-        //             robot.consumePower();
-        //             if (!robot.tasksEmpty()){robot.startTask();} // Go do something
-        //             else {
-        //                 if (robot.getBattery() < 50) {robot.goCharge();};
-        //             }
-        //             break;
-        //         case Robot::Status::Charging:
-        //             robot.charge();
-        //             break;
-        //         case Robot::Status::Cleaning:
-        //             robot.consumePower(3); // Cleaning takes more power
-        //             break;
-        //         case Robot::Status::Unavailable:
-        //             break;
-        //     }
-        // }
+        std::lock_guard<std::mutex> lock(robots_mutex_);
+        for (Robot& robot : robots_) {
+            switch (robot.getStatus()) {
+                case Robot::Status::Available:
+                    robot.consumePower();
+                    if (!robot.tasksEmpty()){robot.startTask();} // Go do something
+                    else {
+                        if (robot.getBattery() < 50) {robot.goCharge();};
+                    }
+                    break;
+                case Robot::Status::Charging:
+                    robot.charge();
+                    break;
+                case Robot::Status::Cleaning:
+                    robot.consumePower(3); // Cleaning takes more power
+                    break;
+                case Robot::Status::Unavailable:
+                    break;
+            }
+        }
 
         // Report status every 5 ticks
         if (clock_ % 5 == 0) {
-            notify("five_sec_ping", " [data can go here]");
-            // for (Robot& robot : robots_) {
-            //     notify("5 sec ping: ", robot.getId());
-            // }
+            for (Robot& robot : robots_) {
+                notify("five_sec_ping", robot.toString());
+            }
         }
 
         if (clock_ >= Simulator::MAX_SIM_TIME) {
             ticking_ = false;
         }
     }
-    notify("finished_ping", " [data can go here]");
+    std::string data; // TODO: method to do this manual stuff
+    for (Robot& robot : robots_) {
+        data += robot.toString() + "\n\u200B"; // TODO: create better fix for this
+    }
+    notify("finished_ping", data);
 }
 
 void Simulator::start_simulation() {
@@ -86,16 +89,14 @@ void Simulator::add_floor(std::string floor) {
     floors_.push_back(floor);
 }
 
-// std::string Simulator::clean(std::string robot_id, std::string floor_id) {
-//     std::lock_guard<std::mutex> lock(robots_mutex_);
-//     for (Robot& robot : robots_) {
-//         if (robot.getId() == robot_id) {
-//             robot.addTasksToBack({floor_id});
-//             return floor_id + " added to " + robot_id + "'s queue.";
-//         }
-//     }
-//     return robot_id + " not found.";
-// }
+void Simulator::add_task(std::string robot_id, std::string floor_id) {
+    std::lock_guard<std::mutex> lock(robots_mutex_);
+    for (Robot& robot : robots_) {
+        if (robot.getId() == robot_id) {
+            robot.addTasksToBack({floor_id});
+        }
+    }
+}
 
 std::string Simulator::status_report(std::string robot_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
@@ -108,16 +109,16 @@ std::string Simulator::status_report(std::string robot_id) {
 }
 
 void Simulator::subscribe(Subscriber* subscriber, const std::string& event) {
-    subscribers[event].push_back(subscriber);
+    subscribers_[event].push_back(subscriber);
 }
 
 void Simulator::unsubscribe(Subscriber* subscriber, const std::string& event) {
-    auto& subs = subscribers[event];
+    auto& subs = subscribers_[event];
     subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
 }
 
 void Simulator::notify(const std::string& event, const std::string& data) {
-    for (auto& subscriber : subscribers[event]) {
+    for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }
 }

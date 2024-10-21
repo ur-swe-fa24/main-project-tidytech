@@ -27,7 +27,7 @@ class Simulator : public Publisher {
         void add_floor(std::string floor);
         void add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr);
         std::string status_report(std::string robot_id);
-        std::string clean(std::string robot_id, std::string floor_id);
+        void add_task(std::string robot_id, std::string floor_id);
 
         void subscribe(Subscriber* subscriber, const std::string& event) override;
         void unsubscribe(Subscriber* subscriber, const std::string& event) override;
@@ -41,7 +41,7 @@ class Simulator : public Publisher {
         std::atomic<bool> ticking_;  // Atomic flag to control the clock since it prevents other threads from interfering 
 
         void simulate(); // Start the ticking thread
-        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers;
+        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
 
 
 };
