@@ -7,17 +7,26 @@
 
 #include "../simulation/simulator.hpp"
 #include "../database/database.hpp"
+#include "pubsub/publisher.hpp"
+#include "pubsub/subscriber.hpp"
 
-class Fleet_manager {
+class Fleet_manager : public Subscriber {
     public:
-        Fleet_manager(Database db);
-        enum class UserType { SM, BM, BO, FE };
-        vector<vector<string>> read_ui_input(std::string filepath);
-        void retrive_status(std::string filepath, std::string robot_name, std::string room_name); // outputs to a file
+        Fleet_manager(Simulator* simulation, Database* db);
+
+        void read_ui_input(std::string filepath);
+        void write_output(std::string filepath, std::string message); // outputs to a file
+
+        void subscribe(const std::string& event);
+        void unsubscribe(const std::string& event);
+        void update(const std::string& event, const std::string& data) override;
     private:
-        Simulator simulator_{};
-        UserType user_type_;
-        Database database_;
+        void handle_five_sec_ping(const std::string& data);
+        void handle_finished_ping(const std::string& data);
+        
+        Simulator* simulator_;
+        Database* database_;
+        vector<Subscriber> subscribers_;
 };
 
 #endif

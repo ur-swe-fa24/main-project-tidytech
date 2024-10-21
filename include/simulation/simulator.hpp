@@ -8,12 +8,15 @@
 #include <chrono>
 #include <atomic>
 #include <mutex>
+// #include "spdlog/spdlog.h"
 
 #include "simulation/robot.hpp"
+#include "pubsub/publisher.hpp"
+#include "pubsub/subscriber.hpp"
 
-class Simulator {
+class Simulator : public Publisher {
     public:
-        static const int MAX_SIM_TIME = 100; //Max simulation time
+        static const int MAX_SIM_TIME = 10; //Max simulation time
 
         Simulator(); // Default constructor
         ~Simulator(); // Destructor
@@ -25,6 +28,10 @@ class Simulator {
         void add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr);
         std::string status_report(std::string robot_id);
         std::string clean(std::string robot_id, std::string floor_id);
+
+        void subscribe(Subscriber* subscriber, const std::string& event) override;
+        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
+        void notify(const std::string& event, const std::string& data) override;
     private:
         std::vector<std::string> floors_;
         std::vector<Robot> robots_;
@@ -34,6 +41,8 @@ class Simulator {
         std::atomic<bool> ticking_;  // Atomic flag to control the clock since it prevents other threads from interfering 
 
         void simulate(); // Start the ticking thread
+        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers;
+
 
 };
 
