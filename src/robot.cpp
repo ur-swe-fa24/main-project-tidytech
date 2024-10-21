@@ -28,7 +28,7 @@ void Robot::setSize(std::string size) {
 void Robot::setType(std::string type) {
     if (type == "scrubber") {
         type_ = Robot::Type::Scrubber;
-    } else if (type == "vaccum") {
+    } else if (type == "vacuum") {
         type_ = Robot::Type::Vaccum;
     } else if (type == "shampoo") {
         type_ = Robot::Type::Shampoo;
@@ -115,7 +115,7 @@ std::string Robot::toString() {
             ", Battery: " + std::to_string(battery_) + "\n" +
             "Base Location: " + base_ + "\n"
             "Current Location: " + curr_ + "\n"
-            "Tasks: " + str_tasks;
+            "Tasks: " + str_tasks + "\n";
 }
 
 
@@ -133,7 +133,7 @@ bool Robot::moveToNext() {
             // Pop the first task and move robot to that floor
             curr_ = task_queue_.front();
             status_ = Robot::Status::Cleaning;
-            task_queue_.erase(task_queue_.begin()); //Remove the first task
+            // task_queue_.erase(task_queue_.begin()); //Remove the first task TODO: make this work again
             return true;
         } else {
             status_ = Robot::Status::Available;
