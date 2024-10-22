@@ -8,7 +8,7 @@
 #include <chrono>
 #include <atomic>
 #include <mutex>
-// #include "spdlog/spdlog.h"
+#include "spdlog/spdlog.h"
 
 #include "simulation/robot.hpp"
 #include "pubsub/publisher.hpp"

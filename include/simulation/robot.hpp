@@ -28,8 +28,8 @@ class Robot {
         bool moveToNext();
         bool canMove();
         void startTask();
-        bool atBase() {return base_ == curr_;};
-        bool tasksEmpty() {return task_queue_.empty();};
+        bool atBase() {return base_ == curr_;}; // Check if robot is at base
+        bool tasksEmpty() {return task_queue_.empty();}; // Check if task is empty
         void goCharge();
         void charge();
         void consumePower(int amount = 1) {battery_ = std::max(0, battery_-amount);}; // One tick of battery consume for every second

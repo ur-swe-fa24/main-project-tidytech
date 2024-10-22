@@ -1,6 +1,9 @@
 #include "simulation/robot.hpp"
 #include "spdlog/spdlog.h"
 
+// Robot constructor
+// Initialize all variables
+// TODO: Implement floorNode for base and curr
 Robot::Robot(std::string id, std::string size, std::string type, std::string base, std::string curr) {
     id_ = id;
     Robot::setSize(size);
@@ -11,6 +14,7 @@ Robot::Robot(std::string id, std::string size, std::string type, std::string bas
     status_ = Robot::Status::Available;
 } 
 
+// Set size with string
 void Robot::setSize(std::string size) {
     if (size == "small") {
         size_ = Robot::Size::Small;
@@ -25,6 +29,7 @@ void Robot::setSize(std::string size) {
     }
 }
 
+// Set type with string
 void Robot::setType(std::string type) {
     if (type == "scrubber") {
         type_ = Robot::Type::Scrubber;
@@ -39,6 +44,7 @@ void Robot::setType(std::string type) {
     }
 }
 
+// Set status with string
 void Robot::setStatus(std::string status) {
     if (status == "available") {
         status_ = Robot::Status::Available;
@@ -55,6 +61,7 @@ void Robot::setStatus(std::string status) {
     }
 }
 
+// toString for robot object
 std::string Robot::toString() {
     std::string str_size;
     std::string str_type;
@@ -118,15 +125,18 @@ std::string Robot::toString() {
             "Tasks: " + str_tasks + "\n";
 }
 
-
+// Add tasks at the back of the queue
 void Robot::addTasksToBack(std::vector<std::string> floors) {
     task_queue_.insert(task_queue_.end(), floors.begin(), floors.end());
 }
 
+// Add tasks at the front of the queue
 void Robot::addTasksToFront(std::vector<std::string> floors) {
     task_queue_.insert(task_queue_.begin(), floors.begin(), floors.end());
 }
 
+// Move to next task if it can
+// TODO: modify the logic to flow better
 bool Robot::moveToNext() {
     if (Robot::canMove()) {
         if (!task_queue_.empty()) {
@@ -146,6 +156,8 @@ bool Robot::moveToNext() {
     }
 }
 
+// Charge 5 unit power every call
+// Must be at base
 void Robot::charge() {
     if (curr_ == base_) {
         battery_ = std::min(100, battery_ + 5); // Charge 5 percentage every tick
@@ -153,6 +165,7 @@ void Robot::charge() {
     }
 }
 
+// Move to base and change status to Charginf
 void Robot::goCharge() {
     /**
      * implement more with battery usage and moving robot
@@ -161,6 +174,7 @@ void Robot::goCharge() {
     curr_ = base_;
 }
 
+// Check if robot has enough battery to move
 bool Robot::canMove() {
     /**
      * Future: Check if the next floor has max capacity
@@ -170,6 +184,7 @@ bool Robot::canMove() {
     return false;
 }
 
+// Start task by going down the queue
 void Robot::startTask() {
     Robot::moveToNext();
 }
