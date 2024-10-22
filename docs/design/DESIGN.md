@@ -54,4 +54,7 @@ The system consists of four main components: the **Simulation Engine** simulates
 ![Uml4](./uml_class_diagrams/ManagementSystem.png)
 
 ## [Activity Diagrams from Sprint 2](./activity_diagram/activity_diagrams.md)
+
 ![Figure1](./activity_diagram/activity_diagram1.png)
+
+This activity diagram shows how the fleet manager reads the config file input, adds robots, rooms, and tasks to the database and simulator, and manages robot status updates during the simulation. It applies to both user stories (building manager and building operator), with the only difference being the number of robots controlled (many vs. one).
