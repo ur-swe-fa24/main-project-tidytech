@@ -1,0 +1,12 @@
+In this sprint, the following is what I was responsible for:
+Fleet manager:
+- Reading the input file
+- Writing to an output file
+
+Pubsub Interfact:
+- Creating the publisher interface
+- Creating the subscriber interface
+
+Integration:
+- Implementing the sub, unsub, notify, and update methods in FM and Sim
+- Creating the events "5_sec_ping" and "Finished_ping" and the methods associated with each
