@@ -52,3 +52,6 @@ The system consists of four main components: the **Simulation Engine** simulates
 ![Uml2](./uml_class_diagrams/Database.png)
 ![Uml3](./uml_class_diagrams/Users.png)
 ![Uml4](./uml_class_diagrams/ManagementSystem.png)
+
+## [Activity Diagrams from Sprint 2](./activity_diagram/activity_diagrams.md)
+![Figure1](./activity_diagram/activity_diagram1.png)
