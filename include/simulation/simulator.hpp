@@ -8,8 +8,8 @@
 #include <chrono>
 #include <atomic>
 #include <mutex>
+#include "spdlog/spdlog.h"
 #include <unordered_map>
-// #include "spdlog/spdlog.h"
 
 #include "simulation/robot.hpp"
 #include "pubsub/publisher.hpp"
