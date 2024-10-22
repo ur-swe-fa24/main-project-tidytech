@@ -9,6 +9,7 @@
 #include <atomic>
 #include <mutex>
 #include "spdlog/spdlog.h"
+#include <unordered_map>
 
 #include "simulation/robot.hpp"
 #include "pubsub/publisher.hpp"
