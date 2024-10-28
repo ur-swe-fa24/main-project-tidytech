@@ -13,6 +13,7 @@
 #include "simulation/robot.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
+#include "spdlog/spdlog.h"
 
 class Simulator : public Publisher {
     public:
@@ -20,6 +21,8 @@ class Simulator : public Publisher {
 
         Simulator(); // Default constructor
         ~Simulator(); // Destructor
+
+        int get_clock() {return clock_;}; 
 
         void start_simulation(); // Start the sim_thread_
         void reset_simulation(); // Reset the simulation

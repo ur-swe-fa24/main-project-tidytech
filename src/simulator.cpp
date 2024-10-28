@@ -2,14 +2,16 @@
 
 
 // Constructor for simulator
-Simulator::Simulator() : ticking_(true), clock_{0} {};
+Simulator::Simulator() : ticking_(false), clock_{0} {};
 
 // Destructor for simulator
 // Wait for the sim_thread_ to finish if we want to wait
 Simulator::~Simulator() {
-    // Stop the clock thread when the Simulator is destroyed
+    // Stop the clock thread when the Simulator is destroyed    
+    if (sim_thread_.joinable()) {
+        sim_thread_.join();
+    }
     ticking_ = false;
-    if (sim_thread_.joinable()) {sim_thread_.join();}
 }
 
 // Simulate the entire simulation
@@ -66,28 +68,26 @@ void Simulator::simulate() {
 // TODO: integrate threads
 void Simulator::start_simulation() {
     // Prevent starting the clock if it's already running
-    simulate();
-    // if (!ticking_) {
-    //     ticking_ = true;
-    //     sim_thread_ = std::thread(&Simulator::simulate, this);
-    //     //spdlog::info("Simulation started!");
-    // } else {
-    //     //spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
-    // }
+    if (!ticking_) {
+        ticking_ = true;
+        sim_thread_ = std::thread(&Simulator::simulate, this);
+        spdlog::info("Simulation started!");
+    } else {
+        spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
+    }
 }
 
 // Reset the simulation
-// TODO: join/detach thread
-// void Simulator::reset_simulation() {
-//     if (ticking_) {
-//         ticking_ = false;
-//         sim_thread_.join();  // Wait for the thread to finish to join
-//         //spdlog::info("Simulation reset! Total time: {} ticks", clock_);
-//         clock_ = 0;  // Reset clock
-//     } else {
-//         //spdlog::warn("No simulation to reset!");
-//     }
-// }
+void Simulator::reset_simulation() {
+    if (ticking_) {
+        ticking_ = false;
+        sim_thread_.join();  // Wait for the thread to finish to join
+        spdlog::info("Simulation reset! Total time: {} ticks", clock_);
+    } else {
+        spdlog::warn("No simulation to reset!");
+    }
+    clock_ = 0;  // Reset clock
+}
 
 // Add robot to the vector of robots_
 void Simulator::add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr) {

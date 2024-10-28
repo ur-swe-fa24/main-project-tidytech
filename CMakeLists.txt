@@ -21,8 +21,9 @@ add_library(simulator
     src/robot.cpp
 )
 
-add_library(pubsub INTERFACE)
 
+
+add_library(pubsub INTERFACE)
 
 target_include_directories(database
     PUBLIC
@@ -41,9 +42,14 @@ target_include_directories(simulator
         pubsub
 )
 
+
 # link spdlog to adapters
 target_link_libraries(simulator
     spdlog::spdlog
+)
+
+target_link_libraries(fleet_manager
+    simulator
 )
 
 # creates app subdirectory
