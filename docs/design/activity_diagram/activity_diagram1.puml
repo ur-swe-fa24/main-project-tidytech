@@ -1,0 +1,30 @@
+@startuml 5_sec_ping
+skinparam dpi 75
+
+start
+
+:MakeConfig;
+:Config]
+:read_ui_input;
+fork
+  :add_to_sim;
+fork again
+  :add_to_db;
+end fork
+:start_simulation;
+
+repeat
+    :Simulate;
+    if (clock % 5==0) then (true)
+        :handle_5_sec_ping;
+    else (false)
+    endif
+
+    if (clock==MAX) then (true)
+        :fnished_ping;
+        :FinalOutput]
+        stop
+    else (false)
+    endif
+
+@enduml

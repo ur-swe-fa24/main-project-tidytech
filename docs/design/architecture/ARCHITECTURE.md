@@ -1,4 +1,7 @@
 # Architecture
+
+![architecture diagram](architecture.png)
+
 There are 4 main components that make up the architecture: user interface, fleet manager, simulation, and database. There are sub-components in each that interact with other sub-components from the main components. The function of each is as follows:
 - ## User Interface
   - **Screen**: literal monitor the user is using

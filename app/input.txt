@@ -1,0 +1,10 @@
+Robot 1 shampoo 1 32
+Robot 2 scrubber 0 35
+Robot 3 vacuum 1 40
+
+Floor 32 Hallway C 
+Floor 35 Office W 
+Floor 40 Garage T 
+
+Tasks 100 1 32 1
+Tasks 101 2 35 0
