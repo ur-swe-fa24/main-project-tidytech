@@ -52,7 +52,7 @@ void Simulator::simulate() {
         }
 
         // End of simulation
-        if (clock_ >= Simulator::MAX_SIM_TIME) {
+        if (clock_ >= MAX_SIM_TIME) {
             ticking_ = false;
         }
     }

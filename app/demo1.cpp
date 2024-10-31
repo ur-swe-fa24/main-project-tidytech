@@ -110,11 +110,12 @@ int main() {
 
 
     // ========= START INTEGRATION TESTING ==================
-    Simulator simulation;
     Database db2;
-    Fleet_manager fleet_manager(&simulation, &db2);
+    FleetManager fleet_manager(db2);
 
     fleet_manager.read_ui_input("../app/input.txt");
-    simulation.start_simulation();
+    //simulation.start_simulation();
+    fleet_manager.start_sim();
+
 }
 

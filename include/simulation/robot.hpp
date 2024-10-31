@@ -13,26 +13,26 @@ class Robot {
         Robot(std::string id, std::string size, std::string type, std::string base, std::string curr); // Constructor
         ~Robot() {}; // Destructor
 
-        void setSize(std::string size);
-        void setType(std::string type);
-        void setStatus(std::string status);
+        void set_size(const std::string size);
+        void set_type(const std::string type);
+        void set_status(const std::string status);
 
-        std::string getId() {return id_;};
-        std::string getCurr() {return curr_;};
-        Robot::Status getStatus() {return status_;};
-        int getBattery() {return battery_;};
-        std::string toString();
+        std::string get_id() const {return id_;};
+        std::string get_curr() const {return curr_;};
+        Robot::Status get_status() const {return status_;};
+        int get_battery() const {return battery_;};
+        std::string to_string() const;
 
-        void addTasksToBack(std::vector<std::string> floors);
-        void addTasksToFront(std::vector<std::string> floors);
-        bool moveToNext();
-        bool canMove();
-        void startTask();
-        bool atBase() {return base_ == curr_;}; // Check if robot is at base
-        bool tasksEmpty() {return task_queue_.empty();}; // Check if task is empty
-        void goCharge();
+        void add_tasks_to_back(std::vector<std::string> floors);
+        void add_tasks_to_front(std::vector<std::string> floors);
+        bool move_to_next();
+        bool can_move();
+        void start_task();
+        bool at_base() {return base_ == curr_;}; // Check if robot is at base
+        bool tasks_empty() {return task_queue_.empty();}; // Check if task is empty
+        void go_charge();
         void charge();
-        void consumePower(int amount = 1) {battery_ = std::max(0, battery_-amount);}; // One tick of battery consume for every second
+        void consume_power(int amount = 1) {battery_ = std::max(0, battery_-amount);}; // One tick of battery consume for every second
         
 
     private:

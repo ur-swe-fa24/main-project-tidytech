@@ -13,7 +13,7 @@ Floor::Floor(std::string id, std::string room, std::string floortype, std::strin
 }
 
 // Set room with string
-void Floor::set_room(std::string room) {
+void Floor::set_room(const std::string room) {
     if (room == "hallway") {
         room_ = Floor::RoomType::Hallway;
     } else if (room == "room") {
@@ -28,7 +28,7 @@ void Floor::set_room(std::string room) {
 }
 
 // Set floortype with string
-void Floor::set_floortype(std::string floortype) {
+void Floor::set_floortype(const std::string floortype) {
     if (floortype == "wood") {
         floortype_ = Floor::FloorType::Wood;
     } else if (floortype == "tile") {
@@ -43,7 +43,7 @@ void Floor::set_floortype(std::string floortype) {
 }
 
 // Set size with string
-void Floor::set_size(std::string size) {
+void Floor::set_size(const std::string size) {
     if (size == "small") {
         size_ = Floor::Size::Small;
     } else if (size == "medium") {
@@ -58,7 +58,7 @@ void Floor::set_size(std::string size) {
 }
 
 // Set interaction with string
-void Floor::set_size(std::string interaction) {
+void Floor::set_size(const std::string interaction) {
     if (interaction == "low") {
         interaction_ = Floor::Interaction::Low;
     } else if (interaction == "medium") {
@@ -93,7 +93,7 @@ void Floor::get_dirty() {
 }
 
 // Floor getting cleaned by different size robot
-void Floor::get_clean(std::string robot_size) {
+void Floor::get_clean(const std::string robot_size) {
     getting_clean_ = true;
     if (robot_size == "small") {
         switch (size_) {
