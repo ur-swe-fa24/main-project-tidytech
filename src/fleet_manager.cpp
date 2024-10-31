@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-FleetManager::FleetManager(Database &db) : simulator_{}, database_(db){
+FleetManager::FleetManager() : simulator_{}, database_{} {
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");

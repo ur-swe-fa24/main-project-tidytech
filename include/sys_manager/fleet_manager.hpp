@@ -4,16 +4,17 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <wx/wx.h>
 
 #include "../simulation/simulator.hpp"
 #include "../database/database.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 
-class FleetManager : public Subscriber {
+class FleetManager : public Subscriber, public wxApp {
     public:
         // Constructor
-        FleetManager(Database &db);
+        FleetManager();
 
         // I/O methods
         void read_ui_input(std::string filepath);
@@ -26,6 +27,8 @@ class FleetManager : public Subscriber {
 
         // Run simulation methods
         void start_sim() {simulator_.start_simulation();};
+
+        bool OnInit() override;
     private:
         // Methods to handle the different events
         void handle_five_sec_ping(const std::string& data);
