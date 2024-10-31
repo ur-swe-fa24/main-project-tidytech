@@ -22,6 +22,14 @@ add_library(simulator
 )
 
 
+add_library(user_interface
+    src/main_frame.cpp
+)
+
+add_library(pubsub INTERFACE)
+
+find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
+include(${wxWidgets_USE_FILE})
 
 add_library(pubsub INTERFACE)
 
@@ -43,10 +51,24 @@ target_include_directories(simulator
 )
 
 
+target_include_directories(user_interface
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    PRIVATE
+        ${wxWidgets_INCLUDE_DIRS}
+)
+
+# link spdlog to simulator
+
+
 # link spdlog to adapters
 target_link_libraries(simulator
     spdlog::spdlog
 )
+
+target_link_libraries(user_interface
+    PRIVATE
+        ${wxWidgets_LIBRARIES}
 
 target_link_libraries(fleet_manager
     simulator
