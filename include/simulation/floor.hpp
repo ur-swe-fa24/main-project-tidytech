@@ -14,19 +14,19 @@ class Floor {
         Floor(std::string id, std::string room, std::string floortype, std::string size, std::string interaction_level, bool restriction);
         ~Floor() {};
 
-        void set_room(std::string room);
-        void set_floortype(std::string floortype);
-        void set_size(std::string size);
-        void set_interaction(std::string interaction);
-        void set_restriction(bool restriction) {restricted_ = restriction;};
-        void set_getting_clean(bool getting_clean) {getting_clean_ = getting_clean;};
+        void set_room(const std::string room);
+        void set_floortype(const std::string floortype);
+        void set_size(const std::string size);
+        void set_interaction(const std::string interaction);
+        void set_restriction(const bool restriction) {restricted_ = restriction;};
+        void set_getting_clean(const bool getting_clean) {getting_clean_ = getting_clean;};
 
-        std::string get_id() {return id_;};
-        int get_clean_level() {return clean_level_;};
+        std::string get_id() const {return id_;};
+        int get_clean_level() const {return clean_level_;};
 
         void get_dirty();
-        void get_clean(std::string robot_size);
-        bool is_clean() {return clean_level_==100;};
+        void get_clean(const std::string robot_size);
+        bool is_clean() const {return clean_level_==100;};
         
 
     private:
