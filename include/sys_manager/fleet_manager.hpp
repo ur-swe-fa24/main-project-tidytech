@@ -1,5 +1,5 @@
-#ifndef SYS_MANAGER_FLEET_MANAGER_HPP
-#define SYS_MANAGER_FLEET_MANAGER_HPP
+#ifndef SYS_MANAGER_FLEETMANAGER_HPP
+#define SYS_MANAGER_FLEETMANAGER_HPP
 
 #include <unordered_map>
 #include <vector>
@@ -10,10 +10,10 @@
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 
-class Fleet_manager : public Subscriber {
+class FleetManager : public Subscriber {
     public:
         // Constructor
-        Fleet_manager(Simulator* simulation, Database* db);
+        FleetManager(Database &db);
 
         // I/O methods
         void read_ui_input(std::string filepath);
@@ -23,14 +23,17 @@ class Fleet_manager : public Subscriber {
         void subscribe(const std::string& event);
         void unsubscribe(const std::string& event);
         void update(const std::string& event, const std::string& data) override;
+
+        // Run simulation methods
+        void start_sim() {simulator_.start_simulation();};
     private:
         // Methods to handle the different events
         void handle_five_sec_ping(const std::string& data);
         void handle_finished_ping(const std::string& data);
         
         // Attributes for simulator, and database
-        Simulator* simulator_;
-        Database* database_;
+        Simulator simulator_;
+        Database database_;
 };
 
 #endif

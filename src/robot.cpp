@@ -6,8 +6,8 @@
 // TODO: Implement floorNode for base and curr
 Robot::Robot(std::string id, std::string size, std::string type, std::string base, std::string curr) {
     id_ = id;
-    Robot::setSize(size);
-    Robot::setType(type);
+    Robot::set_size(size);
+    Robot::set_type(type);
     base_ = base;
     curr_ = curr;
     battery_ = 100;
@@ -15,7 +15,7 @@ Robot::Robot(std::string id, std::string size, std::string type, std::string bas
 } 
 
 // Set size with string
-void Robot::setSize(std::string size) {
+void Robot::set_size(const std::string size) {
     if (size == "small") {
         size_ = Robot::Size::Small;
     } else if (size == "medium") {
@@ -30,7 +30,7 @@ void Robot::setSize(std::string size) {
 }
 
 // Set type with string
-void Robot::setType(std::string type) {
+void Robot::set_type(const std::string type) {
     if (type == "scrubber") {
         type_ = Robot::Type::Scrubber;
     } else if (type == "vacuum") {
@@ -45,7 +45,7 @@ void Robot::setType(std::string type) {
 }
 
 // Set status with string
-void Robot::setStatus(std::string status) {
+void Robot::set_status(const std::string status) {
     if (status == "available") {
         status_ = Robot::Status::Available;
     } else if (status == "cleaning") {
@@ -62,7 +62,7 @@ void Robot::setStatus(std::string status) {
 }
 
 // toString for robot object
-std::string Robot::toString() {
+std::string Robot::to_string() const {
     std::string str_size;
     std::string str_type;
     std::string str_status;
@@ -126,19 +126,19 @@ std::string Robot::toString() {
 }
 
 // Add tasks at the back of the queue
-void Robot::addTasksToBack(std::vector<std::string> floors) {
+void Robot::add_tasks_to_back(std::vector<std::string> floors) {
     task_queue_.insert(task_queue_.end(), floors.begin(), floors.end());
 }
 
 // Add tasks at the front of the queue
-void Robot::addTasksToFront(std::vector<std::string> floors) {
+void Robot::add_tasks_to_front(std::vector<std::string> floors) {
     task_queue_.insert(task_queue_.begin(), floors.begin(), floors.end());
 }
 
 // Move to next task if it can
 // TODO: modify the logic to flow better
-bool Robot::moveToNext() {
-    if (Robot::canMove()) {
+bool Robot::move_to_next() {
+    if (Robot::can_move()) {
         if (!task_queue_.empty()) {
             // Pop the first task and move robot to that floor
             curr_ = task_queue_.front();
@@ -166,7 +166,7 @@ void Robot::charge() {
 }
 
 // Move to base and change status to Charginf
-void Robot::goCharge() {
+void Robot::go_charge() {
     /**
      * implement more with battery usage and moving robot
      */
@@ -175,7 +175,7 @@ void Robot::goCharge() {
 }
 
 // Check if robot has enough battery to move
-bool Robot::canMove() {
+bool Robot::can_move() {
     /**
      * Future: Check if the next floor has max capacity
      * Future: Check if the robot can go back to base
@@ -185,6 +185,6 @@ bool Robot::canMove() {
 }
 
 // Start task by going down the queue
-void Robot::startTask() {
-    Robot::moveToNext();
+void Robot::start_task() {
+    Robot::move_to_next();
 }

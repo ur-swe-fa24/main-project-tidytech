@@ -21,6 +21,7 @@ add_library(simulator
     src/robot.cpp
 )
 
+
 add_library(user_interface
     src/main_frame.cpp
 )
@@ -29,6 +30,8 @@ add_library(pubsub INTERFACE)
 
 find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
+
+add_library(pubsub INTERFACE)
 
 target_include_directories(database
     PUBLIC
@@ -47,6 +50,7 @@ target_include_directories(simulator
         pubsub
 )
 
+
 target_include_directories(user_interface
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -55,6 +59,9 @@ target_include_directories(user_interface
 )
 
 # link spdlog to simulator
+
+
+# link spdlog to adapters
 target_link_libraries(simulator
     spdlog::spdlog
 )
@@ -62,6 +69,9 @@ target_link_libraries(simulator
 target_link_libraries(user_interface
     PRIVATE
         ${wxWidgets_LIBRARIES}
+
+target_link_libraries(fleet_manager
+    simulator
 )
 
 # creates app subdirectory
