@@ -14,6 +14,7 @@ target_link_libraries(demo1
         fleet_manager
         simulator
         pubsub
+        user_interface
 )
 
 target_compile_features(demo1 PRIVATE cxx_std_17)
