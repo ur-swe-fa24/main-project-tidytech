@@ -3,12 +3,11 @@
 #include "simulation/simulator.hpp"
 #include "sys_manager/fleet_manager.hpp"
 #include "ui/user_interface.hpp"
-#include "ui/main_frame.hpp"
 #include <wx/wx.h>
  
 
-bool UserInterface::OnInit() {
-    MainFrame* mf = new MainFrame("C++ GUI");
+bool FleetManager::OnInit() {
+    UserInterface* mf = new UserInterface("C++ GUI");
     mf->SetClientSize(800, 600);
     mf->Center();
     mf->Show();
@@ -16,4 +15,4 @@ bool UserInterface::OnInit() {
     return true;
 }
 
-wxIMPLEMENT_APP(UserInterface);
+wxIMPLEMENT_APP(FleetManager);
