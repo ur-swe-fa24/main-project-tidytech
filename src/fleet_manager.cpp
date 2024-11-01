@@ -43,7 +43,6 @@ void FleetManager::read_ui_input(string filepath) {
             string type;
             ss >> id >> type >> available >> location;
             database_.add_robot(id, type, available, location);
-            simulator_.add_robot(to_string(id), "small", type, to_string(location), to_string(location));
         } else if (word == "Floor") {
             int id;
             string name, type;
@@ -60,7 +59,6 @@ void FleetManager::read_ui_input(string filepath) {
             robot_assigned_vector.push_back(robot_assigned);
             room_assigned_vector.push_back(room_assigned);
             database_.add_task(id, robot_assigned_vector, room_assigned_vector, status);
-            simulator_.add_task(to_string(robot_assigned), to_string(room_assigned));
         }
     }
     

@@ -13,7 +13,10 @@
 #include "simulation/robot.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
+#include "types/types.hpp"
 #include "spdlog/spdlog.h"
+
+using namespace types;
 
 class Simulator : public Publisher {
     public:
@@ -29,9 +32,9 @@ class Simulator : public Publisher {
         void reset_simulation(); // Reset the simulation
 
         void add_floor(std::string floor);
-        void add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr);
-        std::string status_report(std::string robot_id);
-        void add_task(std::string robot_id, std::string floor_id);
+        void add_robot(RobotSize size, RobotType type, std::string base, std::string curr);
+        std::string status_report(int robot_id);
+        void add_task(int robot_id, std::string floor_id);
 
         void subscribe(Subscriber* subscriber, const std::string& event) override;
         void unsubscribe(Subscriber* subscriber, const std::string& event) override;

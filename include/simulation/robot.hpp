@@ -3,23 +3,24 @@
 
 #include <string>
 #include <vector>
+#include "types/types.hpp"
+
+using namespace types;
 
 class Robot {
     public:
-        enum class Size {Small, Medium, Large};
-        enum class Type {Scrubber, Vaccum, Shampoo};
-        enum class Status {Available, Cleaning, Charging, Unavailable}; // You can task a robot if it is Available or Cleaning; but you cannot task it if it is unavailable
+        static int robotCreationCount; // For id
 
-        Robot(std::string id, std::string size, std::string type, std::string base, std::string curr); // Constructor
+        Robot(RobotSize size, RobotType type, std::string base, std::string curr); // Constructor
         ~Robot() {}; // Destructor
 
-        void set_size(const std::string size);
-        void set_type(const std::string type);
-        void set_status(const std::string status);
+        void set_size(const RobotSize size) {size_ = size;};
+        void set_type(const RobotType type) {type_ = type;};
+        void set_status(const RobotStatus status) {status_ = status;};
 
-        std::string get_id() const {return id_;};
+        int get_id() const {return id_;};
         std::string get_curr() const {return curr_;};
-        Robot::Status get_status() const {return status_;};
+        RobotStatus get_status() const {return status_;};
         int get_battery() const {return battery_;};
         std::string to_string() const;
 
@@ -36,14 +37,14 @@ class Robot {
         
 
     private:
-        std::string id_;
-        Robot::Size size_; 
-        Robot::Type type_;
+        int id_;
+        RobotSize size_; 
+        RobotType type_;
         std::string base_;
         std::string curr_;
         int battery_;
         std::vector<std::string> task_queue_;
-        Robot::Status status_;
+        RobotStatus status_;
 
         
         
