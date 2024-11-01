@@ -10,6 +10,9 @@
 #include "../database/database.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
+#include "types/types.hpp"
+
+using namespace types;
 
 class FleetManager : public Subscriber, public wxApp {
     public:

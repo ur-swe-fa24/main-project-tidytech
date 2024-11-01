@@ -29,6 +29,8 @@ add_library(user_interface
 
 add_library(pubsub INTERFACE)
 
+add_library(types INTERFACE)
+
 find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
@@ -67,6 +69,7 @@ target_include_directories(user_interface
 # link spdlog to adapters
 target_link_libraries(simulator
     spdlog::spdlog
+    types
 )
 
 target_link_libraries(user_interface
@@ -79,6 +82,7 @@ target_link_libraries(fleet_manager
     PRIVATE
         ${wxWidgets_LIBRARIES}
         simulator
+        types
 )
 
 # creates app subdirectory

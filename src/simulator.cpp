@@ -26,20 +26,20 @@ void Simulator::simulate() {
         std::lock_guard<std::mutex> lock(robots_mutex_);
         for (Robot& robot : robots_) {
             switch (robot.get_status()) {
-                case Robot::Status::Available:
+                case RobotStatus::Available:
                     robot.consume_power();
                     if (!robot.tasks_empty()){robot.start_task();} // Go do something
                     else {
                         if (robot.get_battery() < 50) {robot.go_charge();}; // Go back to charge if battery < 50
                     }
                     break;
-                case Robot::Status::Charging:
+                case RobotStatus::Charging:
                     robot.charge();
                     break;
-                case Robot::Status::Cleaning:
+                case RobotStatus::Cleaning:
                     robot.consume_power(3); // Cleaning takes more power
                     break;
-                case Robot::Status::Unavailable:
+                case RobotStatus::Unavailable:
                     break;
             }
         }
@@ -90,8 +90,8 @@ void Simulator::reset_simulation() {
 }
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr) {
-    Robot robot(id, size, type, base, curr);
+void Simulator::add_robot(RobotSize size, RobotType type, std::string base, std::string curr) {
+    Robot robot(size, type, base, curr);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
 }
@@ -103,7 +103,7 @@ void Simulator::add_floor(std::string floor) {
 
 // Add task to a robot
 // TODO: assign multiple rooms to a robot task queue
-void Simulator::add_task(std::string robot_id, std::string floor_id) {
+void Simulator::add_task(int robot_id, std::string floor_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
@@ -113,14 +113,14 @@ void Simulator::add_task(std::string robot_id, std::string floor_id) {
 }
 
 // Return a status of a robot
-std::string Simulator::status_report(std::string robot_id) {
+std::string Simulator::status_report(int robot_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
             return robot.to_string();
         }
     }
-    return robot_id + " not found.";
+    return std::to_string(robot_id) + " not found.";
 }
 
 // Let a subscriber subscribe to an event
