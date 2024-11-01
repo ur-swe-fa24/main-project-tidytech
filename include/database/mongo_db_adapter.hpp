@@ -1,0 +1,7 @@
+#ifndef DATABASE_MONGO_DB_ADAPTER_HPP
+#define DATABASE_MONGO_DB_ADAPTER_HPP
+
+
+
+
+#endif

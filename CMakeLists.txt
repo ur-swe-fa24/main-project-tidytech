@@ -21,6 +21,10 @@ add_library(simulator
     src/robot.cpp
 )
 
+add_library(mongoadapter
+    src/mongo_db_adapter.cpp
+)
+
 
 
 add_library(pubsub INTERFACE)
