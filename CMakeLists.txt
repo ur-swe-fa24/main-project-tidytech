@@ -39,22 +39,18 @@ target_include_directories(database
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
-target_include_directories(fleet_manager
-    PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        pubsub
-)
-
 target_include_directories(simulator
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         pubsub
+        types
 )
-
 
 target_include_directories(fleet_manager
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        pubsub
+        types
     PRIVATE
         ${wxWidgets_INCLUDE_DIRS}
 )
