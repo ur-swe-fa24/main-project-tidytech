@@ -14,6 +14,8 @@ class Floor {
         Floor(FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction);
         ~Floor() {};
 
+        bool operator==(const Floor& other) const {id_ == other.id_;} // Overriding Floor comparison
+
         void set_room(const FloorRoomType room) {room_ = room;};
         void set_floortype(const FloorType floortype) {floortype_ = floortype;};
         void set_size(const FloorSize size) {size_ = size;};
