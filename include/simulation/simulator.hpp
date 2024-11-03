@@ -20,7 +20,7 @@ using namespace types;
 
 class Simulator : public Publisher {
     public:
-        static const int MAX_SIM_TIME = 10; //Max simulation time
+        static const int MAX_SIM_TIME = 6; //Max simulation time
 
         Simulator(); // Default constructor
         Simulator& operator=(const Simulator& other);

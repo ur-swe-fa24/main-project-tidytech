@@ -1,4 +1,5 @@
 #include "sys_manager/fleet_manager.hpp"
+#include "ui/user_interface.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -94,5 +95,24 @@ void FleetManager::handle_five_sec_ping(const std::string& data) {
 void FleetManager::handle_finished_ping(const std::string& data) {
     // Calls write_output to write data to a file
     std::string message = "Final Report Summary:\n" + data;
-    write_output("../app/output.txt", message);
+    notify("display_text", "[Final Report]");
+    // write_output("../app/output.txt", message);
+}
+
+
+void FleetManager::subscribe(Subscriber* subscriber, const std::string& event) {
+    subscribers_[event].push_back(subscriber);
+}
+
+// Let the subscriber unsubscribe from an event
+void FleetManager::unsubscribe(Subscriber* subscriber, const std::string& event) {
+    auto& subs = subscribers_[event];
+    subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
+}
+
+// Notify all the subscribers
+void FleetManager::notify(const std::string& event, const std::string& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, data);
+    }
 }

@@ -1,20 +1,2 @@
 Final Report Summary:
-Robot Id: 1, Size: Small, Type: Shampoo
-Status: Cleaning, Battery: 72
-Base Location: 32
-Current Location: 32
-Tasks: 32
 
-​Robot Id: 2, Size: Small, Type: Scrubber
-Status: Cleaning, Battery: 72
-Base Location: 35
-Current Location: 35
-Tasks: 35
-
-​Robot Id: 3, Size: Small, Type: Vaccum
-Status: Available, Battery: 90
-Base Location: 40
-Current Location: 40
-Tasks: 
-
-​
