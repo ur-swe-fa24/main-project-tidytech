@@ -45,7 +45,7 @@ void Simulator::simulate() {
         }
 
         // Report status every 5 ticks
-        if (clock_ % 5 == 0) {
+        if (clock_ % 2 == 0) {
             for (Robot& robot : robots_) {
                 notify("five_sec_ping", robot.to_string());
             }
@@ -61,6 +61,7 @@ void Simulator::simulate() {
         data += robot.to_string() + "\n\u200B"; // TODO: create better fix for this
     }
     // Report the finished simulation result to an output file
+    spdlog::info("Simulation finished!");
     notify("finished_ping", data);
 }
 
@@ -70,8 +71,9 @@ void Simulator::start_simulation() {
     // Prevent starting the clock if it's already running
     if (!ticking_) {
         ticking_ = true;
-        sim_thread_ = std::thread(&Simulator::simulate, this);
         spdlog::info("Simulation started!");
+        sim_thread_ = std::thread(&Simulator::simulate, this);
+        sim_thread_.detach();
     } else {
         spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
     }

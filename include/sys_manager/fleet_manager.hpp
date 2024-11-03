@@ -14,7 +14,7 @@
 
 using namespace types;
 
-class FleetManager : public Subscriber, public wxApp {
+class FleetManager : public Subscriber, public wxApp, public Publisher {
     public:
         // Constructor
         FleetManager();
@@ -28,6 +28,10 @@ class FleetManager : public Subscriber, public wxApp {
         void unsubscribe(const std::string& event);
         void update(const std::string& event, const std::string& data) override;
 
+        void subscribe(Subscriber* subscriber, const std::string& event) override;
+        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
+        void notify(const std::string& event, const std::string& data) override;
+
         // Run simulation methods
         void start_sim() {simulator_.start_simulation();};
 
@@ -36,6 +40,8 @@ class FleetManager : public Subscriber, public wxApp {
         // Methods to handle the different events
         void handle_five_sec_ping(const std::string& data);
         void handle_finished_ping(const std::string& data);
+
+        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
         
         // Attributes for simulator, and database
         Simulator simulator_;

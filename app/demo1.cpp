@@ -7,10 +7,11 @@
  
 
 bool FleetManager::OnInit() {
-    UserInterface* mf = new UserInterface("C++ GUI");
-    mf->SetClientSize(800, 600);
-    mf->Center();
-    mf->Show();
+    UserInterface* ui = new UserInterface("C++ GUI");
+    
+    ui->SetClientSize(800, 600);
+    ui->Center();
+    ui->Show();
 
     return true;
 }
