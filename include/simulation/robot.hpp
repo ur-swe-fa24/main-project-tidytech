@@ -14,6 +14,8 @@ class Robot {
         Robot(RobotSize size, RobotType type, std::string base, std::string curr); // Constructor
         ~Robot() {}; // Destructor
 
+        bool operator==(const Robot& other) const {id_ == other.id_;} // Overriding Robot comparison
+
         void set_size(const RobotSize size) {size_ = size;};
         void set_type(const RobotType type) {type_ = type;};
         void set_status(const RobotStatus status) {status_ = status;};
