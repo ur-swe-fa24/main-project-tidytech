@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/libs/mongo-cxx-driver")
 project(adapter LANGUAGES CXX)
 
 # include the basics
@@ -12,6 +13,11 @@ add_library(database
     src/database.cpp
 )
 
+add_library(mongodb
+    src/db_manager.cpp
+    src/robot_adapter.cpp
+)
+
 add_library(fleet_manager
     src/fleet_manager.cpp
 )
@@ -21,15 +27,14 @@ add_library(simulator
     src/robot.cpp
 )
 
-add_library(mongoadapter
-    src/mongo_db_adapter.cpp
-)
-
-
-
 add_library(pubsub INTERFACE)
 
 target_include_directories(database
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+
+target_include_directories(mongodb
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
@@ -54,6 +59,19 @@ target_link_libraries(simulator
 
 target_link_libraries(fleet_manager
     simulator
+)
+
+find_package(mongocxx REQUIRED)
+if (mongocxx_FOUND)
+  message(STATUS "mongocxx found!")
+endif()
+find_package(bsoncxx REQUIRED)
+if (bsoncxx_FOUND)
+  message(STATUS "bsoncxx found!")
+endif()
+
+target_link_libraries(mongodb
+    mongo::mongocxx_shared
 )
 
 # creates app subdirectory
