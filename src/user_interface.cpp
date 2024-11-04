@@ -52,7 +52,7 @@ void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
     AddRobotWindow robotForm(this);
     if (robotForm.ShowModal() == wxID_OK) {
-        fm_.add_robot(robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
+        //fm_.add_robot(robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
         wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
     }
 }

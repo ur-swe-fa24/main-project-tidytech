@@ -22,7 +22,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         static int robot_count; // For robot_id
         static int floor_count; // For floor_id
 
-        void add_robot(std::string size, std::string type, std::string charging_position, std::string current_position);
+        void add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position);
         void add_floor(std::string name);
         void write_output(std::string filepath, std::string message); // outputs to a file
 

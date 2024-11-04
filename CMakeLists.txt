@@ -11,6 +11,8 @@ include(dependencies/dependencies.cmake)
 # add library for each of the adapters
 add_library(database
     src/database.cpp
+    src/robot_adapter.cpp
+    src/floor_adapter.cpp
 )
 
 add_library(mongodb
@@ -47,6 +49,9 @@ include(${wxWidgets_USE_FILE})
 target_include_directories(database
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    PRIVATE
+        mongodb
+        mongo::mongocxx_shared
 )
 
 target_include_directories(mongodb
@@ -66,6 +71,7 @@ target_include_directories(fleet_manager
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         pubsub
         types
+        database
     PRIVATE
         ${wxWidgets_INCLUDE_DIRS}
         mongodb
@@ -77,6 +83,16 @@ target_include_directories(user_interface
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     PRIVATE
         ${wxWidgets_INCLUDE_DIRS}
+        mongodb
+        mongo::mongocxx_shared
+)
+
+target_include_directories(database
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    PRIVATE
+        mongodb
+        mongo::mongocxx_shared
 )
 
 # link spdlog to adapters
@@ -89,6 +105,9 @@ target_link_libraries(user_interface
     PRIVATE
         ${wxWidgets_LIBRARIES}
         simulator
+        types
+        database
+        mongo::mongocxx_shared
 )
 
 target_link_libraries(fleet_manager
@@ -96,6 +115,15 @@ target_link_libraries(fleet_manager
         ${wxWidgets_LIBRARIES}
         simulator
         types
+        database
+        mongo::mongocxx_shared
+)
+
+target_link_libraries(database
+    PRIVATE
+        types
+        mongo::mongocxx_shared
+        
 )
 
 find_package(mongocxx REQUIRED)
