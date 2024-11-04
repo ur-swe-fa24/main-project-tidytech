@@ -52,15 +52,17 @@ void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
     AddRobotWindow robotForm(this);
     if (robotForm.ShowModal() == wxID_OK) {
-        //fm_.add_robot(robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
+        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
         wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
     }
 }
 
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
-    AddFloorWindow floorForm(this);
+    std::vector<std::string> names = fm_.get_all_floor_names();
+    AddFloorWindow floorForm(this, names);
     if (floorForm.ShowModal() == wxID_OK) {
-        fm_.add_floor(floorForm.get_floor_name());
+        std::vector<int> neighbors; //TODO: remove this
+        fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), neighbors);
         wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
     }
 }

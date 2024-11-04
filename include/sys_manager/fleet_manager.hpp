@@ -23,9 +23,10 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         static int floor_count; // For floor_id
 
         void add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position);
-        void add_floor(std::string name);
+        void add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
         void write_output(std::string filepath, std::string message); // outputs to a file
 
+        std::vector<std::string> get_all_floor_names();
         // Observer pattern methods
         void subscribe(const std::string& event);
         void unsubscribe(const std::string& event);

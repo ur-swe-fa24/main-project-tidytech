@@ -174,3 +174,15 @@ void Simulator::notify(const std::string& event, const std::string& data) {
         subscriber->update(event, data);
     }
 }
+
+std::vector<std::string> Simulator::get_all_floor_names() {
+    std::vector<Floor> all_floors = floorplan_.get_all_floor();
+    std::vector<std::string> floor_names;
+    // for (Floor floor : all_floors) {
+
+    // }
+    floor_names.push_back("Floor 1");
+    floor_names.push_back("Floor 2");
+    floor_names.push_back("Floor 3");
+    return floor_names;
+}
