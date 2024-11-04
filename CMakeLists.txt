@@ -113,3 +113,4 @@ target_link_libraries(mongodb
 
 # creates app subdirectory
 add_subdirectory(app)
+add_subdirectory(tests)
