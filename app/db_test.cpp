@@ -93,7 +93,7 @@ int main() {
         std::cout << "task1 found after deletion: " << bsoncxx::to_json(*foundTask) << std::endl;
     } else {
         std::cout << "task1 successfully deleted." << std::endl;
-
+    }
     // Test 3: FloorAdapter
     // Create a collection
     collection = db["floors"];
