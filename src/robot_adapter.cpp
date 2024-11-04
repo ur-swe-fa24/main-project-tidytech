@@ -26,7 +26,7 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& size, c
     // insert the doc into the collection
         collection_.insert_one(robot_doc.view());
     } else {
-        std::cout << "the robot has been added to the database already" << std::endl;
+        throw std::invalid_argument("the robot has been added to the database already");
     }
 }
 
