@@ -9,13 +9,12 @@ using namespace types;
 
 class Floor {
     public:
-        static int floorCreationCount; // For id
-
-        Floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level);
+        Floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level);
         ~Floor() {};
 
         bool operator==(const Floor& other) const {return id_ == other.id_;} // Overriding Floor comparison
 
+        void set_name(const std::string name) {name_ = name;};
         void set_room(const FloorRoomType room) {room_ = room;};
         void set_floortype(const FloorType floortype) {floortype_ = floortype;};
         void set_size(const FloorSize size) {size_ = size;};
@@ -24,6 +23,7 @@ class Floor {
         void set_getting_clean(const bool getting_clean) {getting_clean_ = getting_clean;};
 
         int get_id() const {return id_;};
+        std::string get_name() const {return name_;;}
         int get_clean_level() const {return clean_level_;};
         bool get_getting_clean() const {return getting_clean_;};
         std::string to_string() const;
@@ -35,6 +35,7 @@ class Floor {
 
     private:
         int id_;
+        std::string name_;
         FloorRoomType room_;
         FloorType floortype_;
         FloorSize size_;

@@ -1,19 +1,17 @@
 #include "simulation/robot.hpp"
 #include "spdlog/spdlog.h"
 
-int Robot::robotCreationCount = 1;
 // Robot constructor
 // Initialize all variables
 // TODO: Implement floorNode for base and curr
-Robot::Robot(int id, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status) {
-    //id_ = Robot::robotCreationCount++;
+Robot::Robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status) {
     id_ = id;
+    name_ = name;
     size_ = size;
     type_ = type;
     base_ = base;
     curr_ = curr;
     battery_ = 100;
-    //status_ = RobotStatus::Available;
     status_ = status;
 } 
 
@@ -30,7 +28,8 @@ std::string Robot::to_string() const {
     }
 
     return "Robot Id: " + std::to_string(id_) +
-            ", Size: " + types::to_string(size_) +
+            ", Name: " + name_ + "\n" +
+            "Size: " + types::to_string(size_) +
             ", Type: " + types::to_string(type_) + "\n" +
             "Status: " + types::to_string(status_) +
             ", Battery: " + std::to_string(battery_) + "\n" +
