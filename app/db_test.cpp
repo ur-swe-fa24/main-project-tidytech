@@ -52,7 +52,8 @@ int main() {
     }
 
     // Test 2: taskAdapter
-    collection = db["tasks"];
+    auto db = client["test_database"];
+    auto collection = db["tasks"];
 
     // Initialize taskAdapter
     TaskAdapter taskAdapter(collection);
