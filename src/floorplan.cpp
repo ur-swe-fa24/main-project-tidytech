@@ -15,7 +15,7 @@ std::string FloorPlan::to_string() const {
         out_str += "Id: " + std::to_string(pair.first.get_id()) + ", Number of Robots: " + std::to_string(get_num_robots(pair.first)) + ", Adjacent Floors: ";
         std::string neighbors_str = "";
         for (const auto& neighbor : pair.second) {
-            neighbors_str += neighbor.get_id() + ", ";
+            neighbors_str += std::to_string(neighbor.get_id()) + ", ";
         }
         if (neighbors_str.length() >= 2) {
         neighbors_str.erase(neighbors_str.length() - 2, 2); // Remove last two characters
@@ -30,7 +30,7 @@ std::string FloorPlan::floor_to_string(const Floor& floor) const {
     std::string neighbors_str = "";
     std::vector<Floor> neighbors = floorgraph_.at(floor);
     for (const auto& neighbor : neighbors) {
-        neighbors_str += neighbor.get_id() + ", ";
+        neighbors_str += std::to_string(neighbor.get_id()) + ", ";
     }
 
     if (neighbors_str.length() >= 2) {
@@ -72,12 +72,7 @@ void FloorPlan::remove_floor(const Floor& floor) {
 }
 
 std::vector<Floor> FloorPlan::get_neighbors(const Floor& floor) const {
-    if (floorgraph_.count(floor) == 1) {
-        return floorgraph_.at(floor);
-    } else {
-        // Floor does not exist in the graph
-        spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
-    }
+    return floorgraph_.at(floor);
 }
 
 void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Floor> neighbors) {
@@ -104,10 +99,11 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
         for (Floor modify_floor : floors_to_modify) {
             int pos = 0;
             std::vector<Floor> modify_neighbors = floorgraph_[modify_floor];
-            for (pos; pos < modify_neighbors.size(); pos++) {
+            for (int i = 0; i < modify_neighbors.size(); pos++) {
                 if (modify_neighbors[pos] == floor) {
                     break;
                 }
+                pos++;
             }
             if (pos != modify_neighbors.size()) {
                 auto it = floorgraph_[modify_floor].begin() + pos; // iterator to that index of pos

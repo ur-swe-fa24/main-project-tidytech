@@ -9,7 +9,22 @@
 
 using namespace types;
 
-FleetManager::FleetManager() : simulator_{} {
+int FleetManager::robot_count = 0; // For robot_id
+int FleetManager::floor_count = 0; // For floor_id
+
+mongocxx::collection getRobotCollection(std::string table) {
+    static mongocxx::instance instance{};  // Ensure MongoDB instance is initialized only once
+    mongocxx::client client{mongocxx::uri{}};
+    auto db = client["database"];
+    return db[table];
+}
+
+FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")} {
+    // mongocxx::instance instance{};
+    // mongocxx::client client{mongocxx::uri{}};
+    // auto db = client["database"];
+    // auto collection = db["robots"];
+    // robot_adapter_ = RobotAdapter(collection);
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");
@@ -97,8 +112,8 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-    simulator_.add_robot(1, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
-
+    simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
+    robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     // database_.add_robot(id, type, 1, location);
 }
 

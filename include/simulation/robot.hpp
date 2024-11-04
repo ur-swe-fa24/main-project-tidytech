@@ -10,9 +10,7 @@ using namespace types;
 
 class Robot {
     public:
-        static int robotCreationCount; // For id
-
-        Robot(int id,RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status); // Constructor
+        Robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status); // Constructor
         ~Robot() {}; // Destructor
 
         bool operator==(const Robot& other) const {return id_ == other.id_;} // Overriding Robot comparison
@@ -22,6 +20,7 @@ class Robot {
         void set_status(const RobotStatus status) {status_ = status;};
 
         int get_id() const {return id_;};
+        std::string get_name() const {return name_;};
         std::string get_curr() const {return curr_;};
         RobotStatus get_status() const {return status_;};
         int get_battery() const {return battery_;};
@@ -41,6 +40,7 @@ class Robot {
 
     private:
         int id_;
+        std::string name_;
         RobotSize size_; 
         RobotType type_;
         std::string base_;
@@ -49,9 +49,6 @@ class Robot {
         std::vector<std::string> task_queue_;
         RobotStatus status_;
         std::queue<int> curr_path; // Shortest path from one floor to another
-
-
-        
         
 };
 

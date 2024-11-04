@@ -1,17 +1,14 @@
 #include "simulation/floor.hpp"
 #include "spdlog/spdlog.h"
 
-int Floor::floorCreationCount = 1;
-
-Floor::Floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level) {
-    //id_ = Floor::floorCreationCount++;
+Floor::Floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level) {
     id_ = id;
+    name_ = name;
     room_ = room;
     floortype_ = floortype;
     size_ = size;
     interaction_ = interaction_level;
     restricted_ = restriction;
-    // clean_level_ = 100;
     clean_level_ = clean_level;
     getting_clean_ = false;
 }
@@ -25,7 +22,8 @@ std::string Floor::to_string() const {
     
 
     return "Floor Id: " + std::to_string(id_) +
-            ", Size: " + types::to_string(size_) +
+            ", Name: " + name_ + "\n" +
+            "Size: " + types::to_string(size_) +
             ", RoomType: " + types::to_string(room_) +
             ", FloorType: " + types::to_string(floortype_) + "\n" +
             "Interaction Level: " + types::to_string(interaction_) +
