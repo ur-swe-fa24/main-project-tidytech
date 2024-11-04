@@ -10,19 +10,25 @@ using bsoncxx::builder::basic::kvp;
 void FloorAdapter::insertFloor(const std::string& id, const std::string& room, const std::string& floortype,
                                const std::string& size, const std::string& interaction, const std::string& restricted,
                                const std::string& clean_level) {
-    auto floor_doc = make_document(
-        kvp("_id", id),
-        kvp("room", room),
-        kvp("floorType", floortype),
-        kvp("size", size),
-        kvp("interactionLevel", interaction),
-        kvp("restricted", restricted),
-        kvp("cleanLevel", clean_level)
+    auto query_doc = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("_id", id)
     );
+    auto existing_doc = collection_.find_one(query_doc.view());
+    if (!existing_doc) {
+        auto floor_doc = make_document(
+            kvp("_id", id),
+            kvp("room", room),
+            kvp("floorType", floortype),
+            kvp("size", size),
+            kvp("interactionLevel", interaction),
+            kvp("restricted", restricted),
+            kvp("cleanLevel", clean_level));
 
     // insert the doc into the collection
-
-    collection_.insert_one(floor_doc.view());
+        collection_.insert_one(floor_doc.view());
+    } else {
+        std::cout << "the floor has been added to database already" << std::endl;
+    }
 }
 
 
