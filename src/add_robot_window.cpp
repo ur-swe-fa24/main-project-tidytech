@@ -6,6 +6,11 @@ AddRobotWindow::AddRobotWindow(wxWindow* parent)
     // Sizer for input form
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
+    // Charging position input
+    robot_name_ = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250, 25));
+    sizer->Add(new wxStaticText(this, wxID_ANY, "Robot Name:"), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+    sizer->Add(robot_name_, 0, wxALL, 10);
+
     // Robot type options
     wxBoxSizer* robotTypeSizer = new wxBoxSizer(wxHORIZONTAL);
     shampoo_button_ = new wxRadioButton(this, wxID_ANY, "Shampoo", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);

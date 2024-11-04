@@ -30,6 +30,7 @@ class AddRobotWindow : public wxDialog {
         };
         std::string get_current_position() { return std::string(current_position_->GetValue().mb_str()); };
         std::string get_charging_position() { return std::string(charging_position_->GetValue().mb_str()); };
+        std::string get_name() { return std::string(robot_name_->GetValue().mb_str()); };
     private:
         wxRadioButton* shampoo_button_;
         wxRadioButton* scrubber_button_;
@@ -39,6 +40,7 @@ class AddRobotWindow : public wxDialog {
         wxRadioButton* large_button_;
         wxTextCtrl* current_position_;
         wxTextCtrl* charging_position_;
+        wxTextCtrl* robot_name_;
 };
 
 #endif
