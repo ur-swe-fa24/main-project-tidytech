@@ -9,7 +9,7 @@
 
 using namespace types;
 
-FleetManager::FleetManager() : simulator_{}, database_{} {
+FleetManager::FleetManager() : simulator_{} {
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");
@@ -122,4 +122,36 @@ void FleetManager::notify(const std::string& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }
+}
+
+void FleetManager::add_robot(std::string size, std::string type, std::string charging_position, std::string current_position) {
+    RobotSize RsSize;
+    if (size == "Small") {
+        RsSize = RobotSize::Small;
+    } else if (size == "Medium") {
+        RsSize = RobotSize::Medium;
+    } else if (size == "Large") {
+        RsSize = RobotSize::Large;
+    } else {
+        std::cout << "Invalid Robot Size" << std::endl;
+    }
+
+    RobotType RtType;
+    if (type == "Shampoo") {
+        RtType = RobotType::Shampoo;
+    } else if (type == "Vacuum") {
+        RtType = RobotType::Vaccum;
+    } else if (type == "Scrubber") {
+        RtType = RobotType::Scrubber;
+    } else {
+        std::cout << "Invalid Robot Type" << std::endl;
+    }
+    simulator_.add_robot(RsSize, RtType, charging_position, current_position);
+
+    // database_.add_robot(id, type, 1, location);
+}
+
+void FleetManager::add_floor(std::string name) {
+    simulator_.add_floor(name);
+    // database_.add_robot(id, type, 1, location);
 }

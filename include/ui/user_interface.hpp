@@ -20,7 +20,9 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
         void unsubscribe(const std::string& event);
         void update(const std::string& event, const std::string& data) override;
     private:
-        void OnButtonClicked(wxCommandEvent& evt);
+        void OnStartSimulation(wxCommandEvent& evt);
+        void OnAddRobot(wxCommandEvent& event);
+        void OnAddFloor(wxCommandEvent& event);
         void setText(const string& new_text);
         void handle_display_text(const std::string& data);
         void OnTextUpdated(wxCommandEvent& event);

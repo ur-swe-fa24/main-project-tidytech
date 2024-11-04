@@ -1,4 +1,6 @@
 #include "ui/user_interface.hpp"
+#include "ui/add_robot_window.hpp"
+#include "ui/add_floor_window.hpp"
 #include <wx/wx.h>
 
 enum IDs {
@@ -6,39 +8,63 @@ enum IDs {
 };
 
 wxBEGIN_EVENT_TABLE(UserInterface, wxFrame)
-    EVT_BUTTON(BUTTON_ID, UserInterface::OnButtonClicked)
+    EVT_BUTTON(BUTTON_ID, UserInterface::OnStartSimulation)
 wxEND_EVENT_TABLE()
 
 UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
     subscribe("display_text");
     Bind(wxEVT_COMMAND_TEXT_UPDATED, &UserInterface::OnTextUpdated, this, GetId());
     Bind(wxEVT_CLOSE_WINDOW, &UserInterface::OnClose, this);
-    wxPanel* panel = new wxPanel(this);
-    wxButton* btn = new wxButton(panel, BUTTON_ID, "Button", wxPoint(350, 100), wxSize(100, 35));
-    CreateStatusBar();
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+    wxPanel* panel = new wxPanel(this);
+    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     display_text_ = new wxStaticText(panel, wxID_ANY, "Final report will go here.",
-                                            wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+                                     wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     display_text_->SetFont(wxFont(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-    sizer->Add(display_text_, 1, wxALIGN_CENTER);
-    panel->SetSizer(sizer);
+    mainSizer->Add(display_text_, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
+
+    wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxButton* btn = new wxButton(panel, BUTTON_ID, "Start Simulation", wxDefaultPosition, wxSize(150, 45));
+    buttonSizer->Add(btn, 0, wxALL, 5);
+
+    wxButton* openAddRobot = new wxButton(panel, wxID_ANY, "Add Robot", wxDefaultPosition, wxSize(150, 45));
+    openAddRobot->Bind(wxEVT_BUTTON, &UserInterface::OnAddRobot, this);
+    buttonSizer->Add(openAddRobot, 0, wxALL, 5);
+
+    wxButton* openAddFloor = new wxButton(panel, wxID_ANY, "Add Floor", wxDefaultPosition, wxSize(150, 45));
+    openAddFloor->Bind(wxEVT_BUTTON, &UserInterface::OnAddFloor, this);
+    buttonSizer->Add(openAddFloor, 0, wxALL, 5);
+
+    mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
+
+    panel->SetSizer(mainSizer);
+
+    mainSizer->SetSizeHints(this);
+
+    CreateStatusBar();
 }
 
-void UserInterface::OnButtonClicked(wxCommandEvent& evt) {
-    // auto f1 = []() -> void {
-    //     int clock = 0;
-    //     while (clock < 5) {
-    //         std::cout << clock << std::endl;
-    //         std::this_thread::sleep_for(std::chrono::seconds(1));
-    //         clock++;
-    //     }
-    // };
-    // std::thread t1(f1);
-    // t1.detach();
-    // wxLogStatus("Button Clicked");
-    fm_.read_ui_input("../app/input.txt");
+
+void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
     fm_.start_sim();
+}
+
+void UserInterface::OnAddRobot(wxCommandEvent& event) {
+    // Show the form dialog when the button is clicked
+    AddRobotWindow robotForm(this);
+    if (robotForm.ShowModal() == wxID_OK) {
+        fm_.add_robot(robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
+        wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
+    }
+}
+
+void UserInterface::OnAddFloor(wxCommandEvent& event) {
+    // Show the form dialog when the button is clicked
+    AddFloorWindow floorForm(this);
+    if (floorForm.ShowModal() == wxID_OK) {
+        fm_.add_floor(floorForm.get_floor_name());
+        wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
+    }
 }
 
 void UserInterface::setText(const std::string& new_text) {
