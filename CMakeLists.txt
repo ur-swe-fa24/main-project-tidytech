@@ -32,6 +32,8 @@ add_library(simulator
 
 add_library(user_interface
     src/user_interface.cpp
+    src/add_robot_window.cpp
+    src/add_floor_window.cpp
 )
 
 add_library(pubsub INTERFACE)
@@ -65,6 +67,8 @@ target_include_directories(fleet_manager
         types
     PRIVATE
         ${wxWidgets_INCLUDE_DIRS}
+        mongodb
+        mongo::mongocxx_shared
 )
 
 target_include_directories(user_interface
