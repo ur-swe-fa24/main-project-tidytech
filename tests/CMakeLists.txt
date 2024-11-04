@@ -10,7 +10,7 @@ add_executable(test_mongodb test_mongodb.cpp)
 
 target_compile_features(test_mongodb PRIVATE cxx_std_17)
 
-target_include_directories(dbtest
+target_include_directories(test_mongodb
     PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
