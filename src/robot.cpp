@@ -5,61 +5,21 @@ int Robot::robotCreationCount = 1;
 // Robot constructor
 // Initialize all variables
 // TODO: Implement floorNode for base and curr
-Robot::Robot(RobotSize size, RobotType type, std::string base, std::string curr) {
-    id_ = Robot::robotCreationCount++;
+Robot::Robot(int id, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status) {
+    //id_ = Robot::robotCreationCount++;
+    id_ = id;
     size_ = size;
     type_ = type;
     base_ = base;
     curr_ = curr;
     battery_ = 100;
-    status_ = RobotStatus::Available;
+    //status_ = RobotStatus::Available;
+    status_ = status;
 } 
 
 // toString for robot object
 std::string Robot::to_string() const {
-    std::string str_size;
-    std::string str_type;
-    std::string str_status;
     std::string str_tasks = "";
-
-    switch(size_) {
-        case RobotSize::Large:
-            str_size = "Large";
-            break;
-        case RobotSize::Medium:
-            str_size = "Medium";
-            break;
-        case RobotSize::Small:
-            str_size = "Small";
-            break;
-    }
-
-    switch(type_) {
-        case RobotType::Scrubber:
-            str_type = "Scrubber";
-            break;
-        case RobotType::Shampoo:
-            str_type = "Shampoo";
-            break;
-        case RobotType::Vaccum:
-            str_type = "Vaccum";
-            break;
-    }
-
-    switch (status_) {
-        case RobotStatus::Available:
-            str_status = "Available";
-            break;
-        case RobotStatus::Cleaning:
-            str_status = "Cleaning";
-            break;
-        case RobotStatus::Charging:
-            str_status = "Charging";
-            break;
-        case RobotStatus::Unavailable:
-            str_status = "Unavailable";
-            break;
-    }
 
     for (std::string task : task_queue_) {
         str_tasks += task + ", ";
@@ -70,9 +30,9 @@ std::string Robot::to_string() const {
     }
 
     return "Robot Id: " + std::to_string(id_) +
-            ", Size: " + str_size +
-            ", Type: " + str_type + "\n" +
-            "Status: " + str_status +
+            ", Size: " + types::to_string(size_) +
+            ", Type: " + types::to_string(type_) + "\n" +
+            "Status: " + types::to_string(status_) +
             ", Battery: " + std::to_string(battery_) + "\n" +
             "Base Location: " + base_ + "\n"
             "Current Location: " + curr_ + "\n"
