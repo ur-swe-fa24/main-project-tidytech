@@ -19,8 +19,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Constructor
         FleetManager();
 
-        // I/O methods
-        void read_ui_input(std::string filepath);
+        void add_robot(std::string size, std::string type, std::string charging_position, std::string current_position);
+        void add_floor(std::string name);
         void write_output(std::string filepath, std::string message); // outputs to a file
 
         // Observer pattern methods
