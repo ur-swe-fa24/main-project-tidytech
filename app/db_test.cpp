@@ -1,6 +1,7 @@
 #include <iostream>
 #include "database/robot_adapter.hpp" // Include your RobotAdapter header file
 #include <bsoncxx/json.hpp>
+#include "database/floor_adapter.hpp" 
 
 int main() {
     // Initialize MongoDB instance
@@ -47,6 +48,43 @@ int main() {
         std::cout << "robot1 found after deletion: " << bsoncxx::to_json(*foundRobot) << std::endl;
     } else {
         std::cout << "robot1 successfully deleted." << std::endl;
+    }
+
+    // Create or get a collection
+    auto collection2 = db["floors"];
+
+    // Initialize RobotAdapter
+    FloorAdapter floorAdapter(collection);
+
+    //floor test
+    floorAdapter.insertFloor("floor1", "Bedroom", "Carpet", "Small", "Medium", "false", "90");
+    std::cout << "Inserted floor1." << std::endl;
+
+    auto foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "Found floor1: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    } else {
+        std::cout << "floor1 not found." << std::endl;
+    }
+
+    floorAdapter.updateCleanLevel("floor1", "75");
+    foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "Updated floor1 clean level: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    }
+
+    floorAdapter.updateRestriction("floor1", "true");
+    foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "Updated floor1 restriction: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    }
+
+    floorAdapter.deleteFloor("floor1");
+    foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "floor1 found after deletion: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    } else {
+        std::cout << "floor1 successfully deleted." << std::endl;
     }
 
     return 0;
