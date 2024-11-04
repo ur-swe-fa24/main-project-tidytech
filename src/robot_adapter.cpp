@@ -10,16 +10,24 @@ using bsoncxx::builder::basic::kvp;
 void RobotAdapter::insertRobot(const std::string& id, const std::string& size, const std::string& type,
                                 const std::string& baseLocation, const std::string& currentLocation,
                                 const std::string& status) {
-    auto robot_doc = make_document(
+
+    auto query_doc = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("_id", id)
+    );
+    auto existing_doc = collection_.find_one(query_doc.view());
+    if (!existing_doc) {
+        auto robot_doc = make_document(
         kvp("_id", id),
         kvp("size", size),
         kvp("type", type),
         kvp("baseLocation", baseLocation),
         kvp("currentLocation", currentLocation),
-        kvp("status", status)
-    );
+        kvp("status", status));
     // insert the doc into the collection
-    collection_.insert_one(robot_doc.view());
+        collection_.insert_one(robot_doc.view());
+    } else {
+        std::cout << "the robot has been added to the database already" << std::endl;
+    }
 }
 
 std::optional<bsoncxx::document::value> RobotAdapter::findDocumentById(const std::string& robotId) {
@@ -83,4 +91,3 @@ bool RobotAdapter::deleteRobot(const std::string& robotId) {
     auto result = collection_.delete_one(query_doc.view());
     return result && result->deleted_count() > 0;
 }
-

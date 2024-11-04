@@ -16,6 +16,7 @@ add_library(database
 add_library(mongodb
     src/db_manager.cpp
     src/robot_adapter.cpp
+    src/task_adapter.cpp
     src/floor_adapter.cpp
 )
 
