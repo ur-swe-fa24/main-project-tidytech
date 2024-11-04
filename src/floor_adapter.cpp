@@ -20,13 +20,18 @@ void FloorAdapter::insertFloor(const std::string& id, const std::string& room, c
         kvp("cleanLevel", clean_level)
     );
 
+    // insert the doc into the collection
+
     collection_.insert_one(floor_doc.view());
 }
 
+
 std::optional<bsoncxx::document::value> FloorAdapter::findDocumentById(const std::string& floorId) {
+    // build the query doc
     auto query_doc = make_document(kvp("_id", floorId));
     mongocxx::stdx::optional<bsoncxx::document::value> result = collection_.find_one(query_doc.view());
 
+    // Check if the result contains a document
     if (result) {
         return std::optional<bsoncxx::document::value>{std::move(*result)};
     } else {
@@ -34,6 +39,7 @@ std::optional<bsoncxx::document::value> FloorAdapter::findDocumentById(const std
     }
 }
 
+//update clean level
 bool FloorAdapter::updateCleanLevel(const std::string& floorId, const std::string& newCleanLevel) {
     auto query_doc = make_document(kvp("_id", floorId));
     auto update_doc = make_document(kvp("$set", make_document(kvp("cleanLevel", newCleanLevel))));
@@ -42,6 +48,7 @@ bool FloorAdapter::updateCleanLevel(const std::string& floorId, const std::strin
     return result && result->modified_count() > 0;
 }
 
+//update floor restrictions
 bool FloorAdapter::updateRestriction(const std::string& floorId, const std::string& restricted) {
     auto query_doc = make_document(kvp("_id", floorId));
     auto update_doc = make_document(kvp("$set", make_document(kvp("restricted", restricted))));
@@ -50,6 +57,7 @@ bool FloorAdapter::updateRestriction(const std::string& floorId, const std::stri
     return result && result->modified_count() > 0;
 }
 
+//delete floor
 bool FloorAdapter::deleteFloor(const std::string& floorId) {
     auto query_doc = make_document(kvp("_id", floorId));
 
