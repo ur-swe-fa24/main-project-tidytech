@@ -45,7 +45,7 @@ void Simulator::simulate() {
         }
 
         // Report status every 5 ticks
-        if (clock_ % 2 == 0) {
+        if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
                 notify("five_sec_ping", robot.to_string());
             }
