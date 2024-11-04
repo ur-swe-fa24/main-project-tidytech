@@ -8,6 +8,7 @@
 
 #include "../simulation/simulator.hpp"
 #include "../database/database.hpp"
+#include "../database/robot_adapter.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 #include "types/types.hpp"
@@ -18,6 +19,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
     public:
         // Constructor
         FleetManager();
+        static int robot_count; // For robot_id
+        static int floor_count; // For floor_id
 
         void add_robot(std::string size, std::string type, std::string charging_position, std::string current_position);
         void add_floor(std::string name);
@@ -46,6 +49,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Attributes for simulator, and database
         Simulator simulator_;
         Database database_;
+        RobotAdapter robot_adapter_;
 };
 
 #endif

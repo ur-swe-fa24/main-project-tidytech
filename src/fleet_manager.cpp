@@ -9,6 +9,9 @@
 
 using namespace types;
 
+int FleetManager::robot_count = 0; // For robot_id
+int FleetManager::floor_count = 0; // For floor_id
+
 FleetManager::FleetManager() : simulator_{} {
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
@@ -97,8 +100,8 @@ void FleetManager::add_robot(std::string size, std::string type, std::string cha
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-    simulator_.add_robot(1, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
-
+    simulator_.add_robot(++robot_count, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
+    robot_adapter_.insert(std::to_string(robot_count), size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     // database_.add_robot(id, type, 1, location);
 }
 
