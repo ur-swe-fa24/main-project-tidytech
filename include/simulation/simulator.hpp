@@ -13,24 +13,28 @@
 #include "simulation/robot.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
+#include "types/types.hpp"
 #include "spdlog/spdlog.h"
+
+using namespace types;
 
 class Simulator : public Publisher {
     public:
-        static const int MAX_SIM_TIME = 10; //Max simulation time
+        static const int MAX_SIM_TIME = 6; //Max simulation time
 
         Simulator(); // Default constructor
+        Simulator& operator=(const Simulator& other);
         ~Simulator(); // Destructor
 
-        int get_clock() {return clock_;}; 
+        int get_clock() const {return clock_;}; 
 
         void start_simulation(); // Start the sim_thread_
         void reset_simulation(); // Reset the simulation
 
         void add_floor(std::string floor);
-        void add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr);
-        std::string status_report(std::string robot_id);
-        void add_task(std::string robot_id, std::string floor_id);
+        void add_robot(RobotSize size, RobotType type, std::string base, std::string curr);
+        std::string status_report(int robot_id);
+        void add_task(int robot_id, std::string floor_id);
 
         void subscribe(Subscriber* subscriber, const std::string& event) override;
         void unsubscribe(Subscriber* subscriber, const std::string& event) override;
@@ -38,7 +42,7 @@ class Simulator : public Publisher {
     private:
         std::vector<std::string> floors_;
         std::vector<Robot> robots_;
-        std::mutex robots_mutex_; // Mutex to protect robots_
+        mutable std::mutex robots_mutex_; // Mutex to protect robots_
         int clock_;
         std::thread sim_thread_;  // Thread to start the clock when the simulator object is created
         std::atomic<bool> ticking_;  // Atomic flag to control the clock since it prevents other threads from interfering 

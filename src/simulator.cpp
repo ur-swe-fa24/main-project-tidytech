@@ -25,42 +25,43 @@ void Simulator::simulate() {
         // Drain power accordingly
         std::lock_guard<std::mutex> lock(robots_mutex_);
         for (Robot& robot : robots_) {
-            switch (robot.getStatus()) {
-                case Robot::Status::Available:
-                    robot.consumePower();
-                    if (!robot.tasksEmpty()){robot.startTask();} // Go do something
+            switch (robot.get_status()) {
+                case RobotStatus::Available:
+                    robot.consume_power();
+                    if (!robot.tasks_empty()){robot.start_task();} // Go do something
                     else {
-                        if (robot.getBattery() < 50) {robot.goCharge();}; // Go back to charge if battery < 50
+                        if (robot.get_battery() < 50) {robot.go_charge();}; // Go back to charge if battery < 50
                     }
                     break;
-                case Robot::Status::Charging:
+                case RobotStatus::Charging:
                     robot.charge();
                     break;
-                case Robot::Status::Cleaning:
-                    robot.consumePower(3); // Cleaning takes more power
+                case RobotStatus::Cleaning:
+                    robot.consume_power(3); // Cleaning takes more power
                     break;
-                case Robot::Status::Unavailable:
+                case RobotStatus::Unavailable:
                     break;
             }
         }
 
         // Report status every 5 ticks
-        if (clock_ % 5 == 0) {
+        if (clock_ % 2 == 0) {
             for (Robot& robot : robots_) {
-                notify("five_sec_ping", robot.toString());
+                notify("five_sec_ping", robot.to_string());
             }
         }
 
         // End of simulation
-        if (clock_ >= Simulator::MAX_SIM_TIME) {
+        if (clock_ >= MAX_SIM_TIME) {
             ticking_ = false;
         }
     }
     std::string data; // TODO: method to do this manual stuff
     for (Robot& robot : robots_) {
-        data += robot.toString() + "\n\u200B"; // TODO: create better fix for this
+        data += robot.to_string() + "\n\u200B"; // TODO: create better fix for this
     }
     // Report the finished simulation result to an output file
+    spdlog::info("Simulation finished!");
     notify("finished_ping", data);
 }
 
@@ -70,8 +71,9 @@ void Simulator::start_simulation() {
     // Prevent starting the clock if it's already running
     if (!ticking_) {
         ticking_ = true;
-        sim_thread_ = std::thread(&Simulator::simulate, this);
         spdlog::info("Simulation started!");
+        sim_thread_ = std::thread(&Simulator::simulate, this);
+        sim_thread_.detach();
     } else {
         spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
     }
@@ -90,8 +92,8 @@ void Simulator::reset_simulation() {
 }
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(std::string id, std::string size, std::string type, std::string base, std::string curr) {
-    Robot robot(id, size, type, base, curr);
+void Simulator::add_robot(RobotSize size, RobotType type, std::string base, std::string curr) {
+    Robot robot(size, type, base, curr);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
 }
@@ -103,24 +105,24 @@ void Simulator::add_floor(std::string floor) {
 
 // Add task to a robot
 // TODO: assign multiple rooms to a robot task queue
-void Simulator::add_task(std::string robot_id, std::string floor_id) {
+void Simulator::add_task(int robot_id, std::string floor_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
-        if (robot.getId() == robot_id) {
-            robot.addTasksToBack({floor_id});
+        if (robot.get_id() == robot_id) {
+            robot.add_tasks_to_back({floor_id});
         }
     }
 }
 
 // Return a status of a robot
-std::string Simulator::status_report(std::string robot_id) {
+std::string Simulator::status_report(int robot_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
-        if (robot.getId() == robot_id) {
-            return robot.toString();
+        if (robot.get_id() == robot_id) {
+            return robot.to_string();
         }
     }
-    return robot_id + " not found.";
+    return std::to_string(robot_id) + " not found.";
 }
 
 // Let a subscriber subscribe to an event

@@ -21,6 +21,12 @@ target_link_libraries(demo1
     PRIVATE
         mongodb
         mongo::mongocxx_shared
+        #database
+        #fleet_manager
+        #simulator
+        #pubsub
+        #user_interface
+        #types
 )
 
 
