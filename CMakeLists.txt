@@ -28,6 +28,7 @@ add_library(simulator
     src/simulator.cpp
     src/robot.cpp
     src/floor.cpp
+    src/floorplan.cpp
 )
 
 add_library(user_interface
