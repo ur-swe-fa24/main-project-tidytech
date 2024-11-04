@@ -14,7 +14,7 @@ namespace types {
     enum class FloorInteraction {Low, Medium, High};
 
     // String format for every enum class
-    std::string to_string(RobotSize size) {
+    inline std::string to_string(RobotSize size) {
         switch(size) {
             case RobotSize::Large:
                 return "Large";
@@ -25,7 +25,7 @@ namespace types {
         }
     }
 
-    std::string to_string(RobotType type) {
+    inline std::string to_string(RobotType type) {
         switch(type) {
             case RobotType::Scrubber:
                 return "Scrubber";
@@ -36,7 +36,7 @@ namespace types {
         }
     }
 
-    std::string to_string(RobotStatus status) {
+    inline std::string to_string(RobotStatus status) {
         switch(status) {
             case RobotStatus::Available:
                 return "Available";
@@ -49,7 +49,7 @@ namespace types {
         }
     }
 
-    std::string to_string(FloorSize size) {
+    inline std::string to_string(FloorSize size) {
         switch(size) {
             case FloorSize::Large:
                 return "Large";
@@ -60,7 +60,7 @@ namespace types {
         }
     }
 
-    std::string to_string(FloorType type) {
+    inline std::string to_string(FloorType type) {
         switch(type) {
             case FloorType::Wood:
                 return "Wood";
@@ -71,7 +71,7 @@ namespace types {
         }
     }
 
-    std::string to_string(FloorRoomType roomType) {
+    inline std::string to_string(FloorRoomType roomType) {
         switch(roomType) {
             case FloorRoomType::Hallway:
                 return "Hallway";
@@ -82,7 +82,7 @@ namespace types {
         }
     }
 
-    std::string to_string(FloorInteraction interaction) {
+    inline std::string to_string(FloorInteraction interaction) {
         switch(interaction) {
             case FloorInteraction::Low:
                 return "Low";

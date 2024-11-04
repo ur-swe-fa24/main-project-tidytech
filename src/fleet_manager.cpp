@@ -97,12 +97,12 @@ void FleetManager::add_robot(std::string size, std::string type, std::string cha
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-    simulator_.add_robot(RsSize, RtType, charging_position, current_position);
+    simulator_.add_robot(1, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
 
     // database_.add_robot(id, type, 1, location);
 }
 
 void FleetManager::add_floor(std::string name) {
-    simulator_.add_floor(name);
+    ///simulator_.add_floor();
     // database_.add_robot(id, type, 1, location);
 }
