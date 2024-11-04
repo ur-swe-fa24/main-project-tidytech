@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include "types/types.hpp"
 
 using namespace types;
@@ -11,10 +12,10 @@ class Robot {
     public:
         static int robotCreationCount; // For id
 
-        Robot(RobotSize size, RobotType type, std::string base, std::string curr); // Constructor
+        Robot(int id,RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status); // Constructor
         ~Robot() {}; // Destructor
 
-        bool operator==(const Robot& other) const {id_ == other.id_;} // Overriding Robot comparison
+        bool operator==(const Robot& other) const {return id_ == other.id_;} // Overriding Robot comparison
 
         void set_size(const RobotSize size) {size_ = size;};
         void set_type(const RobotType type) {type_ = type;};
@@ -47,6 +48,8 @@ class Robot {
         int battery_;
         std::vector<std::string> task_queue_;
         RobotStatus status_;
+        std::queue<int> curr_path; // Shortest path from one floor to another
+
 
         
         

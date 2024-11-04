@@ -1,9 +1,50 @@
 #include "simulation/floorplan.hpp"
 #include "spdlog/spdlog.h"
 
+std::vector<Floor> FloorPlan::get_all_floor() const {
+    std::vector<Floor> floors;
+    for (const auto& pair : floorgraph_) {
+        floors.push_back(pair.first);
+    }
+    return floors;
+}
+
+std::string FloorPlan::to_string() const {
+    std::string out_str = "FloorPlan: \n";
+    for (const auto& pair : floorgraph_) {
+        out_str += "Id: " + std::to_string(pair.first.get_id()) + ", Number of Robots: " + std::to_string(get_num_robots(pair.first)) + ", Adjacent Floors: ";
+        std::string neighbors_str = "";
+        for (const auto& neighbor : pair.second) {
+            neighbors_str += neighbor.get_id() + ", ";
+        }
+        if (neighbors_str.length() >= 2) {
+        neighbors_str.erase(neighbors_str.length() - 2, 2); // Remove last two characters
+        }
+        out_str += neighbors_str = "\n";
+    }
+    return out_str;
+}
+
+std::string FloorPlan::floor_to_string(const Floor& floor) const {
+    std::string out_str = floor.to_string();
+    std::string neighbors_str = "";
+    std::vector<Floor> neighbors = floorgraph_.at(floor);
+    for (const auto& neighbor : neighbors) {
+        neighbors_str += neighbor.get_id() + ", ";
+    }
+
+    if (neighbors_str.length() >= 2) {
+        neighbors_str.erase(neighbors_str.length() - 2, 2); // Remove last two characters
+    }
+
+    return out_str + "Adjacent Floors: [" + neighbors_str + "]";
+
+}
+
 void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors) {
     if (floorgraph_.count(floor) != 1) {
         floorgraph_[floor] = neighbors;
+        floor_to_robots_[floor] = std::vector<RobotSize>(); // add to floor_to_robots
         update_neighbors(floor, true); // Update all other neighbors
     } else {
         // Floor already exist in the graph
@@ -12,13 +53,21 @@ void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors
 }
 
 void FloorPlan::remove_floor(const Floor& floor) {
-    auto remove = floorgraph_.find(floor);
-    if (remove != floorgraph_.end()) {
-        update_neighbors(floor, false); // Update all other neighbors
-        floorgraph_.erase(remove);
+    // Check if there is any robot in the floor
+    auto remove_floor_to_robot = floor_to_robots_.find(floor);
+    if ((remove_floor_to_robot != floor_to_robots_.end()) && (remove_floor_to_robot->second.size() == 0)) {
+        auto remove = floorgraph_.find(floor);
+        if (remove != floorgraph_.end()) {
+            update_neighbors(floor, false); // Update all other neighbors
+            floorgraph_.erase(remove);
+            floor_to_robots_.erase(remove_floor_to_robot);
+        } else {
+            // Floor does not exist in the graph
+            spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        }
     } else {
-        // Floor does not exist in the graph
-        spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        // Floor does not exist in the floor_to_robots or there are robots in the floor
+        spdlog::error("Floor {} either has robots or does not exist in the Floor_to_Robot", floor.get_id());
     }
 }
 
@@ -42,7 +91,7 @@ void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Flo
     }
 }
 
-void FloorPlan::update_neighbors(const Floor floor, bool add) {
+void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     std::vector<Floor> floors_to_modify = floorgraph_[floor];
     if (add) {
         // append floor to every neighbor's vector
@@ -65,5 +114,19 @@ void FloorPlan::update_neighbors(const Floor floor, bool add) {
                 floorgraph_[modify_floor].erase(it);
             }
         }
+    }
+}
+
+void FloorPlan::add_robot_to_floor(const Floor& floor, const RobotSize robot_size) {
+    floor_to_robots_.at(floor).push_back(robot_size);
+}
+
+void FloorPlan::remove_robot_from_floor(const Floor& floor, const RobotSize robot_size) {
+    auto remove = floor_to_robots_.find(floor);
+    if (remove != floor_to_robots_.end()) {
+        floor_to_robots_.erase(remove);
+    } else {
+        // RobotSize does not exist in the Floor
+        spdlog::error("RobotSize does not exist in the Floor {}", std::to_string(floor.get_id()));
     }
 }
