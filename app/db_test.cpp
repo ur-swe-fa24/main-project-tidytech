@@ -2,6 +2,7 @@
 #include "database/robot_adapter.hpp" 
 #include "database/task_adapter.hpp" 
 #include <bsoncxx/json.hpp>
+#include "database/floor_adapter.hpp" 
 
 int main() {
     // Initialize MongoDB instance
@@ -50,7 +51,7 @@ int main() {
         std::cout << "robot1 successfully deleted." << std::endl;
     }
 
-    // Test 3: taskAdapter
+    // Test 2: taskAdapter
     collection = db["tasks"];
 
     // Initialize taskAdapter
@@ -92,6 +93,47 @@ int main() {
         std::cout << "task1 found after deletion: " << bsoncxx::to_json(*foundTask) << std::endl;
     } else {
         std::cout << "task1 successfully deleted." << std::endl;
+
+    // Test 3: FloorAdapter
+    // Create a collection
+    collection = db["floors"];
+
+    // Initialize FloorAdapter
+    FloorAdapter floorAdapter(collection);
+
+    //floor test insert
+    floorAdapter.insertFloor("floor1", "Bedroom", "Carpet", "Small", "Medium", "false", "90");
+    std::cout << "Inserted floor1." << std::endl;
+
+    // Test finding the floor
+    auto foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "Found floor1: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    } else {
+        std::cout << "floor1 not found." << std::endl;
+    }
+
+    //test updating clean level
+    floorAdapter.updateCleanLevel("floor1", "75");
+    foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "Updated floor1 clean level: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    }
+    
+    //update robot restrictions
+    floorAdapter.updateRestriction("floor1", "true");
+    foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "Updated floor1 restriction: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    }
+
+    //delete floor
+    floorAdapter.deleteFloor("floor1");
+    foundFloor = floorAdapter.findDocumentById("floor1");
+    if (foundFloor) {
+        std::cout << "floor1 found after deletion: " << bsoncxx::to_json(*foundFloor) << std::endl;
+    } else {
+        std::cout << "floor1 successfully deleted." << std::endl;
     }
 
     return 0;
