@@ -1,5 +1,6 @@
 #include <iostream>
-#include "database/robot_adapter.hpp" // Include your RobotAdapter header file
+#include "database/robot_adapter.hpp" 
+#include "database/task_adapter.hpp" 
 #include <bsoncxx/json.hpp>
 
 int main() {
@@ -47,6 +48,50 @@ int main() {
         std::cout << "robot1 found after deletion: " << bsoncxx::to_json(*foundRobot) << std::endl;
     } else {
         std::cout << "robot1 successfully deleted." << std::endl;
+    }
+
+    // Test 3: taskAdapter
+    collection = db["tasks"];
+
+    // Initialize taskAdapter
+    TaskAdapter taskAdapter(collection);
+
+    // Test inserting a task
+    taskAdapter.insertTask("1", "task1", "clean the floor1", "10:00", "13:00", "in progress", "50", {"1", "2", "3"});
+    std::cout << "Inserted task1." << std::endl;
+
+    taskAdapter.insertTask("2", "task2", "clean the bathroom2", "14:00", "14:20", "pending", "0", {"1"});
+    std::cout << "Inserted task2." << std::endl;
+
+    // Test finding the task
+    auto foundTask = taskAdapter.findDocumentById("1");
+    if (foundTask) {
+        std::cout << "Found task1: " << bsoncxx::to_json(*foundTask) << std::endl;
+    } else {
+        std::cout << "task1 not found." << std::endl;
+    }
+
+    // Test updates methods:
+    taskAdapter.updateTaskStatus("2", "in progress");
+    foundTask = taskAdapter.findDocumentById("2");
+    if (foundTask) {
+        std::cout << "Updated task 2 status: " << bsoncxx::to_json(*foundTask) << std::endl;
+    }
+
+    // update the task assignment
+    taskAdapter.updateTaskRobotAssignment("1", {"2", "3", "4"});
+    foundTask = robotAdapter.findDocumentById("1");
+    if (foundTask) {
+        std::cout << "Updated robot1 status: " << bsoncxx::to_json(*foundTask) << std::endl;
+    }
+
+    // Test deleting the task
+    taskAdapter.deleteTask("1");
+    foundTask = taskAdapter.findDocumentById("1");
+    if (foundTask) {
+        std::cout << "task1 found after deletion: " << bsoncxx::to_json(*foundTask) << std::endl;
+    } else {
+        std::cout << "task1 successfully deleted." << std::endl;
     }
 
     return 0;

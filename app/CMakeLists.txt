@@ -23,6 +23,7 @@ target_link_libraries(demo1
         fleet_manager
         simulator
         pubsub
+        user_interface
 )
 
 target_link_libraries(dbtest
