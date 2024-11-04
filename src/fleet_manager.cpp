@@ -26,55 +26,6 @@ void FleetManager::write_output(string filepath, string message) {
     }
 }
 
-void FleetManager::read_ui_input(string filepath) {
-    // Reads file from the filepath
-    ifstream file(filepath);
-    string line;
-    
-    if (!file.is_open()) {
-        throw invalid_argument("invalid file path.");
-    }
-
-    // Adds to the database and simulation depending on what type of "thing" it is
-    // TODO: abstract this and thread this
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string word;
-        ss >> word;
-
-        if (word == "Robot") {
-            int id, available, location;
-            string type;
-            ss >> id >> type >> available >> location;
-            database_.add_robot(id, type, available, location);
-            simulator_.add_robot(RobotSize::Small, RobotType::Scrubber, "base", "current");
-        } else if (word == "Floor") {
-            int id;
-            string name, type;
-            ss >> id >> name >> type;
-            database_.add_floor(id, name, type);
-            simulator_.add_floor("random_string");
-            // simulator_.add_floor(FloorRoomType::Room, FloorType::Wood, FloorSize::Large, FloorInteraction::Medium, false);
-        } else if (word == "Tasks") {
-            vector<int> robot_assigned_vector; // TODO: change this
-            vector<int> room_assigned_vector; // TODO: change this
-            int id;
-            int robot_assigned;
-            int room_assigned;
-            string status;
-            ss >> id >> robot_assigned >> room_assigned >> status;
-            robot_assigned_vector.push_back(robot_assigned);
-            room_assigned_vector.push_back(room_assigned);
-            database_.add_task(id, robot_assigned_vector, room_assigned_vector, status);
-            simulator_.add_task(1, "55");
-        }
-    }
-    
-    file.close();
-}
-
-
-
 void FleetManager::subscribe(const std::string& event) {
     // subscribe to an event
     simulator_.subscribe(this, event);

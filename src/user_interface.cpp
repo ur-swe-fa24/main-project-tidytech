@@ -50,7 +50,6 @@ void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
 }
 
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
-    // Show the form dialog when the button is clicked
     AddRobotWindow robotForm(this);
     if (robotForm.ShowModal() == wxID_OK) {
         fm_.add_robot(robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
@@ -59,7 +58,6 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
 }
 
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
-    // Show the form dialog when the button is clicked
     AddFloorWindow floorForm(this);
     if (floorForm.ShowModal() == wxID_OK) {
         fm_.add_floor(floorForm.get_floor_name());
@@ -69,11 +67,8 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
 
 void UserInterface::setText(const std::string& new_text) {
     if (display_text_) { 
-        // Create a custom event
         wxCommandEvent* event = new wxCommandEvent(wxEVT_COMMAND_TEXT_UPDATED, GetId());
         event->SetString(new_text);
-        
-        // Queue the event to be processed on the main thread
         wxPostEvent(display_text_, *event);
     } else {
         wxLogError("error");
