@@ -27,7 +27,7 @@ void FloorAdapter::insertFloor(const std::string& id, const std::string& room, c
     // insert the doc into the collection
         collection_.insert_one(floor_doc.view());
     } else {
-        std::cout << "the floor has been added to database already" << std::endl;
+        throw std::invalid_argument("the floor has been added to database already");
     }
 }
 
