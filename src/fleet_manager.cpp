@@ -1,10 +1,13 @@
 #include "sys_manager/fleet_manager.hpp"
 #include "ui/user_interface.hpp"
+#include "types/types.hpp"
 
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
+
+using namespace types;
 
 FleetManager::FleetManager() : simulator_{}, database_{} {
     // Subscribe to these two events upon initialization
@@ -44,11 +47,14 @@ void FleetManager::read_ui_input(string filepath) {
             string type;
             ss >> id >> type >> available >> location;
             database_.add_robot(id, type, available, location);
+            simulator_.add_robot(RobotSize::Small, RobotType::Scrubber, "base", "current");
         } else if (word == "Floor") {
             int id;
             string name, type;
             ss >> id >> name >> type;
             database_.add_floor(id, name, type);
+            simulator_.add_floor("random_string");
+            // simulator_.add_floor(FloorRoomType::Room, FloorType::Wood, FloorSize::Large, FloorInteraction::Medium, false);
         } else if (word == "Tasks") {
             vector<int> robot_assigned_vector; // TODO: change this
             vector<int> room_assigned_vector; // TODO: change this
@@ -60,6 +66,7 @@ void FleetManager::read_ui_input(string filepath) {
             robot_assigned_vector.push_back(robot_assigned);
             room_assigned_vector.push_back(room_assigned);
             database_.add_task(id, robot_assigned_vector, room_assigned_vector, status);
+            simulator_.add_task(1, "55");
         }
     }
     
