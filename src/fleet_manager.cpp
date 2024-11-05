@@ -9,7 +9,22 @@
 
 using namespace types;
 
-FleetManager::FleetManager() : simulator_{} {
+int FleetManager::robot_count = 0; // For robot_id
+int FleetManager::floor_count = 0; // For floor_id
+
+mongocxx::collection getRobotCollection(std::string table) {
+    static mongocxx::instance instance{};  // Ensure MongoDB instance is initialized only once
+    mongocxx::client client{mongocxx::uri{}};
+    auto db = client["database"];
+    return db[table];
+}
+
+FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")} {
+    // mongocxx::instance instance{};
+    // mongocxx::client client{mongocxx::uri{}};
+    // auto db = client["database"];
+    // auto collection = db["robots"];
+    // robot_adapter_ = RobotAdapter(collection);
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");
@@ -75,7 +90,7 @@ void FleetManager::notify(const std::string& event, const std::string& data) {
     }
 }
 
-void FleetManager::add_robot(std::string size, std::string type, std::string charging_position, std::string current_position) {
+void FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position) {
     RobotSize RsSize;
     if (size == "Small") {
         RsSize = RobotSize::Small;
@@ -97,12 +112,62 @@ void FleetManager::add_robot(std::string size, std::string type, std::string cha
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-    simulator_.add_robot(1, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
-
+    simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
+    robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     // database_.add_robot(id, type, 1, location);
 }
 
-void FleetManager::add_floor(std::string name) {
-    ///simulator_.add_floor();
+void FleetManager::add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors) {
+    // add_floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors)
+    FloorSize FsSize;
+    FloorType FtType;
+    FloorRoomType FrtRoom;
+    FloorInteraction FiInteraction;
+    if (roomType == "Elevator") {
+        FrtRoom = FloorRoomType::Elevator;
+    } else if (roomType == "Hallway") {
+        FrtRoom = FloorRoomType::Hallway;
+    } else if (roomType == "Room") {
+        FrtRoom = FloorRoomType::Room;
+    } else {
+        std::cout << "Invalid Floor Room Type" << std::endl;
+    }
+
+    if (type == "Carpet") {
+        FtType = FloorType::Carpet;
+    } else if (type == "Wood") {
+        FtType = FloorType::Wood;
+    } else if (type == "Tile") {
+        FtType = FloorType::Tile;
+    } else {
+        std::cout << "Invalid Floor Type" << std::endl;
+    }
+
+    if (size == "Small") {
+        FsSize = FloorSize::Small;
+    } else if (size == "Medium") {
+        FsSize = FloorSize::Medium;
+    } else if (size == "Large") {
+        FsSize = FloorSize::Large;
+    } else {
+        std::cout << "Invalid Floor Size" << std::endl;
+    }
+
+    if (interaction == "Low") {
+        FiInteraction = FloorInteraction::Low;
+    } else if (interaction == "Moderate") {
+        FiInteraction = FloorInteraction::Medium;
+    } else if (interaction == "High") {
+        FiInteraction = FloorInteraction::High;  
+    } else {
+        std::cout << "Invalid Floor Interaction" << std::endl;
+    }
+
+    
+    simulator_.add_floor(1, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
     // database_.add_robot(id, type, 1, location);
+}
+
+std::vector<std::string> FleetManager::get_all_floor_names() {
+    return simulator_.get_all_floor_names();
 }

@@ -7,7 +7,7 @@
 using bsoncxx::builder::basic::make_document;
 using bsoncxx::builder::basic::kvp;
 
-void RobotAdapter::insertRobot(const std::string& id, const std::string& size, const std::string& type,
+void RobotAdapter::insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
                                 const std::string& baseLocation, const std::string& currentLocation,
                                 const std::string& status) {
 
@@ -18,6 +18,7 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& size, c
     if (!existing_doc) {
         auto robot_doc = make_document(
         kvp("_id", id),
+        kvp("name", name),
         kvp("size", size),
         kvp("type", type),
         kvp("baseLocation", baseLocation),
@@ -26,7 +27,7 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& size, c
     // insert the doc into the collection
         collection_.insert_one(robot_doc.view());
     } else {
-        std::cout << "the robot has been added to the database already" << std::endl;
+        throw std::invalid_argument("the robot has been added to the database already");
     }
 }
 

@@ -34,10 +34,11 @@ class Simulator : public Publisher {
         void start_simulation(); // Start the sim_thread_
         void reset_simulation(); // Reset the simulation
 
-        void add_floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors);
-        void add_robot(int id, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status);
+        void add_floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors);
+        void add_robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status);
         std::string status_report(int robot_id);
         void add_task(int robot_id, std::string floor_id);
+        std::vector<std::string> get_all_floor_names();
 
         void subscribe(Subscriber* subscriber, const std::string& event) override;
         void unsubscribe(Subscriber* subscriber, const std::string& event) override;

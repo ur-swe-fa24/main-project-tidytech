@@ -15,7 +15,7 @@ public:
     RobotAdapter(mongocxx::collection collection) : collection_(std::move(collection)) {}
 
     // Insert a new robot document
-    void insertRobot(const std::string& id, const std::string& size, const std::string& type,
+    void insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
                     const std::string& baseLocation, const std::string& currentLocation,
                     const std::string& status);
 

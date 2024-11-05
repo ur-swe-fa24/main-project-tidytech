@@ -112,16 +112,16 @@ void Simulator::reset_simulation() {
 
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(int id, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status) {
-    Robot robot(id, size, type, base, curr, status);
+void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status) {
+    Robot robot(id, name, size, type, base, curr, status);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
 }
 
 // Add floor to the vector of floors_
-void Simulator::add_floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors) {
+void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors) {
     if (floorplan_.get_size() <= MAX_NUM_FLOORS) {
-        Floor new_floor(id, room, floortype, size, interaction_level, restriction, clean_level);
+        Floor new_floor(id, name, room, floortype, size, interaction_level, restriction, clean_level);
         std::vector<Floor> neighbor_floors;
         for (const auto& floor : floorplan_.get_all_floor()) {
             if (std::find(neighbors.begin(), neighbors.end(), floor.get_id()) != neighbors.end()) {
@@ -173,4 +173,16 @@ void Simulator::notify(const std::string& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }
+}
+
+std::vector<std::string> Simulator::get_all_floor_names() {
+    std::vector<Floor> all_floors = floorplan_.get_all_floor();
+    std::vector<std::string> floor_names;
+    // for (Floor floor : all_floors) {
+
+    // }
+    floor_names.push_back("Floor 1");
+    floor_names.push_back("Floor 2");
+    floor_names.push_back("Floor 3");
+    return floor_names;
 }
