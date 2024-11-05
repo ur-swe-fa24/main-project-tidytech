@@ -6,6 +6,8 @@
 class AddRobotWindow : public wxDialog {
     public:
         AddRobotWindow(wxWindow* parent);
+
+        // Everything below this is just a getter for the form rows
         std::string get_type() {
             if (shampoo_button_->GetValue()) {
                 return "Shampoo";
@@ -32,6 +34,7 @@ class AddRobotWindow : public wxDialog {
         std::string get_charging_position() { return std::string(charging_position_->GetValue().mb_str()); };
         std::string get_name() { return std::string(robot_name_->GetValue().mb_str()); };
     private:
+        // members for all the options in the form
         wxRadioButton* shampoo_button_;
         wxRadioButton* scrubber_button_;
         wxRadioButton* vacuum_button_;

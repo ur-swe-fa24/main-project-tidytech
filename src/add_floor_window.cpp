@@ -4,10 +4,9 @@
 AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
         : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 500)) {
 
-    // Create a vertical sizer for layout
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-    // Text input
+    // Floor name
     floor_name_ = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250, 25));
     sizer->Add(new wxStaticText(this, wxID_ANY, "Floor Name:"), 0, wxLEFT | wxRIGHT | wxTOP, 10);
     sizer->Add(floor_name_, 0, wxALL, 10);
@@ -45,7 +44,7 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
     sizer->Add(new wxStaticText(this, wxID_ANY, "Floor Size:"), 0, wxLEFT | wxRIGHT, 10);
     sizer->Add(floorSizeSizer, 0, wxLEFT | wxRIGHT, 10);
 
-    // Room floor type
+    // Floor usage
     wxBoxSizer* floorInteractionSizer = new wxBoxSizer(wxHORIZONTAL);
     low_button_ = new wxRadioButton(this, wxID_ANY, "Low", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
     moderate_button_ = new wxRadioButton(this, wxID_ANY, "Moderate");
@@ -56,6 +55,7 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
     sizer->Add(new wxStaticText(this, wxID_ANY, "Interaction Level:"), 0, wxLEFT | wxRIGHT, 10);
     sizer->Add(floorInteractionSizer, 0, wxLEFT | wxRIGHT, 10);
 
+    // TODO: Store the information in the checkboxes
     for (std::string name : names) {
         sizer->Add(new wxCheckBox(this, wxID_ANY, name), 0, wxALL, 10);
     }
@@ -64,7 +64,6 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
     wxButton* submitButton = new wxButton(this, wxID_OK, "Submit");
     sizer->Add(submitButton, 0, wxALIGN_CENTER | wxALL, 10);
 
-    // Set the sizer and center the dialog
     SetSizer(sizer);
     Centre();
 }

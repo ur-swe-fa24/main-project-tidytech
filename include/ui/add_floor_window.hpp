@@ -6,6 +6,8 @@
 class AddFloorWindow : public wxDialog {
     public:
         AddFloorWindow(wxWindow* parent, std::vector<std::string> names);
+
+        // Everything below this is just a getter for each of the form rows
         std::string get_floor_name() { return std::string(floor_name_->GetValue().mb_str()); };
         std::string get_floor_room_type() {
             if (elevator_button_->GetValue()) {
@@ -53,6 +55,7 @@ class AddFloorWindow : public wxDialog {
         };
 
     private:
+        // members for all the options in the floor form
         wxTextCtrl* floor_name_;
         wxRadioButton* hallway_button_;
         wxRadioButton* elevator_button_;

@@ -3,10 +3,9 @@
 AddRobotWindow::AddRobotWindow(wxWindow* parent)
         : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 450)) {
 
-    // Sizer for input form
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-    // Charging position input
+    // Name text field
     robot_name_ = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250, 25));
     sizer->Add(new wxStaticText(this, wxID_ANY, "Robot Name:"), 0, wxLEFT | wxRIGHT | wxTOP, 10);
     sizer->Add(robot_name_, 0, wxALL, 10);
@@ -49,7 +48,6 @@ AddRobotWindow::AddRobotWindow(wxWindow* parent)
     wxButton* submitButton = new wxButton(this, wxID_OK, "Submit");
     sizer->Add(submitButton, 0, wxALIGN_CENTER | wxALL, 10);
 
-    // Set the sizer and center the dialog
     SetSizer(sizer);
     Centre();
 }
