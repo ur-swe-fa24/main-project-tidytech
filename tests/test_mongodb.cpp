@@ -156,4 +156,11 @@ TEST_CASE("Task Adapter Unit Tests") {
         REQUIRE(bsoncxx::to_json(*updatedTask).find("3") != std::string::npos);  
     }
 
+    SECTION("Delete Task") {
+        taskAdapter.insertTask("5", "task5", "clean the office", "11:00", "12:30", "in progress", "30", {"2"});
+        taskAdapter.deleteTask("5");
+        auto foundTask = taskAdapter.findDocumentById("5");
+        REQUIRE(!foundTask);
+    }
+
 }
