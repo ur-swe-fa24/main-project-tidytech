@@ -12,13 +12,15 @@ using namespace types;
 int FleetManager::robot_count = 0; // For robot_id
 int FleetManager::floor_count = 0; // For floor_id
 
+// TODO: change it in sprint 4
 mongocxx::collection getRobotCollection(std::string table) {
-    static mongocxx::instance instance{};  // Ensure MongoDB instance is initialized only once
+    static mongocxx::instance instance{};
     mongocxx::client client{mongocxx::uri{}};
     auto db = client["database"];
     return db[table];
 }
 
+// TODO: change it in sprint 4
 FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")}, floor_adapter_{getRobotCollection("floor")} {
     // mongocxx::instance instance{};
     // mongocxx::client client{mongocxx::uri{}};
