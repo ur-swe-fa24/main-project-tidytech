@@ -12,18 +12,26 @@ wxBEGIN_EVENT_TABLE(UserInterface, wxFrame)
 wxEND_EVENT_TABLE()
 
 UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
+    // To be able to change the main text on the panel
     subscribe("display_text");
+
+    // Binding buttons to events (Potention TODO: change this to match the style of the others)
     Bind(wxEVT_COMMAND_TEXT_UPDATED, &UserInterface::OnTextUpdated, this, GetId());
     Bind(wxEVT_CLOSE_WINDOW, &UserInterface::OnClose, this);
 
+    // Crate a panel for the whole window
     wxPanel* panel = new wxPanel(this);
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Create a text section and add it to the sizer
     display_text_ = new wxStaticText(panel, wxID_ANY, "Final report will go here.",
                                      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     display_text_->SetFont(wxFont(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     mainSizer->Add(display_text_, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
 
+    // Create a sizer for the three buttons and add the buttons
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+
     wxButton* btn = new wxButton(panel, BUTTON_ID, "Start Simulation", wxDefaultPosition, wxSize(150, 45));
     buttonSizer->Add(btn, 0, wxALL, 5);
 
@@ -35,20 +43,21 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     openAddFloor->Bind(wxEVT_BUTTON, &UserInterface::OnAddFloor, this);
     buttonSizer->Add(openAddFloor, 0, wxALL, 5);
 
+    // Add the buttons to the main sizer
     mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
 
     panel->SetSizer(mainSizer);
-
     mainSizer->SetSizeHints(this);
-
     CreateStatusBar();
 }
 
 
+// Wrapper to just call the start sim from the fleet manager
 void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
     fm_.start_sim();
 }
 
+// Have a dialogue (form) for when you click the add robot
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
     AddRobotWindow robotForm(this);
     if (robotForm.ShowModal() == wxID_OK) {
@@ -57,6 +66,7 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
     }
 }
 
+// Have a dialogue (form) for when you click the add floor
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
     AddFloorWindow floorForm(this, names);
@@ -67,6 +77,7 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     }
 }
 
+// Method to set the main text at the top of the window
 void UserInterface::setText(const std::string& new_text) {
     if (display_text_) { 
         wxCommandEvent* event = new wxCommandEvent(wxEVT_COMMAND_TEXT_UPDATED, GetId());
@@ -83,6 +94,7 @@ void UserInterface::OnTextUpdated(wxCommandEvent& event) {
     Layout();
 }
 
+// Observer pattern methods
 void UserInterface::subscribe(Subscriber* subscriber, const std::string& event) {
     subscribers_[event].push_back(subscriber);
 }
@@ -117,10 +129,12 @@ void UserInterface::update(const std::string& event, const std::string& data) {
     }
 }
 
+// Method called after event "display_text" occurs
 void UserInterface::handle_display_text(const std::string& data) {
     setText(data);
 }
 
+// Method runs when the window is closed (TODO: fix the crash)
 void UserInterface::OnClose(wxCloseEvent& event) {
     std::cout << "closed" << std::endl;
     event.Skip();

@@ -92,6 +92,7 @@ void FleetManager::notify(const std::string& event, const std::string& data) {
     }
 }
 
+// Wrapper method that just calls the add_robot for the sim and the db
 void FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position) {
     RobotSize RsSize;
     if (size == "Small") {
@@ -119,6 +120,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
     // database_.add_robot(id, type, 1, location);
 }
 
+// Wrapper method that just calls the add_floor for the sim and the db
 void FleetManager::add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors) {
     // add_floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors)
     FloorSize FsSize;
@@ -171,6 +173,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
     // database_.add_robot(id, type, 1, location);
 }
 
+// Wrapper that just calls the get_all_floor_names() from the sim
 std::vector<std::string> FleetManager::get_all_floor_names() {
     return simulator_.get_all_floor_names();
 }

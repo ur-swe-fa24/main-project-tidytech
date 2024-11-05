@@ -46,11 +46,12 @@ class Floor {
 
 };
 
+// Have to specifically define how to hash a floor type for unordered map
 namespace std {
     template <>
     struct hash<Floor> {
         size_t operator()(const Floor& floor) const {
-            return std::hash<int>()(floor.get_id());  // Hash the unique ID of Floor
+            return std::hash<int>()(floor.get_id());
         }
     };
 }

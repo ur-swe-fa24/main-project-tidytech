@@ -177,7 +177,7 @@ void Simulator::notify(const std::string& event, const std::string& data) {
     }
 }
 
-// Return all floors in string vector
+// Return all floor names in string vector
 std::vector<std::string> Simulator::get_all_floor_names() {
     std::vector<Floor> all_floors = floorplan_.get_all_floor();
     std::vector<std::string> floor_names;
