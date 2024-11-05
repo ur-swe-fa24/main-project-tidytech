@@ -2,19 +2,28 @@
 skinparam dpi 200
 skinparam DefaultFontName Inconsolata
 ' To produce the UML png
-
 class Database {
-    - database : MongoDB
+    - robots_ : unordered_map<int, vector<string>>
+    - floors_ : unordered_map<int, vector<string>>
+    - tasks_ : unordered_map<int, vector<string>>
 
-    + storeCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
-    + accessCleanData()
-    + removeCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
-    + modifyCleanData(robotID : string, batteryUsed : int, capacityUsed : int, startTime : int, endTime : int)
+    + Database()
     
-    + addError(robotID : string, location : FloorNode, time : int, status : bool)
-    + accessError()
-    + removeError(robotID : string, location : FloorNode, time : int, status : bool)
-    + modifyError(robotID : string, location : FloorNode, time : int, status : bool)
+    + add_robot(id : int, type : string, available : int, location : int)
+    + add_floor(id : int, name : string, type : string)
+    + add_task(id : int, robot_assigned : vector<int>, room_assigned : vector<int>, status : string)
+    
+    + get_robot(id : int) : vector<string>
+    + get_floor(id : int) : vector<string>
+    + get_task(id : int) : vector<string>
+    
+    + update_robot(id : int, type : string, available : int, location : int)
+    + update_floor(id : int, name : string, type : string)
+    + update_task(id : int, robot_assigned : vector<int>, room_assigned : vector<int>, status : string)
+    
+    + delete_robot(id : int)
+    + delete_floor(id : int)
+    + delete_task(id : int)
 }
 
 @enduml
