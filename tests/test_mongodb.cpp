@@ -9,10 +9,9 @@
 #include <bsoncxx/json.hpp>
 #include "database/floor_adapter.hpp" 
 
-
+// create the MongoDB instance
 mongocxx::instance instance{};
 mongocxx::client client{mongocxx::uri{}};
-auto db = client["test_database"];
 
 /**
  * unit tests for robot adapter
@@ -106,9 +105,6 @@ TEST_CASE("Floor Adapter Unit Tests") {
  * unit tests for task adapter
  */
 TEST_CASE("Task Adapter Unit Tests") {
-    // create the MongoDB instance
-    mongocxx::instance instance{};
-    mongocxx::client client{mongocxx::uri{}};
     
     // get the database and collection
     auto db = client["test_database"];
