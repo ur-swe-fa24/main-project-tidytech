@@ -15,7 +15,7 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, std::stri
     status_ = status;
 } 
 
-// toString for robot object
+// to_string for robot object
 std::string Robot::to_string() const {
     std::string str_tasks = "";
 

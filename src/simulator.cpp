@@ -49,6 +49,7 @@ void Simulator::simulate() {
     notify("finished_ping", data);
 }
 
+// simulate the robots
 void Simulator::simulate_robots() {
     // Drain power accordingly
     std::lock_guard<std::mutex> lock(robots_mutex_);
@@ -73,6 +74,7 @@ void Simulator::simulate_robots() {
     }
 }
 
+// simulate the floors
 void Simulator::simulate_floors() {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Floor& floor: floorplan_.get_all_floor()) {
@@ -175,6 +177,7 @@ void Simulator::notify(const std::string& event, const std::string& data) {
     }
 }
 
+// Return all floors in string vector
 std::vector<std::string> Simulator::get_all_floor_names() {
     std::vector<Floor> all_floors = floorplan_.get_all_floor();
     std::vector<std::string> floor_names;
