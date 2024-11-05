@@ -163,4 +163,19 @@ TEST_CASE("Task Adapter Unit Tests") {
         REQUIRE(!foundTask);
     }
 
+    SECTION("Delete all tasks") {
+        taskAdapter.deleteTask("4");
+        auto foundTask = taskAdapter.findDocumentById("4");
+        REQUIRE(!foundTask);
+        taskAdapter.deleteTask("3");
+        foundTask = taskAdapter.findDocumentById("3");
+        REQUIRE(!foundTask);
+        taskAdapter.deleteTask("2");
+        foundTask = taskAdapter.findDocumentById("2");
+        REQUIRE(!foundTask);
+        taskAdapter.deleteTask("1");
+        foundTask = taskAdapter.findDocumentById("1");
+        REQUIRE(!foundTask);
+    }
+
 }
