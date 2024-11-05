@@ -40,7 +40,7 @@ void Floor::dirty() {
             case FloorInteraction::Low:
                 clean_level_ = std::max(0, clean_level_-2);
                 break;
-            case FloorInteraction::Medium:
+            case FloorInteraction::Moderate:
                 clean_level_ = std::max(0, clean_level_-4);
                 break;
             case FloorInteraction::High:

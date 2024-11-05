@@ -24,35 +24,35 @@ TEST_CASE("Robot Adapter Unit Tests") {
 
     //testing inserting and finding robot
     SECTION("Insert and Find Robot") {
-        robotAdapter.insertRobot("robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active");
-        auto foundRobot = robotAdapter.findDocumentById("robot1");
+        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active");
+        auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
-        REQUIRE(bsoncxx::to_json(*foundRobot).find("robot1") != std::string::npos);
+        REQUIRE(bsoncxx::to_json(*foundRobot).find("1") != std::string::npos);
 
         //exception when trying to insert a robot with a duplicate ID
-        REQUIRE_THROWS(robotAdapter.insertRobot("robot1", "small", "typeB", "baseLocationB", "currentLocationB", "inactive"));
+        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive"));
     }
 
     //testing updating robot location
     SECTION("Update Robot Location") {
-        robotAdapter.updateRobotLocation("robot1", "newLocationA");
-        auto foundRobot = robotAdapter.findDocumentById("robot1");
+        robotAdapter.updateRobotLocation("1", "newLocationA");
+        auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
         REQUIRE(bsoncxx::to_json(*foundRobot).find("newLocationA") != std::string::npos);
     }
 
     //testing update robot status
     SECTION("Update Robot Status") {
-        robotAdapter.updateRobotStatus("robot1", "inactive");
-        auto foundRobot = robotAdapter.findDocumentById("robot1");
+        robotAdapter.updateRobotStatus("1", "inactive");
+        auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
         REQUIRE(bsoncxx::to_json(*foundRobot).find("inactive") != std::string::npos);
     }
 
     //testing delete robot
     SECTION("Delete Robot") {
-        robotAdapter.deleteRobot("robot1");
-        auto foundRobot = robotAdapter.findDocumentById("robot1");
+        robotAdapter.deleteRobot("1");
+        auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(!foundRobot);
     }
 }
@@ -67,27 +67,27 @@ TEST_CASE("Floor Adapter Unit Tests") {
     
     //testing inserting and finding floor
     SECTION("Insert and Find Floor") {
-        floorAdapter.insertFloor("floor1", "Bedroom", "Carpet", "Small", "Medium", "false", "90");
-        auto foundFloor = floorAdapter.findDocumentById("floor1");
+        floorAdapter.insertFloor("1", "floor1", "elevator", "Carpet", "Small", "Medium", "false", "90");
+        auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
-        REQUIRE(bsoncxx::to_json(*foundFloor).find("floor1") != std::string::npos);
+        REQUIRE(bsoncxx::to_json(*foundFloor).find("1") != std::string::npos);
 
         //exception when trying to insert a floor with a duplicate ID
-        REQUIRE_THROWS(floorAdapter.insertFloor("floor1", "Living Room", "Wood", "Large", "High", "true", "85"));
+        REQUIRE_THROWS(floorAdapter.insertFloor("1", "floor1", "hallway", "Wood", "Large", "High", "true", "85"));
     }
 
     //testing updating floor clean level
     SECTION("Update Floor Clean Level") {
-        floorAdapter.updateCleanLevel("floor1", "75");
-        auto foundFloor = floorAdapter.findDocumentById("floor1");
+        floorAdapter.updateCleanLevel("1", "75");
+        auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
         REQUIRE(bsoncxx::to_json(*foundFloor).find("75") != std::string::npos);
     }
 
     //testing updating floor restrictions
     SECTION("Update Floor Restriction") {
-        floorAdapter.updateRestriction("floor1", "true");
-        auto foundFloor = floorAdapter.findDocumentById("floor1");
+        floorAdapter.updateRestriction("1", "true");
+        auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
         REQUIRE(bsoncxx::to_json(*foundFloor).find("true") != std::string::npos);
 
@@ -95,8 +95,8 @@ TEST_CASE("Floor Adapter Unit Tests") {
 
     //testing delete floor
     SECTION("Delete Floor") {
-        floorAdapter.deleteFloor("floor1");
-        auto foundFloor = floorAdapter.findDocumentById("floor1");
+        floorAdapter.deleteFloor("1");
+        auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(!foundFloor);
     }
 }

@@ -16,7 +16,7 @@ public:
     FloorAdapter(mongocxx::collection collection) : collection_(std::move(collection)) {}
 
     // Insert a new floor document
-    void insertFloor(const std::string& id, const std::string& room, const std::string& floortype, const std::string& size,
+    void insertFloor(const std::string& id, const std::string& name, const std::string& roomType, const std::string& floortype, const std::string& size,
                      const std::string& interaction, const std::string& restricted, const std::string& clean_level);
     
 
