@@ -1,6 +1,7 @@
 #include "simulation/floorplan.hpp"
 #include "spdlog/spdlog.h"
 
+// Return all the floors in the FloorPlan 
 std::vector<Floor> FloorPlan::get_all_floor() const {
     std::vector<Floor> floors;
     for (const auto& pair : floorgraph_) {
@@ -9,6 +10,7 @@ std::vector<Floor> FloorPlan::get_all_floor() const {
     return floors;
 }
 
+// to_string for FloorPlan
 std::string FloorPlan::to_string() const {
     std::string out_str = "FloorPlan: \n";
     for (const auto& pair : floorgraph_) {
@@ -25,6 +27,7 @@ std::string FloorPlan::to_string() const {
     return out_str;
 }
 
+// to_string for Floor
 std::string FloorPlan::floor_to_string(const Floor& floor) const {
     std::string out_str = floor.to_string();
     std::string neighbors_str = "";
@@ -41,6 +44,7 @@ std::string FloorPlan::floor_to_string(const Floor& floor) const {
 
 }
 
+// Add floor to the FloorPlan
 void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors) {
     if (floorgraph_.count(floor) != 1) {
         floorgraph_[floor] = neighbors;
@@ -52,6 +56,7 @@ void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors
     }
 }
 
+// Remove floor from the FloorPlan
 void FloorPlan::remove_floor(const Floor& floor) {
     // Check if there is any robot in the floor
     auto remove_floor_to_robot = floor_to_robots_.find(floor);
@@ -71,10 +76,12 @@ void FloorPlan::remove_floor(const Floor& floor) {
     }
 }
 
+// Return the adjacent floors of the floor
 std::vector<Floor> FloorPlan::get_neighbors(const Floor& floor) const {
     return floorgraph_.at(floor);
 }
 
+// Modify the neighbors of the Floor
 void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Floor> neighbors) {
     auto update = floorgraph_.find(floor);
     if (update != floorgraph_.end()) {
@@ -86,6 +93,7 @@ void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Flo
     }
 }
 
+// Update the neighbors from either adding or removing floor
 void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     std::vector<Floor> floors_to_modify = floorgraph_[floor];
     if (add) {
@@ -113,10 +121,12 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     }
 }
 
+// Add robotsize to the floor_to_robots_
 void FloorPlan::add_robot_to_floor(const Floor& floor, const RobotSize robot_size) {
     floor_to_robots_.at(floor).push_back(robot_size);
 }
 
+// Remove an instance of robotsize from the floor_to_robots_
 void FloorPlan::remove_robot_from_floor(const Floor& floor, const RobotSize robot_size) {
     auto remove = floor_to_robots_.find(floor);
     if (remove != floor_to_robots_.end()) {

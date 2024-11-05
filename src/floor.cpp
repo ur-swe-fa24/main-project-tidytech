@@ -13,6 +13,7 @@ Floor::Floor(int id, std::string name, FloorRoomType room, FloorType floortype, 
     getting_clean_ = false;
 }
 
+// to_string for Floor
 std::string Floor::to_string() const {
     std::string str_restriction = "Not Restricted";
     std::string str_getting_clean = "Not At This Time";

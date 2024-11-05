@@ -9,7 +9,7 @@ using namespace types;
 
 class Floor {
     public:
-        Floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level);
+        Floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level); // Constructor
         ~Floor() {};
 
         bool operator==(const Floor& other) const {return id_ == other.id_;} // Overriding Floor comparison
