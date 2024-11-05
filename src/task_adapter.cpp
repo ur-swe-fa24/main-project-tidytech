@@ -3,6 +3,7 @@
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/stdx.hpp>
+#include <stdexcept>
 
 using bsoncxx::builder::basic::make_document;
 using bsoncxx::builder::basic::kvp;
@@ -33,7 +34,7 @@ void TaskAdapter::insertTask(const std::string& id, const std::string& name, con
         // insert the doc into the collection
         collection_.insert_one(task_doc.view());
     } else {
-        std::cout << "the task has been added to the database already" << std::endl;
+        throw std::invalid_argument("the task has been added to the database already" );
     }
 }
 
