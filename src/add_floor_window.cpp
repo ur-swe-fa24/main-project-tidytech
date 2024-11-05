@@ -56,10 +56,6 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
     sizer->Add(new wxStaticText(this, wxID_ANY, "Interaction Level:"), 0, wxLEFT | wxRIGHT, 10);
     sizer->Add(floorInteractionSizer, 0, wxLEFT | wxRIGHT, 10);
 
-    // // Checkbox
-    // wxCheckBox* checkBox = new wxCheckBox(this, wxID_ANY, "Check me!");
-    // sizer->Add(checkBox, 0, wxALL, 10);
-
     for (std::string name : names) {
         sizer->Add(new wxCheckBox(this, wxID_ANY, name), 0, wxALL, 10);
     }

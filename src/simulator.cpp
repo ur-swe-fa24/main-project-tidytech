@@ -127,8 +127,8 @@ void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorTyp
             if (std::find(neighbors.begin(), neighbors.end(), floor.get_id()) != neighbors.end()) {
                 neighbor_floors.push_back(floor);
             }
+        }
         floorplan_.add_floor(std::ref(new_floor), neighbor_floors);
-    }
     } else {
         spdlog::error("MAXIMUM NUMBER OF FLOORS REACHED! Current: {} floors", floorplan_.get_size());
     }
@@ -178,11 +178,8 @@ void Simulator::notify(const std::string& event, const std::string& data) {
 std::vector<std::string> Simulator::get_all_floor_names() {
     std::vector<Floor> all_floors = floorplan_.get_all_floor();
     std::vector<std::string> floor_names;
-    // for (Floor floor : all_floors) {
-
-    // }
-    floor_names.push_back("Floor 1");
-    floor_names.push_back("Floor 2");
-    floor_names.push_back("Floor 3");
+    for (Floor floor : all_floors) {
+        floor_names.push_back(floor.get_name());
+    }
     return floor_names;
 }

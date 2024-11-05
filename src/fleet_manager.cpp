@@ -68,7 +68,7 @@ void FleetManager::handle_five_sec_ping(const std::string& data) {
 void FleetManager::handle_finished_ping(const std::string& data) {
     // Calls write_output to write data to a file
     std::string message = "Final Report Summary:\n" + data;
-    notify("display_text", "[Final Report]");
+    notify("display_text", data);
     // write_output("../app/output.txt", message);
 }
 
@@ -113,7 +113,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
         std::cout << "Invalid Robot Type" << std::endl;
     }
     simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
-    robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
+    // robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     // database_.add_robot(id, type, 1, location);
 }
 
@@ -165,7 +165,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
 
     
     simulator_.add_floor(++floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
-    floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
+    // floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
     // database_.add_robot(id, type, 1, location);
 }
 
