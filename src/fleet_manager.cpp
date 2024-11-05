@@ -19,7 +19,7 @@ mongocxx::collection getRobotCollection(std::string table) {
     return db[table];
 }
 
-FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")} {
+FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")}, floor_adapter_{getRobotCollection("floor")} {
     // mongocxx::instance instance{};
     // mongocxx::client client{mongocxx::uri{}};
     // auto db = client["database"];
@@ -156,7 +156,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
     if (interaction == "Low") {
         FiInteraction = FloorInteraction::Low;
     } else if (interaction == "Moderate") {
-        FiInteraction = FloorInteraction::Medium;
+        FiInteraction = FloorInteraction::Moderate;
     } else if (interaction == "High") {
         FiInteraction = FloorInteraction::High;  
     } else {
@@ -164,7 +164,8 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
     }
 
     
-    simulator_.add_floor(1, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
+    simulator_.add_floor(++floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
+    floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
     // database_.add_robot(id, type, 1, location);
 }
 

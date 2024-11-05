@@ -11,7 +11,7 @@ namespace types {
     enum class FloorSize {Small, Medium, Large};
     enum class FloorType {Wood, Tile, Carpet};
     enum class FloorRoomType {Hallway, Room, Elevator};
-    enum class FloorInteraction {Low, Medium, High};
+    enum class FloorInteraction {Low, Moderate, High};
 
     // String format for every enum class
     inline std::string to_string(RobotSize size) {
@@ -86,8 +86,8 @@ namespace types {
         switch(interaction) {
             case FloorInteraction::Low:
                 return "Low";
-            case FloorInteraction::Medium:
-                return "Medium";
+            case FloorInteraction::Moderate:
+                return "Moderate";
             case FloorInteraction::High:
                 return "High";
         }

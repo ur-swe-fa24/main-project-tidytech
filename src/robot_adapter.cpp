@@ -21,8 +21,8 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
         kvp("name", name),
         kvp("size", size),
         kvp("type", type),
-        kvp("baseLocation", baseLocation),
-        kvp("currentLocation", currentLocation),
+        kvp("base_location", baseLocation),
+        kvp("current_location", currentLocation),
         kvp("status", status));
     // insert the doc into the collection
         collection_.insert_one(robot_doc.view());
@@ -74,7 +74,7 @@ bool RobotAdapter::updateRobotLocation(const std::string& robotId, const std::st
     auto update_doc = make_document(
         kvp("$set", 
             make_document(
-                kvp("currentLocation", newLocation)
+                kvp("current_location", newLocation)
             )
         )
     );

@@ -7,7 +7,7 @@
 using bsoncxx::builder::basic::make_document;
 using bsoncxx::builder::basic::kvp;
 
-void FloorAdapter::insertFloor(const std::string& id, const std::string& room, const std::string& floortype,
+void FloorAdapter::insertFloor(const std::string& id, const std::string& name, const std::string& roomType, const std::string& floortype,
                                const std::string& size, const std::string& interaction, const std::string& restricted,
                                const std::string& clean_level) {
     auto query_doc = bsoncxx::builder::basic::make_document(
@@ -17,12 +17,13 @@ void FloorAdapter::insertFloor(const std::string& id, const std::string& room, c
     if (!existing_doc) {
         auto floor_doc = make_document(
             kvp("_id", id),
-            kvp("room", room),
-            kvp("floorType", floortype),
+            kvp("name", name),
+            kvp("room_type", roomType),
+            kvp("floor_type", floortype),
             kvp("size", size),
-            kvp("interactionLevel", interaction),
+            kvp("interaction_level", interaction),
             kvp("restricted", restricted),
-            kvp("cleanLevel", clean_level));
+            kvp("clean_level", clean_level));
 
     // insert the doc into the collection
         collection_.insert_one(floor_doc.view());
@@ -48,7 +49,7 @@ std::optional<bsoncxx::document::value> FloorAdapter::findDocumentById(const std
 //update clean level
 bool FloorAdapter::updateCleanLevel(const std::string& floorId, const std::string& newCleanLevel) {
     auto query_doc = make_document(kvp("_id", floorId));
-    auto update_doc = make_document(kvp("$set", make_document(kvp("cleanLevel", newCleanLevel))));
+    auto update_doc = make_document(kvp("$set", make_document(kvp("clean_level", newCleanLevel))));
 
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0;
