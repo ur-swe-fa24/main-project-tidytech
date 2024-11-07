@@ -167,7 +167,6 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         std::cout << "Invalid Floor Interaction" << std::endl;
     }
 
-    
     simulator_.add_floor(++floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
     // floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
     // database_.add_robot(id, type, 1, location);
