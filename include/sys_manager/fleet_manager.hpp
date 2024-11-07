@@ -1,36 +1,56 @@
-#ifndef SYS_MANAGER_FLEET_MANAGER_HPP
-#define SYS_MANAGER_FLEET_MANAGER_HPP
+#ifndef SYS_MANAGER_FLEETMANAGER_HPP
+#define SYS_MANAGER_FLEETMANAGER_HPP
 
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <wx/wx.h>
 
 #include "../simulation/simulator.hpp"
-#include "../database/database.hpp"
+#include "../database/robot_adapter.hpp"
+#include "../database/floor_adapter.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
+#include "types/types.hpp"
 
-class Fleet_manager : public Subscriber {
+using namespace types;
+
+class FleetManager : public Subscriber, public wxApp, public Publisher {
     public:
         // Constructor
-        Fleet_manager(Simulator* simulation, Database* db);
+        FleetManager();
+        static int robot_count; // For robot_id
+        static int floor_count; // For floor_id
 
-        // I/O methods
-        void read_ui_input(std::string filepath);
+        void add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position);
+        void add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
         void write_output(std::string filepath, std::string message); // outputs to a file
 
+        std::vector<std::string> get_all_floor_names();
         // Observer pattern methods
         void subscribe(const std::string& event);
         void unsubscribe(const std::string& event);
         void update(const std::string& event, const std::string& data) override;
+
+        void subscribe(Subscriber* subscriber, const std::string& event) override;
+        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
+        void notify(const std::string& event, const std::string& data) override;
+
+        // Run simulation methods
+        void start_sim() {simulator_.start_simulation();};
+
+        bool OnInit() override;
     private:
         // Methods to handle the different events
         void handle_five_sec_ping(const std::string& data);
         void handle_finished_ping(const std::string& data);
+
+        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
         
         // Attributes for simulator, and database
-        Simulator* simulator_;
-        Database* database_;
+        Simulator simulator_;
+        RobotAdapter robot_adapter_;
+        FloorAdapter floor_adapter_;
 };
 
 #endif

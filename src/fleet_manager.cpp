@@ -1,18 +1,38 @@
 #include "sys_manager/fleet_manager.hpp"
+#include "ui/user_interface.hpp"
+#include "types/types.hpp"
 
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
 
-Fleet_manager::Fleet_manager(Simulator* simulation, Database* db)
-    : simulator_(simulation), database_(db) {
+using namespace types;
+
+int FleetManager::robot_count = 0; // For robot_id
+int FleetManager::floor_count = 0; // For floor_id
+
+// TODO: change it in sprint 4
+mongocxx::collection getRobotCollection(std::string table) {
+    static mongocxx::instance instance{};
+    mongocxx::client client{mongocxx::uri{}};
+    auto db = client["database"];
+    return db[table];
+}
+
+// TODO: change it in sprint 4
+FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")}, floor_adapter_{getRobotCollection("floor")} {
+    // mongocxx::instance instance{};
+    // mongocxx::client client{mongocxx::uri{}};
+    // auto db = client["database"];
+    // auto collection = db["robots"];
+    // robot_adapter_ = RobotAdapter(collection);
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");
 }
 
-void Fleet_manager::write_output(string filepath, string message) {
+void FleetManager::write_output(string filepath, string message) {
     // Writes the message parameter to the file specified by filepath
     ofstream myfile(filepath);
     if (myfile.is_open()) {
@@ -23,62 +43,17 @@ void Fleet_manager::write_output(string filepath, string message) {
     }
 }
 
-void Fleet_manager::read_ui_input(string filepath) {
-    // Reads file from the filepath
-    ifstream file(filepath);
-    string line;
-    
-    if (!file.is_open()) {
-        throw invalid_argument("invalid file path.");
-    }
-
-    // Adds to the database and simulation depending on what type of "thing" it is
-    // TODO: abstract this and thread this
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string word;
-        ss >> word;
-
-        if (word == "Robot") {
-            int id, available, location;
-            string type;
-            ss >> id >> type >> available >> location;
-            database_->add_robot(id, type, available, location);
-            simulator_->add_robot(to_string(id), "small", type, to_string(location), to_string(location));
-        } else if (word == "Floor") {
-            int id;
-            string name, type;
-            ss >> id >> name >> type;
-            database_->add_floor(id, name, type);
-        } else if (word == "Tasks") {
-            vector<int> robot_assigned_vector; // TODO: change this
-            vector<int> room_assigned_vector; // TODO: change this
-            int id;
-            int robot_assigned;
-            int room_assigned;
-            string status;
-            ss >> id >> robot_assigned >> room_assigned >> status;
-            robot_assigned_vector.push_back(robot_assigned);
-            room_assigned_vector.push_back(room_assigned);
-            database_->add_task(id, robot_assigned_vector, room_assigned_vector, status);
-            simulator_->add_task(to_string(robot_assigned), to_string(room_assigned));
-        }
-    }
-    
-    file.close();
-}
-
-void Fleet_manager::subscribe(const std::string& event) {
+void FleetManager::subscribe(const std::string& event) {
     // subscribe to an event
-    simulator_->subscribe(this, event);
+    simulator_.subscribe(this, event);
 }
 
-void Fleet_manager::unsubscribe(const std::string& event) {
+void FleetManager::unsubscribe(const std::string& event) {
     // unsubscribe from an event
-    simulator_->unsubscribe(this, event);
+    simulator_.unsubscribe(this, event);
 }
 
-void Fleet_manager::update(const std::string& event, const std::string& data) {
+void FleetManager::update(const std::string& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
     if (event == "five_sec_ping") {
         handle_five_sec_ping(data);
@@ -87,13 +62,118 @@ void Fleet_manager::update(const std::string& event, const std::string& data) {
     }
 }
 
-void Fleet_manager::handle_five_sec_ping(const std::string& data) {
+void FleetManager::handle_five_sec_ping(const std::string& data) {
     // Prints data
     std::cout << data << std::endl;
 }
 
-void Fleet_manager::handle_finished_ping(const std::string& data) {
+void FleetManager::handle_finished_ping(const std::string& data) {
     // Calls write_output to write data to a file
     std::string message = "Final Report Summary:\n" + data;
-    write_output("../app/output.txt", message);
+    notify("display_text", data);
+    // write_output("../app/output.txt", message);
+}
+
+
+void FleetManager::subscribe(Subscriber* subscriber, const std::string& event) {
+    subscribers_[event].push_back(subscriber);
+}
+
+// Let the subscriber unsubscribe from an event
+void FleetManager::unsubscribe(Subscriber* subscriber, const std::string& event) {
+    auto& subs = subscribers_[event];
+    subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
+}
+
+// Notify all the subscribers
+void FleetManager::notify(const std::string& event, const std::string& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, data);
+    }
+}
+
+// Wrapper method that just calls the add_robot for the sim and the db
+void FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position) {
+    RobotSize RsSize;
+    if (size == "Small") {
+        RsSize = RobotSize::Small;
+    } else if (size == "Medium") {
+        RsSize = RobotSize::Medium;
+    } else if (size == "Large") {
+        RsSize = RobotSize::Large;
+    } else {
+        std::cout << "Invalid Robot Size" << std::endl;
+    }
+
+    RobotType RtType;
+    if (type == "Shampoo") {
+        RtType = RobotType::Shampoo;
+    } else if (type == "Vacuum") {
+        RtType = RobotType::Vaccum;
+    } else if (type == "Scrubber") {
+        RtType = RobotType::Scrubber;
+    } else {
+        std::cout << "Invalid Robot Type" << std::endl;
+    }
+    simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
+    // robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
+    // database_.add_robot(id, type, 1, location);
+}
+
+// Wrapper method that just calls the add_floor for the sim and the db
+void FleetManager::add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors) {
+    // add_floor(int id, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors)
+    FloorSize FsSize;
+    FloorType FtType;
+    FloorRoomType FrtRoom;
+    FloorInteraction FiInteraction;
+    if (roomType == "Elevator") {
+        FrtRoom = FloorRoomType::Elevator;
+    } else if (roomType == "Hallway") {
+        FrtRoom = FloorRoomType::Hallway;
+    } else if (roomType == "Room") {
+        FrtRoom = FloorRoomType::Room;
+    } else {
+        std::cout << "Invalid Floor Room Type" << std::endl;
+    }
+
+    if (type == "Carpet") {
+        FtType = FloorType::Carpet;
+    } else if (type == "Wood") {
+        FtType = FloorType::Wood;
+    } else if (type == "Tile") {
+        FtType = FloorType::Tile;
+    } else {
+        std::cout << "Invalid Floor Type" << std::endl;
+    }
+
+    if (size == "Small") {
+        FsSize = FloorSize::Small;
+    } else if (size == "Medium") {
+        FsSize = FloorSize::Medium;
+    } else if (size == "Large") {
+        FsSize = FloorSize::Large;
+    } else {
+        std::cout << "Invalid Floor Size" << std::endl;
+    }
+
+    if (interaction == "Low") {
+        FiInteraction = FloorInteraction::Low;
+    } else if (interaction == "Moderate") {
+        FiInteraction = FloorInteraction::Moderate;
+    } else if (interaction == "High") {
+        FiInteraction = FloorInteraction::High;  
+    } else {
+        std::cout << "Invalid Floor Interaction" << std::endl;
+    }
+
+    
+    simulator_.add_floor(++floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
+    // floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
+    // database_.add_robot(id, type, 1, location);
+}
+
+// Wrapper that just calls the get_all_floor_names() from the sim
+std::vector<std::string> FleetManager::get_all_floor_names() {
+    return simulator_.get_all_floor_names();
 }
