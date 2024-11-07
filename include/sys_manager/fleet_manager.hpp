@@ -6,9 +6,10 @@
 #include <string>
 #include <wx/wx.h>
 
-#include "../simulation/simulator.hpp"
-#include "../database/robot_adapter.hpp"
-#include "../database/floor_adapter.hpp"
+#include "simulation/simulator.hpp"
+#include "database/db_manager.hpp"
+#include "database/robot_adapter.hpp"
+#include "database/floor_adapter.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 #include "types/types.hpp"
@@ -49,6 +50,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         
         // Attributes for simulator, and database
         Simulator simulator_;
+        DBManager dbmanager_;
         RobotAdapter robot_adapter_;
         FloorAdapter floor_adapter_;
 };

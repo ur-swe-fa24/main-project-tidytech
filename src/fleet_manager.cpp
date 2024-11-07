@@ -12,21 +12,20 @@ using namespace types;
 int FleetManager::robot_count = 0; // For robot_id
 int FleetManager::floor_count = 0; // For floor_id
 
-// TODO: change it in sprint 4
-mongocxx::collection getRobotCollection(std::string table) {
-    static mongocxx::instance instance{};
-    mongocxx::client client{mongocxx::uri{}};
-    auto db = client["database"];
-    return db[table];
-}
+// // TODO: change it in sprint 4
+// mongocxx::collection getRobotCollection(std::string table) {
+//     static mongocxx::instance instance{};
+//     mongocxx::client client{mongocxx::uri{}};
+//     auto db = client["database"];
+//     return db[table];
+// }
 
 // TODO: change it in sprint 4
-FleetManager::FleetManager() : simulator_{}, robot_adapter_{getRobotCollection("robot")}, floor_adapter_{getRobotCollection("floor")} {
-    // mongocxx::instance instance{};
-    // mongocxx::client client{mongocxx::uri{}};
-    // auto db = client["database"];
-    // auto collection = db["robots"];
-    // robot_adapter_ = RobotAdapter(collection);
+FleetManager::FleetManager() : simulator_{} {
+    DBManager::getInstance("mongodb://localhost:27017", "database");
+    auto db = dbmanager_.getDatabase();
+    robot_adapter_ = RobotAdapter(db["robots"]);
+    floor_adapter_ = FloorAdapter(db["floors"]);
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");
@@ -116,7 +115,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
         std::cout << "Invalid Robot Type" << std::endl;
     }
     simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
-    // robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
+    robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     // database_.add_robot(id, type, 1, location);
 }
 
@@ -169,7 +168,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
 
     
     simulator_.add_floor(++floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
-    // floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
+    floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
     // database_.add_robot(id, type, 1, location);
 }
 
