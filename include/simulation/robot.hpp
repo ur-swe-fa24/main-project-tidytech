@@ -18,6 +18,7 @@ class Robot {
         void set_size(const RobotSize size) {size_ = size;};
         void set_type(const RobotType type) {type_ = type;};
         void set_status(const RobotStatus status) {status_ = status;};
+        void set_curr_path(const std::queue<int> path) {curr_path_ = path;};
 
         int get_id() const {return id_;};
         std::string get_name() const {return name_;};
@@ -48,7 +49,7 @@ class Robot {
         int battery_;
         std::vector<std::string> task_queue_;
         RobotStatus status_;
-        std::queue<int> curr_path; // Shortest path from one floor to another
+        std::queue<int> curr_path_; // Shortest path from one floor to another
         
 };
 

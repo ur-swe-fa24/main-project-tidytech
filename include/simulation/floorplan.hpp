@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <queue>
 #include "floor.hpp"
 #include "types/types.hpp"
 
@@ -28,12 +29,16 @@ class FloorPlan {
         void remove_robot_from_floor(const Floor& floor, const RobotSize robot_size);
         int get_num_robots(const Floor& floor) const {return floor_to_robots_.at(floor).size();};
 
+        std::queue<int> get_path(int floor_id_one, int floor_id_two);
+
 
     private:
         std::unordered_map<Floor, std::vector<Floor>> floorgraph_;
         std::unordered_map<Floor, std::vector<RobotSize>> floor_to_robots_; // To determine the number of robots in a floor + cleaning
         int size_;
         void update_neighbors(const Floor& floor, bool add);
+        bool floor_in_frontier(std::queue<Floor> queue, const Floor& floor);
+        std::queue<int> get_shortest_path(std::unordered_map<int,int> track_path, int floor_id_goal);
 };
 
 #endif
