@@ -12,20 +12,10 @@ using namespace types;
 int FleetManager::robot_count = 0; // For robot_id
 int FleetManager::floor_count = 0; // For floor_id
 
-// // TODO: change it in sprint 4
-// mongocxx::collection getRobotCollection(std::string table) {
-//     static mongocxx::instance instance{};
-//     mongocxx::client client{mongocxx::uri{}};
-//     auto db = client["database"];
-//     return db[table];
-// }
 
 // TODO: change it in sprint 4
-FleetManager::FleetManager() : simulator_{} {
-    DBManager::getInstance("mongodb://localhost:27017", "database");
-    auto db = dbmanager_.getDatabase();
-    robot_adapter_ = RobotAdapter(db["robots"]);
-    floor_adapter_ = FloorAdapter(db["floors"]);
+FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
+                                robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]} {
     // Subscribe to these two events upon initialization
     subscribe("five_sec_ping");
     subscribe("finished_ping");
@@ -114,8 +104,13 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-    simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
-    robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
+    
+    try {
+        simulator_.add_robot(++robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
+        robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
+    } catch (const std::exception& e) {
+        std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
+    }
     // database_.add_robot(id, type, 1, location);
 }
 

@@ -50,7 +50,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         
         // Attributes for simulator, and database
         Simulator simulator_;
-        DBManager dbmanager_;
+        DBManager& dbmanager_;
         RobotAdapter robot_adapter_;
         FloorAdapter floor_adapter_;
 };

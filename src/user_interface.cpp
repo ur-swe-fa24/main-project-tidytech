@@ -18,6 +18,7 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     // Binding buttons to events (Potention TODO: change this to match the style of the others)
     Bind(wxEVT_COMMAND_TEXT_UPDATED, &UserInterface::OnTextUpdated, this, GetId());
     Bind(wxEVT_CLOSE_WINDOW, &UserInterface::OnClose, this);
+    Bind(EVT_ROBOT_ADDED, &UserInterface::OnRobotAdded, this);
 
     // Crate a panel for the whole window
     wxPanel* panel = new wxPanel(this);
@@ -58,13 +59,50 @@ void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
 }
 
 // Have a dialogue (form) for when you click the add robot
+// void UserInterface::OnAddRobot(wxCommandEvent& event) {
+//     AddRobotWindow robotForm(this);
+//     if (robotForm.ShowModal() == wxID_OK) {
+//         fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
+//         wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
+//     }
+// }
+
+#include <future>  // For std::async
+
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
     AddRobotWindow robotForm(this);
     if (robotForm.ShowModal() == wxID_OK) {
-        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
-        wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
+        auto name = robotForm.get_name();
+        auto size = robotForm.get_size();
+        auto type = robotForm.get_type();
+        auto charging_position = robotForm.get_charging_position();
+        auto current_position = robotForm.get_current_position();
+
+        std::async(std::launch::async, [this, name, size, type, charging_position, current_position]() {
+            try {
+                fm_.add_robot(name, size, type, charging_position, current_position);
+
+                // Create a custom event to notify the UI thread
+                wxCommandEvent evt(EVT_ROBOT_ADDED);
+                wxQueueEvent(this, evt.Clone());
+            } catch (const std::exception& e) {
+                wxCommandEvent evt(EVT_ROBOT_ADDED);
+                evt.SetString("Error adding robot: " + wxString(e.what()));
+                wxQueueEvent(this, evt.Clone());
+            }
+        });
     }
 }
+
+void UserInterface::OnRobotAdded(wxCommandEvent& event) {
+    wxString message = event.GetString();
+    if (message.IsEmpty()) {
+        wxMessageBox("Robot Added Successfully", "Success", wxICON_INFORMATION | wxOK, this);
+    } else {
+        wxMessageBox(message, "Error", wxICON_ERROR | wxOK, this);
+    }
+}
+
 
 // Have a dialogue (form) for when you click the add floor
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
