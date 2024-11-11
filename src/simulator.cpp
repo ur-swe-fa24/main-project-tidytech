@@ -41,9 +41,10 @@ void Simulator::simulate() {
         data += robot.to_string() + "\n\u200B"; // TODO: create better fix for this
     }
     for (Floor& floor : floorplan_.get_all_floor()) {
-        data += floorplan_.floor_to_string(floor) + "\n\u200B";
+        data += "\n\u200B" + floorplan_.floor_to_string(floor) + "\n\u200B";
     }
-    data += floorplan_.to_string();
+
+    data += "\n\u200B" + floorplan_.to_string();
     // Report the finished simulation result to an output file
     spdlog::info("Simulation finished!");
     notify("finished_ping", data);
