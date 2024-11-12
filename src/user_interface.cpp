@@ -59,9 +59,10 @@ void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
 
 // Have a dialogue (form) for when you click the add robot
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
-    AddRobotWindow robotForm(this);
+    std::vector<std::string> names = fm_.get_all_floor_names();
+    AddRobotWindow robotForm(this, names);
     if (robotForm.ShowModal() == wxID_OK) {
-        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
+        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position());
         wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
     }
 }
@@ -71,11 +72,12 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
 // Have a dialogue (form) for when you click the add floor
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
-    AddFloorWindow floorForm(this, names);
+    AddFloorWindow floorForm(this, names, num_added_);
     if (floorForm.ShowModal() == wxID_OK) {
-        std::vector<int> neighbors; //TODO: remove this
-        fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), neighbors);
+        std::vector<int> tmp = floorForm.get_floor_neighbors();
+        fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors());
         wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
+        num_added_++;
     }
 }
 

@@ -32,6 +32,7 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
         wxDECLARE_EVENT_TABLE();
         FleetManager fm_;
         wxStaticText* display_text_;
+        int num_added_ = 0;
 
         std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
 };
