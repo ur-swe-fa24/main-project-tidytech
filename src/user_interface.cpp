@@ -59,9 +59,10 @@ void UserInterface::OnStartSimulation(wxCommandEvent& evt) {
 
 // Have a dialogue (form) for when you click the add robot
 void UserInterface::OnAddRobot(wxCommandEvent& event) {
-    AddRobotWindow robotForm(this);
+    std::vector<std::string> names = fm_.get_all_floor_names();
+    AddRobotWindow robotForm(this, names);
     if (robotForm.ShowModal() == wxID_OK) {
-        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_current_position());
+        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position());
         wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
     }
 }
