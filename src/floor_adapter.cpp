@@ -13,8 +13,20 @@ void FloorAdapter::insertFloor(const std::string& id, const std::string& name, c
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
     );
+    auto query_name = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("name", name)
+    );
     auto existing_doc = collection_.find_one(query_doc.view());
-    if (!existing_doc) {
+    auto existing_name = collection_.find_one(query_name.view());
+    //checking if the id is already in the databse and checking if the name is an empty string
+    if (existing_doc || name == "") {
+        //throw error
+        throw std::invalid_argument("the floor cannot be added to database because of duplicate id");
+    } 
+    //if the name is already in the database throw error
+    else if (existing_name){
+        throw std::invalid_argument("the floor cannot be added to database because of duplicate name");
+    } else {
         auto floor_doc = make_document(
             kvp("_id", id),
             kvp("name", name),
@@ -24,14 +36,9 @@ void FloorAdapter::insertFloor(const std::string& id, const std::string& name, c
             kvp("interaction_level", interaction),
             kvp("restricted", restricted),
             kvp("clean_level", clean_level));
-
-    // insert the doc into the collection
         collection_.insert_one(floor_doc.view());
-    } else {
-        throw std::invalid_argument("the floor has been added to database already");
     }
 }
-
 
 std::optional<bsoncxx::document::value> FloorAdapter::findDocumentById(const std::string& floorId) {
     // build the query doc

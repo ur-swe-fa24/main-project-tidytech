@@ -14,20 +14,28 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
     );
+    auto query_name = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("name", name)
+    );
     auto existing_doc = collection_.find_one(query_doc.view());
-    if (!existing_doc) {
-        auto robot_doc = make_document(
-        kvp("_id", id),
-        kvp("name", name),
-        kvp("size", size),
-        kvp("type", type),
-        kvp("base_location", baseLocation),
-        kvp("current_location", currentLocation),
-        kvp("status", status));
-    // insert the doc into the collection
-        collection_.insert_one(robot_doc.view());
+    auto existing_name = collection_.find_one(query_name.view());
+    if (existing_doc || name == "") {
+        //throw error
+        throw std::invalid_argument("the robot cannot be added to database because of duplicate id");
+    } 
+    //if the name is already in the database throw error
+    else if (existing_name){
+        throw std::invalid_argument("the robot cannot be added to database because of duplicate name");
     } else {
-        throw std::invalid_argument("the robot has been added to the database already");
+        auto robot_doc = make_document(
+            kvp("_id", id),
+            kvp("name", name),
+            kvp("size", size),
+            kvp("type", type),
+            kvp("base_location", baseLocation),
+            kvp("current_location", currentLocation),
+            kvp("status", status));
+        collection_.insert_one(robot_doc.view());
     }
 }
 
