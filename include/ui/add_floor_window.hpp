@@ -58,7 +58,7 @@ class AddFloorWindow : public wxDialog {
             std::vector<int> neighbors;
             for (int i = 0; i < num_added_; i++) {
                 if (boxes_[i]->GetValue()) {
-                    neighbors.push_back(i);
+                    neighbors.push_back(i+1);
                 }
             }
             return neighbors;

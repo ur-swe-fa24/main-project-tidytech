@@ -16,13 +16,13 @@ std::string FloorPlan::to_string() const {
     for (const auto& pair : floorgraph_) {
         out_str += "Id: " + std::to_string(pair.first.get_id()) + ", Number of Robots: " + std::to_string(get_num_robots(pair.first)) + ", Adjacent Floors: ";
         std::string neighbors_str = "";
-        for (const auto& neighbor : pair.second) {
-            neighbors_str += std::to_string(neighbor.get_id()) + ", ";
+        for (const Floor& neighbor : pair.second) {
+            neighbors_str += neighbor.get_name() + ", ";
         }
         if (neighbors_str.length() >= 2) {
         neighbors_str.erase(neighbors_str.length() - 2, 2); // Remove last two characters
         }
-        out_str += neighbors_str = "\n";
+        out_str += neighbors_str + "\n";
     }
     return out_str;
 }
@@ -33,7 +33,7 @@ std::string FloorPlan::floor_to_string(const Floor& floor) const {
     std::string neighbors_str = "";
     std::vector<Floor> neighbors = floorgraph_.at(floor);
     for (const auto& neighbor : neighbors) {
-        neighbors_str += std::to_string(neighbor.get_id()) + ", ";
+        neighbors_str += neighbor.get_name() + ", ";
     }
 
     if (neighbors_str.length() >= 2) {
@@ -98,7 +98,7 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     std::vector<Floor> floors_to_modify = floorgraph_[floor];
     if (add) {
         // append floor to every neighbor's vector
-        for (Floor modify_floor : floors_to_modify) {
+        for (Floor& modify_floor : floors_to_modify) {
             floorgraph_[modify_floor].push_back(floor);
         }
 
@@ -172,8 +172,7 @@ std::queue<int> FloorPlan::get_path(int floor_id_start, int floor_id_goal) {
         }
         frontier.pop(); // Remove the current floor
     }
-
-
+    return std::queue<int>(); // Return empty queue if path not found
 }
 
 bool FloorPlan::floor_in_frontier(std::queue<Floor> queue, const Floor& check_floor) {
