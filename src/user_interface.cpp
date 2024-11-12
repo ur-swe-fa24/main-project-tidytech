@@ -67,6 +67,8 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
     }
 }
 
+
+
 // Have a dialogue (form) for when you click the add floor
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
