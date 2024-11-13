@@ -24,6 +24,7 @@ class Robot{
 
         int get_id() const {return id_;};
         std::string get_name() const {return name_;};
+        RobotSize get_size() const {return size_;};
         int get_curr() const {return curr_;};
         int get_base() const {return base_;};
         RobotStatus get_status() const {return status_;};

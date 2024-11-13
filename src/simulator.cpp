@@ -103,13 +103,19 @@ void Simulator::simulate_robots() {
 void Simulator::simulate_floors() {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Floor& floor: floorplan_.get_all_floor()) {
-        if (floor.get_getting_clean()) {
-            floor.clean(RobotSize::Small); // TODO: based on number of robots in that room
-        } else {
+        floor.set_getting_clean(false);
+        // Check which robots are cleaning this floor
+        for (const Robot& robot : robots_) {
+            if ((robot.get_curr() == floor.get_id()) && (robot.get_status()==RobotStatus::Cleaning)) {
+                floor.set_getting_clean(true);
+                floor.clean(robot.get_size());
+            }
+        }
+        // Get dirty if no robots are cleaning
+        if (!floor.get_getting_clean()) {
             floor.dirty();
         }
     }
-
 }
 
 // Call on the simulate() to start simulation
