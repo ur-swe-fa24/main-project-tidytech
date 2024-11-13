@@ -27,7 +27,7 @@ std::string FloorPlan::to_string() const {
         out_str += "Id: " + std::to_string(pair.first.get_id()) + ", Adjacent Floors: ";
         std::string neighbors_str = "";
         for (const Floor& neighbor : pair.second) {
-            neighbors_str += neighbor.get_name() + ", ";
+            neighbors_str += std::to_string(neighbor.get_id()) + ", ";
         }
         if (neighbors_str.length() >= 2) {
         neighbors_str.erase(neighbors_str.length() - 2, 2); // Remove last two characters
