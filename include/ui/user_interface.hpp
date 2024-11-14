@@ -25,6 +25,7 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
     private:
         void OnStartSimulation(wxCommandEvent& evt);
         void OnAddRobot(wxCommandEvent& event);
+        // void OnRobotAdded(wxCommandEvent& event); 
         void OnAddFloor(wxCommandEvent& event);
         void setText(const string& new_text);
         void handle_display_text(const std::string& data);
