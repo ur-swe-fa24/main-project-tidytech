@@ -111,7 +111,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
 
     robot_count += 1;
     try {
-        simulator_.add_robot(robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);
+        simulator_.add_robot(robot_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available);
         robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     } catch (const std::exception& e) {
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
