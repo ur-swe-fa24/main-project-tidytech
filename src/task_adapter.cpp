@@ -16,7 +16,7 @@ void TaskAdapter::insertTask(const std::string& id, const std::string& name, con
         bsoncxx::builder::basic::kvp("_id", id)
     );
     auto existing_doc = collection_.find_one(query_doc.view());
-    if (!existing_doc) {
+    if (!existing_doc || name = "") {
         bsoncxx::builder::basic::array assigned_robots_array;
         for (const auto& robot_id : assigned_robots) {
             assigned_robots_array.append(robot_id);
