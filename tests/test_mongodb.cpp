@@ -23,13 +23,13 @@ TEST_CASE("Robot Adapter Unit Tests") {
 
     //testing inserting and finding robot
     SECTION("Insert and Find Robot") {
-        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active");
+        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active", "100");
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
         REQUIRE(bsoncxx::to_json(*foundRobot).find("1") != std::string::npos);
 
         //exception when trying to insert a robot with a duplicate ID
-        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive"));
+        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive", "100"));
     }
 
     //testing updating robot location

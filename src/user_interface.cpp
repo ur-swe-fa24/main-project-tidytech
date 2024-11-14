@@ -62,7 +62,7 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
     AddRobotWindow robotForm(this, names);
     if (robotForm.ShowModal() == wxID_OK) {
-        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position());
+        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position(), std::to_string(100));
         wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
     }
 }
