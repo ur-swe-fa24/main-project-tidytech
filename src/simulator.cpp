@@ -53,50 +53,81 @@ void Simulator::simulate_robots() {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         robot.break_robot(); // Random robot breaking down
-        switch (robot.get_status()) {
-            case RobotStatus::Available:
-                robot.consume_power();
-                if (!robot.tasks_empty() && can_move(robot)) {
-                    // Set the path to task
-                    robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
-                    robot.start_task();
-                } else {
-                    if (robot.get_battery() < 50) {
-                        // Set the path to base
-                        robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
-                        robot.go_charge();
-                    }; // Go back to charge if battery < 50
-                }
-                break;
-            case RobotStatus::Charging:
-                if (robot.at_base()) {
-                    robot.charge(); // only charge if you reached base
-                } else {
+        if (can_move(robot)) {
+            switch (robot.get_status()) {
+                case RobotStatus::Available:
                     robot.consume_power();
-                    robot.move_to_next_floor();
-                }
-                break;
-            case RobotStatus::Traveling:
-                robot.consume_power(); // traveling power consumption
-                robot.move_to_next_task();
-                break;
-            case RobotStatus::Cleaning:
-                robot.consume_power(3); // Cleaning power consumption
-                // Check if room is clean
-                if (floorplan_.access_floor(robot.get_curr()).is_clean()) {
-                    if (!robot.tasks_empty() && can_move(robot)) {
+                    if (!robot.tasks_empty()) {
                         // Set the path to task
                         robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
-                        robot.move_to_next_task();
+                        robot.start_task();
                     } else {
-                        robot.set_status(RobotStatus::Available);
+                        if (robot.get_battery() < 50) {
+                            // Set the path to base
+                            robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
+                            robot.go_charge();
+                        }
                     }
-                }
-                break;
-            case RobotStatus::Unavailable:
-                notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
-                break;
+                    break;
+                case RobotStatus::Charging:
+                    if (robot.at_base()) {
+                        robot.charge(); // only charge if you reached base
+                    } else {
+                        robot.consume_power();
+                        robot.move_to_next_floor();
+                    }
+                    break;
+                case RobotStatus::Traveling:
+                    robot.consume_power(); // traveling power consumption
+                    robot.move_to_next_task();
+                    break;
+                case RobotStatus::Cleaning:
+                    robot.consume_power(3); // Cleaning power consumption
+                    robot.clean(); // lower capacity
+                    if (robot.is_capacity_empty()) {
+                        // Set the path to base
+                        robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
+                        robot.go_empty();
+                        break;
+                    }
+                    // Check if room is clean
+                    if (floorplan_.access_floor(robot.get_curr()).is_clean()) {
+                        if (!robot.tasks_empty()) {
+                            // Set the path to task
+                            robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
+                            robot.move_to_next_task();
+                        } else {
+                            robot.set_status(RobotStatus::Available);
+                        }
+                    }
+                    break;
+                case RobotStatus::NeedEmpty:
+                    if (robot.at_base()) {
+                        // Notify operator
+                    } else {
+                        robot.consume_power();
+                        robot.move_to_next_floor();
+                    }
+                    break;
+                case RobotStatus::Unavailable:
+                    notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
+                    break;
+            }
+        } else {
+            // Set status
+            if (robot.get_status() != RobotStatus::Charging) {
+                robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
+                robot.set_status(RobotStatus::Charging);
+            }
+            // Go back and charge
+            if (robot.at_base()) {
+                robot.charge(); // only charge if you reached base
+            } else {
+                robot.consume_power();
+                robot.move_to_next_floor();
+            }
         }
+        
     }
 }
 
@@ -191,12 +222,11 @@ std::string Simulator::status_report(int robot_id) {
 }
 
 bool Simulator::can_move(Robot& robot) {
-    int path_to_task_to_base_distance = floorplan_.get_path(robot.get_curr(), robot.get_first_task()).size()
-                                        + floorplan_.get_path(robot.get_first_task(), robot.get_base()).size(); // Path length total from curr to task and task back to base
-    if (path_to_task_to_base_distance > robot.get_battery()) {
-        return false;
-    } 
-    return true;
+    int path_base_distance = floorplan_.get_path(robot.get_curr(), robot.get_base()).size() + 3; // +3 to account for cleaning this current room
+    if (path_base_distance < robot.get_battery()) {
+        return true;
+    }
+    return false;
 }
 
 

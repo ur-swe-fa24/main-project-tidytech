@@ -10,7 +10,7 @@ namespace types {
     // Robot enum classes
     enum class RobotSize {Small, Medium, Large};
     enum class RobotType {Scrubber, Vaccum, Shampoo};
-    enum class RobotStatus {Available, Cleaning, Traveling, Charging, Unavailable}; // You can task a robot if it is Available or Cleaning; but you cannot task it if it is unavailable
+    enum class RobotStatus {Available, Cleaning, Traveling, Charging, NeedEmpty, Unavailable}; // You can task a robot if it is Available or Cleaning; but you cannot task it if it is unavailable
 
     enum class FloorSize {Small, Medium, Large};
     enum class FloorType {Wood, Tile, Carpet};
@@ -50,6 +50,8 @@ namespace types {
                 return "Traveling";
             case RobotStatus::Charging:
                 return "Charging";
+            case RobotStatus::NeedEmpty:
+                return "NeedEmpty";
             case RobotStatus::Unavailable:
                 return "Unavailable";
         }
