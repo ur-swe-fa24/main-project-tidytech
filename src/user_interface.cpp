@@ -13,7 +13,7 @@ wxEND_EVENT_TABLE()
 
 UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
     // To be able to change the main text on the panel
-    subscribe("display_text");
+    subscribe(Event::DisplayText);
 
     // Binding buttons to events (Potention TODO: change this to match the style of the others)
     Bind(wxEVT_COMMAND_TEXT_UPDATED, &UserInterface::OnTextUpdated, this, GetId());
@@ -96,36 +96,36 @@ void UserInterface::OnTextUpdated(wxCommandEvent& event) {
 }
 
 // Observer pattern methods
-void UserInterface::subscribe(Subscriber* subscriber, const std::string& event) {
+void UserInterface::subscribe(Subscriber* subscriber, const Event& event) {
     subscribers_[event].push_back(subscriber);
 }
 
 // Let the subscriber unsubscribe from an event
-void UserInterface::unsubscribe(Subscriber* subscriber, const std::string& event) {
+void UserInterface::unsubscribe(Subscriber* subscriber, const Event& event) {
     auto& subs = subscribers_[event];
     subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
 }
 
 // Notify all the subscribers
-void UserInterface::notify(const std::string& event, const std::string& data) {
+void UserInterface::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }
 }
 
-void UserInterface::subscribe(const std::string& event) {
+void UserInterface::subscribe(const Event& event) {
     // subscribe to an event
     fm_.subscribe(this, event);
 }
 
-void UserInterface::unsubscribe(const std::string& event) {
+void UserInterface::unsubscribe(const Event& event) {
     // unsubscribe from an event
     fm_.unsubscribe(this, event);
 }
 
-void UserInterface::update(const std::string& event, const std::string& data) {
+void UserInterface::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
-    if (event == "display_text") {
+    if (event == Event::DisplayText) {
         handle_display_text(data);
     }
 }

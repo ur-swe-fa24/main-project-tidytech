@@ -24,7 +24,7 @@ void Simulator::simulate() {
         // Report status every 5 ticks
         if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
-                notify("five_sec_ping", robot.to_string());
+                notify(Event::FiveSecReport, robot.to_string());
             }
         }
 
@@ -44,7 +44,7 @@ void Simulator::simulate() {
     data += "\n\u200B" + floorplan_.to_string();
     // Report the finished simulation result to an output file
     spdlog::info("Simulation finished!");
-    notify("finished_ping", data);
+    notify(Event::FinalReport, data);
 }
 
 // simulate the robots
@@ -72,6 +72,7 @@ void Simulator::simulate_robots() {
                 if (robot.at_base()) {
                     robot.charge(); // only charge if you reached base
                 } else {
+                    robot.consume_power();
                     robot.move_to_next_floor();
                 }
                 break;
@@ -93,7 +94,7 @@ void Simulator::simulate_robots() {
                 }
                 break;
             case RobotStatus::Unavailable:
-                notify("finished_ping", "Needs Fixing: \n" + robot.to_string());
+                notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
                 break;
         }
     }
@@ -200,18 +201,18 @@ bool Simulator::can_move(Robot& robot) {
 
 
 // Let a subscriber subscribe to an event
-void Simulator::subscribe(Subscriber* subscriber, const std::string& event) {
+void Simulator::subscribe(Subscriber* subscriber, const Event& event) {
     subscribers_[event].push_back(subscriber);
 }
 
 // Let the subscriber unsubscribe from an event
-void Simulator::unsubscribe(Subscriber* subscriber, const std::string& event) {
+void Simulator::unsubscribe(Subscriber* subscriber, const Event& event) {
     auto& subs = subscribers_[event];
     subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
 }
 
 // Notify all the subscribers
-void Simulator::notify(const std::string& event, const std::string& data) {
+void Simulator::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }

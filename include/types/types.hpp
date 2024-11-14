@@ -2,6 +2,10 @@
 #define TYPES_HPP
 
 namespace types {
+    // Events
+    enum class Event {FiveSecReport, FinalReport, ErrorReport,
+                      DisplayText};
+
     // Simulation Enum Classes //
     // Robot enum classes
     enum class RobotSize {Small, Medium, Large};
@@ -95,8 +99,6 @@ namespace types {
         }
     }
 
-
 }
-
 
 #endif

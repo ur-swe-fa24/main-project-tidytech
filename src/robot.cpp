@@ -111,9 +111,7 @@ void Robot::start_task() {
 
 // Robot breaks randomly
 void Robot::break_robot() {
-    double prob = ((double)rand()) / INT_MAX;
-    spdlog::info("Prob: {}", prob);
-    if ((prob) < 0.05) {
+    if ((((double)rand()) / INT_MAX) < 0.01) {
         status_ = RobotStatus::Unavailable;
     }
 }

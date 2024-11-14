@@ -40,9 +40,9 @@ class Simulator : public Publisher {
         void add_task(int robot_id, int floor_id);
         std::vector<std::string> get_all_floor_names();
 
-        void subscribe(Subscriber* subscriber, const std::string& event) override;
-        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
-        void notify(const std::string& event, const std::string& data) override;
+        void subscribe(Subscriber* subscriber, const Event& event) override;
+        void unsubscribe(Subscriber* subscriber, const Event& event) override;
+        void notify(const Event& event, const std::string& data) override;
     private:
         FloorPlan floorplan_;
         mutable std::mutex floors_mutex; // Mutex to protect floors
@@ -56,7 +56,7 @@ class Simulator : public Publisher {
         void simulate_robots(); // Adjust the robots for simulate
         void simulate_floors(); // Adjust the flooors for simulate
         bool can_move(Robot& robot); // Check whether if the robot can move or not
-        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
+        std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
 
 
 };

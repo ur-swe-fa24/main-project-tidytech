@@ -28,13 +28,13 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
 
         std::vector<std::string> get_all_floor_names();
         // Observer pattern methods
-        void subscribe(const std::string& event);
-        void unsubscribe(const std::string& event);
-        void update(const std::string& event, const std::string& data) override;
+        void subscribe(const Event& event);
+        void unsubscribe(const Event& event);
+        void update(const Event& event, const std::string& data) override;
 
-        void subscribe(Subscriber* subscriber, const std::string& event) override;
-        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
-        void notify(const std::string& event, const std::string& data) override;
+        void subscribe(Subscriber* subscriber, const Event& event) override;
+        void unsubscribe(Subscriber* subscriber, const Event& event) override;
+        void notify(const Event& event, const std::string& data) override;
 
         // Run simulation methods
         void start_sim() {simulator_.start_simulation();};
@@ -45,7 +45,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void handle_five_sec_ping(const std::string& data);
         void handle_finished_ping(const std::string& data);
 
-        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
+        std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
         
         // Attributes for simulator, and database
         Simulator simulator_;
