@@ -11,6 +11,7 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base,
     base_ = base;
     curr_ = curr;
     battery_ = 100;
+    remaining_capacity_ = 100;
     status_ = status;
 } 
 
@@ -41,7 +42,8 @@ std::string Robot::to_string() const {
             "Size: " + types::to_string(size_) +
             ", Type: " + types::to_string(type_) + "\n" +
             "Status: " + types::to_string(status_) +
-            ", Battery: " + std::to_string(battery_) + "\n" +
+            ", Battery: " + std::to_string(battery_) + 
+            ", Remaining Capacity: " + std::to_string(remaining_capacity_) + "\n" +
             "Base Location: " + std::to_string(base_) + "\n" +
             "Current Location: " + std::to_string(curr_) + "\n" +
             "Current Path: " + str_path + "\n" +
@@ -86,6 +88,12 @@ void Robot::go_charge() {
     move_to_next_floor();
 }
 
+// Move to base and wait to get empty
+void Robot::go_empty() {
+    status_ = RobotStatus::NeedEmpty;
+    move_to_next_floor();
+}
+
 // Consuming power at every tick
 void Robot::consume_power(int amount) {
     battery_ = std::max(0, battery_-amount);
@@ -114,4 +122,12 @@ void Robot::break_robot() {
     if ((((double)rand()) / INT_MAX) < 0.01) {
         status_ = RobotStatus::Unavailable;
     }
+}
+
+// Check if capacity is 0
+bool Robot::is_capacity_empty() {
+    if (remaining_capacity_ == 0) {
+        return true;
+    }
+    return false;
 }
