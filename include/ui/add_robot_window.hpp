@@ -31,8 +31,20 @@ class AddRobotWindow : public wxDialog {
             }
         };
         std::string get_charging_position() {
-            return std::string(charging_position_->GetValue().mb_str());
+            int sol;
+            for (int i = 0; i < 11; i++) {
+                try {
+                    if (boxes_[i]->GetValue()) {
+                        sol = i + 1;
+                    }
+                    return std::to_string(sol);
+                } catch (...) {
+                    continue;
+                }
+            }
+            return "-1";
         };
+        
         std::string get_name() { return std::string(robot_name_->GetValue().mb_str()); };
     private:
         // members for all the options in the form
