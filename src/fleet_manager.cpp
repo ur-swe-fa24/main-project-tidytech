@@ -86,7 +86,7 @@ void FleetManager::notify(const Event& event, const std::string& data) {
 }
 
 // Wrapper method that just calls the add_robot for the sim and the db
-void FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position) {
+void FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity) {
     RobotSize RsSize;
     if (size == "Small") {
         RsSize = RobotSize::Small;
@@ -108,11 +108,13 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-
+    if (robot_count >= 11) {
+        std::cerr << "Error: reached the limit of robots" << std::endl;
+    }
     robot_count += 1;
     try {
+        robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100");
         simulator_.add_robot(robot_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available);
-        robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available));
     } catch (const std::exception& e) {
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
     }
@@ -164,10 +166,13 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         std::cout << "Invalid Floor Interaction" << std::endl;
     }
 
+    if (floor_count >= 11) {
+        std::cerr << "Error: reached the limit of floors" << std::endl;
+    }
     floor_count += 1;
     try {
-        simulator_.add_floor(floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
         floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
+        simulator_.add_floor(floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
     } catch (const std::exception& e) {
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
     }

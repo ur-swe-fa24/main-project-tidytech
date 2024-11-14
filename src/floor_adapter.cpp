@@ -10,14 +10,17 @@ using bsoncxx::builder::basic::kvp;
 void FloorAdapter::insertFloor(const std::string& id, const std::string& name, const std::string& roomType, const std::string& floortype,
                                const std::string& size, const std::string& interaction, const std::string& restricted,
                                const std::string& clean_level) {
+    // find the entry that has the given id
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
     );
+    auto existing_doc = collection_.find_one(query_doc.view());
+    // find the entry that has the given name
     auto query_name = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("name", name)
     );
-    auto existing_doc = collection_.find_one(query_doc.view());
     auto existing_name = collection_.find_one(query_name.view());
+    
     //checking if the id is already in the databse and checking if the name is an empty string
     if (existing_doc || name == "") {
         //throw error

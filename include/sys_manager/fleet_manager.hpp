@@ -21,7 +21,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Constructor
         FleetManager();
 
-        void add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position);
+        void add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity);
         void add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
         void write_output(std::string filepath, std::string message); // outputs to a file
 
