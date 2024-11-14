@@ -5,12 +5,14 @@
 #include <vector>
 #include <queue>
 #include "types/types.hpp"
+#include "pubsub/publisher.hpp"
+#include "pubsub/subscriber.hpp"
 
 using namespace types;
 
-class Robot {
+class Robot{
     public:
-        Robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status); // Constructor
+        Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status); // Constructor
         ~Robot() {}; // Destructor
 
         bool operator==(const Robot& other) const {return id_ == other.id_;} // Overriding Robot comparison
@@ -22,21 +24,28 @@ class Robot {
 
         int get_id() const {return id_;};
         std::string get_name() const {return name_;};
-        std::string get_curr() const {return curr_;};
+        RobotSize get_size() const {return size_;};
+        int get_curr() const {return curr_;};
+        int get_base() const {return base_;};
         RobotStatus get_status() const {return status_;};
         int get_battery() const {return battery_;};
         std::string to_string() const;
 
-        void add_tasks_to_back(std::vector<std::string> floors);
-        void add_tasks_to_front(std::vector<std::string> floors);
-        bool move_to_next();
-        bool can_move();
+        void add_tasks_to_back(std::vector<int> floors);
+        void add_tasks_to_front(std::vector<int> floors);
+        int get_first_task() {return task_queue_.front();};
+        void update_curr_path(const std::queue<int> path) {curr_path_ = path;};
+        void remove_curr_path() {curr_path_ = std::queue<int>();}; // Reset the path
+        void move_to_next_task();
+        void move_to_next_floor();
         void start_task();
         bool at_base() {return base_ == curr_;}; // Check if robot is at base
         bool tasks_empty() {return task_queue_.empty();}; // Check if task is empty
         void go_charge();
         void charge();
-        void consume_power(int amount = 1) {battery_ = std::max(0, battery_-amount);}; // One tick of battery consume for every second
+        void consume_power(int amount = 1);
+        void fix_error() {status_ = RobotStatus::Available; battery_ = 100;}; // Error fix
+        void break_robot();
         
 
     private:
@@ -44,10 +53,10 @@ class Robot {
         std::string name_;
         RobotSize size_; 
         RobotType type_;
-        std::string base_;
-        std::string curr_;
+        int base_;
+        int curr_;
         int battery_;
-        std::vector<std::string> task_queue_;
+        std::vector<int> task_queue_;
         RobotStatus status_;
         std::queue<int> curr_path_; // Shortest path from one floor to another
         

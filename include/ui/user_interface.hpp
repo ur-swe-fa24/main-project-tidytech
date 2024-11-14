@@ -5,21 +5,23 @@
 #include "../simulation/simulator.hpp"
 #include "../database/database.hpp"
 #include "../sys_manager/fleet_manager.hpp"
+#include "../types/types.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 
+using namespace types;
  
 class UserInterface : public wxFrame, public Publisher, public Subscriber {
     public:
         UserInterface(const wxString& title);
 
-        void subscribe(Subscriber* subscriber, const std::string& event) override;
-        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
-        void notify(const std::string& event, const std::string& data) override;
+        void subscribe(Subscriber* subscriber, const Event& event) override;
+        void unsubscribe(Subscriber* subscriber, const Event& event) override;
+        void notify(const Event& event, const std::string& data) override;
 
-        void subscribe(const std::string& event);
-        void unsubscribe(const std::string& event);
-        void update(const std::string& event, const std::string& data) override;
+        void subscribe(const Event& event);
+        void unsubscribe(const Event& event);
+        void update(const Event& event, const std::string& data) override;
     private:
         void OnStartSimulation(wxCommandEvent& evt);
         void OnAddRobot(wxCommandEvent& event);
@@ -34,7 +36,7 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
         wxStaticText* display_text_;
         int num_added_ = 0;
 
-        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
+        std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
 };
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "subscriber.hpp"
 #include <vector>
+#include "types/types.hpp"
 using namespace std;
 
 class Publisher {
@@ -10,9 +11,9 @@ class Publisher {
         virtual ~Publisher() {}; // Deconstructor
 
         // Three standard pubisher methods
-        virtual void subscribe(Subscriber* subscriber, const std::string& event) = 0;
-        virtual void unsubscribe(Subscriber* subscriber, const std::string& event) = 0;
-        virtual void notify(const std::string& event, const std::string& data) = 0;
+        virtual void subscribe(Subscriber* subscriber, const types::Event& event) = 0;
+        virtual void unsubscribe(Subscriber* subscriber, const types::Event& event) = 0;
+        virtual void notify(const types::Event& event, const std::string& data) = 0;
         
 };
 

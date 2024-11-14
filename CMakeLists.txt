@@ -39,9 +39,9 @@ add_library(user_interface
     src/add_floor_window.cpp
 )
 
-add_library(pubsub INTERFACE)
-
 add_library(types INTERFACE)
+
+add_library(pubsub INTERFACE)
 
 find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
@@ -83,6 +83,7 @@ target_include_directories(user_interface
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     PRIVATE
         ${wxWidgets_INCLUDE_DIRS}
+        types
         mongodb
         mongo::mongocxx_shared
 )

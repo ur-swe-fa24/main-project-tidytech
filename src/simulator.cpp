@@ -8,9 +8,6 @@ Simulator::Simulator() : ticking_(false), clock_{0} {};
 // Wait for the sim_thread_ to finish if we want to wait
 Simulator::~Simulator() {
     // Stop the clock thread when the Simulator is destroyed    
-    if (sim_thread_.joinable()) {
-        sim_thread_.join();
-    }
     ticking_ = false;
 }
 
@@ -27,7 +24,7 @@ void Simulator::simulate() {
         // Report status every 5 ticks
         if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
-                notify("five_sec_ping", robot.to_string());
+                notify(Event::FiveSecReport, robot.to_string());
             }
         }
 
@@ -47,7 +44,7 @@ void Simulator::simulate() {
     data += "\n\u200B" + floorplan_.to_string();
     // Report the finished simulation result to an output file
     spdlog::info("Simulation finished!");
-    notify("finished_ping", data);
+    notify(Event::FinalReport, data);
 }
 
 // simulate the robots
@@ -55,21 +52,49 @@ void Simulator::simulate_robots() {
     // Drain power accordingly
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
+        robot.break_robot(); // Random robot breaking down
         switch (robot.get_status()) {
             case RobotStatus::Available:
                 robot.consume_power();
-                if (!robot.tasks_empty()){robot.start_task();} // Go do something
-                else {
-                    if (robot.get_battery() < 50) {robot.go_charge();}; // Go back to charge if battery < 50
+                if (!robot.tasks_empty() && can_move(robot)) {
+                    // Set the path to task
+                    robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
+                    robot.start_task();
+                } else {
+                    if (robot.get_battery() < 50) {
+                        // Set the path to base
+                        robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
+                        robot.go_charge();
+                    }; // Go back to charge if battery < 50
                 }
                 break;
             case RobotStatus::Charging:
-                robot.charge();
+                if (robot.at_base()) {
+                    robot.charge(); // only charge if you reached base
+                } else {
+                    robot.consume_power();
+                    robot.move_to_next_floor();
+                }
+                break;
+            case RobotStatus::Traveling:
+                robot.consume_power(); // traveling power consumption
+                robot.move_to_next_task();
                 break;
             case RobotStatus::Cleaning:
-                robot.consume_power(3); // Cleaning takes more power
+                robot.consume_power(3); // Cleaning power consumption
+                // Check if room is clean
+                if (floorplan_.access_floor(robot.get_curr()).is_clean()) {
+                    if (!robot.tasks_empty() && can_move(robot)) {
+                        // Set the path to task
+                        robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
+                        robot.move_to_next_task();
+                    } else {
+                        robot.set_status(RobotStatus::Available);
+                    }
+                }
                 break;
             case RobotStatus::Unavailable:
+                notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
                 break;
         }
     }
@@ -79,13 +104,19 @@ void Simulator::simulate_robots() {
 void Simulator::simulate_floors() {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Floor& floor: floorplan_.get_all_floor()) {
-        if (floor.get_getting_clean()) {
-            floor.clean(RobotSize::Small); // TODO: based on number of robots in that room
-        } else {
+        floor.set_getting_clean(false);
+        // Check which robots are cleaning this floor
+        for (const Robot& robot : robots_) {
+            if ((robot.get_curr() == floor.get_id()) && (robot.get_status()==RobotStatus::Cleaning)) {
+                floor.set_getting_clean(true);
+                floor.clean(robot.get_size());
+            }
+        }
+        // Get dirty if no robots are cleaning
+        if (!floor.get_getting_clean()) {
             floor.dirty();
         }
     }
-
 }
 
 // Call on the simulate() to start simulation
@@ -95,7 +126,7 @@ void Simulator::start_simulation() {
         ticking_ = true;
         spdlog::info("Simulation started!");
         sim_thread_ = std::thread(&Simulator::simulate, this);
-        //sim_thread_.detach();
+        sim_thread_.detach();
     } else {
         spdlog::warn("There is an ongoing simulation. Cannot start another simulation!");
     }
@@ -105,7 +136,6 @@ void Simulator::start_simulation() {
 void Simulator::reset_simulation() {
     if (ticking_) {
         ticking_ = false;
-        sim_thread_.join();  // Wait for the thread to finish to join
         spdlog::info("Simulation reset! Total time: {} ticks", clock_);
     } else {
         spdlog::warn("No simulation to reset!");
@@ -115,7 +145,7 @@ void Simulator::reset_simulation() {
 
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status) {
+void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status) {
     Robot robot(id, name, size, type, base, curr, status);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
@@ -140,7 +170,7 @@ void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorTyp
 
 // Add task to a robot
 // TODO: assign multiple rooms to a robot task queue
-void Simulator::add_task(int robot_id, std::string floor_id) {
+void Simulator::add_task(int robot_id, int floor_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
@@ -160,19 +190,29 @@ std::string Simulator::status_report(int robot_id) {
     return std::to_string(robot_id) + " not found.";
 }
 
+bool Simulator::can_move(Robot& robot) {
+    int path_to_task_to_base_distance = floorplan_.get_path(robot.get_curr(), robot.get_first_task()).size()
+                                        + floorplan_.get_path(robot.get_first_task(), robot.get_base()).size(); // Path length total from curr to task and task back to base
+    if (path_to_task_to_base_distance > robot.get_battery()) {
+        return false;
+    } 
+    return true;
+}
+
+
 // Let a subscriber subscribe to an event
-void Simulator::subscribe(Subscriber* subscriber, const std::string& event) {
+void Simulator::subscribe(Subscriber* subscriber, const Event& event) {
     subscribers_[event].push_back(subscriber);
 }
 
 // Let the subscriber unsubscribe from an event
-void Simulator::unsubscribe(Subscriber* subscriber, const std::string& event) {
+void Simulator::unsubscribe(Subscriber* subscriber, const Event& event) {
     auto& subs = subscribers_[event];
     subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
 }
 
 // Notify all the subscribers
-void Simulator::notify(const std::string& event, const std::string& data) {
+void Simulator::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }

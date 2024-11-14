@@ -13,8 +13,8 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
                                 robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]},
                                 robot_count{(int)dbmanager_.getDatabase()["robots"].count_documents({})}, floor_count{(int)dbmanager_.getDatabase()["floors"].count_documents({})} {
     // Subscribe to these two events upon initialization
-    subscribe("five_sec_ping");
-    subscribe("finished_ping");
+    subscribe(Event::FiveSecReport);
+    subscribe(Event::FinalReport);
 }
 
 void FleetManager::write_output(string filepath, string message) {
@@ -28,22 +28,30 @@ void FleetManager::write_output(string filepath, string message) {
     }
 }
 
-void FleetManager::subscribe(const std::string& event) {
+void FleetManager::subscribe(const Event& event) {
     // subscribe to an event
     simulator_.subscribe(this, event);
 }
 
-void FleetManager::unsubscribe(const std::string& event) {
+void FleetManager::unsubscribe(const Event& event) {
     // unsubscribe from an event
     simulator_.unsubscribe(this, event);
 }
 
-void FleetManager::update(const std::string& event, const std::string& data) {
+void FleetManager::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
-    if (event == "five_sec_ping") {
-        handle_five_sec_ping(data);
-    } else if (event == "finished_ping") {
-        handle_finished_ping(data);
+    switch (event) {
+        case Event::FiveSecReport:
+            handle_five_sec_ping(data);
+            break;
+        case Event::FinalReport:
+            handle_finished_ping(data);
+            break;
+        case Event::ErrorReport:
+            // TODO
+            break;
+        case Event::DisplayText:
+            break;
     }
 }
 
@@ -55,23 +63,23 @@ void FleetManager::handle_five_sec_ping(const std::string& data) {
 void FleetManager::handle_finished_ping(const std::string& data) {
     // Calls write_output to write data to a file
     std::string message = "Final Report Summary:\n" + data;
-    notify("display_text", data);
+    notify(Event::DisplayText, data);
     // write_output("../app/output.txt", message);
 }
 
 
-void FleetManager::subscribe(Subscriber* subscriber, const std::string& event) {
+void FleetManager::subscribe(Subscriber* subscriber, const Event& event) {
     subscribers_[event].push_back(subscriber);
 }
 
 // Let the subscriber unsubscribe from an event
-void FleetManager::unsubscribe(Subscriber* subscriber, const std::string& event) {
+void FleetManager::unsubscribe(Subscriber* subscriber, const Event& event) {
     auto& subs = subscribers_[event];
     subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
 }
 
 // Notify all the subscribers
-void FleetManager::notify(const std::string& event, const std::string& data) {
+void FleetManager::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
     }
@@ -100,6 +108,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
+
     robot_count += 1;
     try {
         simulator_.add_robot(robot_count, name, RsSize, RtType, charging_position, current_position, RobotStatus::Available);

@@ -35,14 +35,14 @@ class Simulator : public Publisher {
         void reset_simulation(); // Reset the simulation
 
         void add_floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors);
-        void add_robot(int id, std::string name, RobotSize size, RobotType type, std::string base, std::string curr, RobotStatus status);
+        void add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status);
         std::string status_report(int robot_id);
-        void add_task(int robot_id, std::string floor_id);
+        void add_task(int robot_id, int floor_id);
         std::vector<std::string> get_all_floor_names();
 
-        void subscribe(Subscriber* subscriber, const std::string& event) override;
-        void unsubscribe(Subscriber* subscriber, const std::string& event) override;
-        void notify(const std::string& event, const std::string& data) override;
+        void subscribe(Subscriber* subscriber, const Event& event) override;
+        void unsubscribe(Subscriber* subscriber, const Event& event) override;
+        void notify(const Event& event, const std::string& data) override;
     private:
         FloorPlan floorplan_;
         mutable std::mutex floors_mutex; // Mutex to protect floors
@@ -55,7 +55,8 @@ class Simulator : public Publisher {
         void simulate(); // Start the ticking thread
         void simulate_robots(); // Adjust the robots for simulate
         void simulate_floors(); // Adjust the flooors for simulate
-        std::unordered_map<std::string, std::vector<Subscriber*>> subscribers_;
+        bool can_move(Robot& robot); // Check whether if the robot can move or not
+        std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
 
 
 };

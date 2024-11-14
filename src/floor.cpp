@@ -56,7 +56,6 @@ void Floor::dirty() {
 
 // Floor getting cleaned by different size robot
 void Floor::clean(const RobotSize robot_size) {
-    getting_clean_ = true;
     switch (robot_size) {
         case RobotSize::Small:
             switch (size_) {
