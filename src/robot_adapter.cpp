@@ -9,7 +9,7 @@ using bsoncxx::builder::basic::kvp;
 
 void RobotAdapter::insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
                                 const std::string& baseLocation, const std::string& currentLocation,
-                                const std::string& status) {
+                                const std::string& status, const std::string& capacity) {
 
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
@@ -34,7 +34,8 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
             kvp("type", type),
             kvp("base_location", baseLocation),
             kvp("current_location", currentLocation),
-            kvp("status", status));
+            kvp("status", status),
+            kvp("capacity", capacity));
         collection_.insert_one(robot_doc.view());
     }
 }
@@ -92,6 +93,27 @@ bool RobotAdapter::updateRobotLocation(const std::string& robotId, const std::st
     return result && result->modified_count() > 0; 
 }
 
+
+bool RobotAdapter::updateRobotCapacity(const std::string& robotId, const std::string& newCapacity) {
+    // build the query document to find the robot by ID
+    auto query_doc = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("_id", robotId)
+    );
+
+    // build the update document for the current capacity
+    auto update_doc = make_document(
+        kvp("$set", 
+            make_document(
+                kvp("capacity", newCapacity)
+            )
+        )
+    );
+
+    // execute the update operation
+    auto result = collection_.update_one(query_doc.view(), update_doc.view());
+    return result && result->modified_count() > 0; 
+}
+
 bool RobotAdapter::deleteRobot(const std::string& robotId) {
     auto query_doc = make_document(
         kvp("_id", robotId)
@@ -100,3 +122,4 @@ bool RobotAdapter::deleteRobot(const std::string& robotId) {
     auto result = collection_.delete_one(query_doc.view());
     return result && result->deleted_count() > 0;
 }
+
