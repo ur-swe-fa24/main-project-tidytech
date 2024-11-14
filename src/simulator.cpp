@@ -15,7 +15,7 @@ Simulator::~Simulator() {
 void Simulator::simulate() {
     while (ticking_) {
         std::cout << clock_ << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         clock_++;
 
         simulate_robots();

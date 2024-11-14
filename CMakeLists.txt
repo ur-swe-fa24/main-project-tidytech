@@ -37,6 +37,7 @@ add_library(user_interface
     src/user_interface.cpp
     src/add_robot_window.cpp
     src/add_floor_window.cpp
+    src/login_page.cpp
 )
 
 add_library(types INTERFACE)
