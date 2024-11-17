@@ -22,6 +22,7 @@ package Database {
         + bool updateCleanLevel(const string& floorId, const string& newCleanLevel)
         + bool updateRestriction(const string& floorId, const string& restricted)
         + bool deleteFloor(const string& floorId)
+        + vector<bsoncxx::document::value> getAllFloors()
         - mongocxx::collection collection_
     }
     class RobotAdapter {
@@ -34,7 +35,9 @@ package Database {
         + bool updateRobotStatus(const string& robotId, const string& newStatus)
         + bool updateRobotCapacity(const string& robotId, const string& newCapacity)
         + bool deleteRobot(const string& robotId)
+        + vector<bsoncxx::document::value> getAllRobots();
         - mongocxx::collection collection_
+
     } 
     class TaskAdapter {
         + TaskAdapter(mongocxx::collection collection)
