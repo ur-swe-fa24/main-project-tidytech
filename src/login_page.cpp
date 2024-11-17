@@ -13,7 +13,7 @@ LoginPage::LoginPage(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxVERTICAL);
 
     wxButton* btn1 = new wxButton(panel, wxID_ANY, "Senior Manager", wxDefaultPosition, wxSize(150, 45));
-    btn1->Bind(wxEVT_BUTTON, &LoginPage::OnButtonClick, this);
+    btn1->Bind(wxEVT_BUTTON, &LoginPage::OnSeniorManagerClick, this);
     buttonSizer->Add(btn1, 0, wxALL, 5);
 
     wxButton* btn2 = new wxButton(panel, wxID_ANY, "Building Manager", wxDefaultPosition, wxSize(150, 45));
@@ -40,10 +40,17 @@ void LoginPage::OnButtonClick(wxCommandEvent& evt) {
     this->Hide();
 
     // Show or create the UserInterface window
-    if (!userInterface) {
-        userInterface = new UserInterface("User Interface");
-    }
-    userInterface->SetClientSize(800, 600);
-    userInterface->Center();
-    userInterface->Show();
+    UserInterface* ui = new UserInterface("User Interface");
+    ui->SetClientSize(800, 600);
+    ui->Center();
+    ui->Show();
+}
+
+void LoginPage::OnSeniorManagerClick(wxCommandEvent& evt) {
+    this->Hide();
+
+    SeniorManagerPage* smp = new SeniorManagerPage("Senior Manager");
+    smp->SetClientSize(800, 600);
+    smp->Center();
+    smp->Show();
 }

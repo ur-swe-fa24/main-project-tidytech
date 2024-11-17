@@ -21,11 +21,14 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Constructor
         FleetManager();
 
-        void add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity);
-        void add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
+        int add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity);
+        int add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
+        bool add_task(int robot_id, int floor_id);
         void write_output(std::string filepath, std::string message); // outputs to a file
 
         std::vector<std::string> get_all_floor_names();
+        std::vector<std::string> get_all_robot_names();
+
         // Observer pattern methods
         void subscribe(const Event& event);
         void unsubscribe(const Event& event);

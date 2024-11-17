@@ -1,6 +1,7 @@
 #include "ui/user_interface.hpp"
 #include "ui/add_robot_window.hpp"
 #include "ui/add_floor_window.hpp"
+#include "ui/add_task_window.hpp"
 #include <wx/wx.h>
 
 enum IDs {
@@ -43,6 +44,10 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     openAddFloor->Bind(wxEVT_BUTTON, &UserInterface::OnAddFloor, this);
     buttonSizer->Add(openAddFloor, 0, wxALL, 5);
 
+    wxButton* openAddTask = new wxButton(panel, wxID_ANY, "Add Task", wxDefaultPosition, wxSize(150, 45));
+    openAddTask->Bind(wxEVT_BUTTON, &UserInterface::OnAddTask, this);
+    buttonSizer->Add(openAddTask, 0, wxALL, 5);
+
     // Add the buttons to the main sizer
     mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
 
@@ -62,8 +67,11 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
     AddRobotWindow robotForm(this, names);
     if (robotForm.ShowModal() == wxID_OK) {
-        fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position(), std::to_string(100));
-        wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
+        if (fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position(), std::to_string(100))) {
+            wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
+        } else {
+            wxMessageBox(wxT(""), wxT("Could Not Add Robot"), wxICON_INFORMATION);
+        }
     }
 }
 
@@ -75,9 +83,25 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     AddFloorWindow floorForm(this, names, num_added_);
     if (floorForm.ShowModal() == wxID_OK) {
         std::vector<int> tmp = floorForm.get_floor_neighbors();
-        fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors());
-        wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
-        num_added_++;
+        if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
+            wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
+            num_added_++;
+        } else {
+            wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
+        }
+    }
+}
+
+void UserInterface::OnAddTask(wxCommandEvent& event) {
+    std::vector<std::string> floor_names = fm_.get_all_floor_names();
+    std::vector<std::string> robot_names = fm_.get_all_robot_names();
+    AddTaskWindow taskForm(this, floor_names, robot_names, num_added_);
+    if (taskForm.ShowModal() == wxID_OK) {
+        if (fm_.add_task(std::stoi(taskForm.get_robot()), std::stoi(taskForm.get_floor()))) {
+            wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
+        } else {
+            wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
+        }
     }
 }
 

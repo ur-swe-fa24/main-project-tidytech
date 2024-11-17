@@ -39,6 +39,7 @@ class Simulator : public Publisher {
         std::string status_report(int robot_id);
         void add_task(int robot_id, int floor_id);
         std::vector<std::string> get_all_floor_names();
+        std::vector<std::string> get_all_robot_names();
 
         void subscribe(Subscriber* subscriber, const Event& event) override;
         void unsubscribe(Subscriber* subscriber, const Event& event) override;

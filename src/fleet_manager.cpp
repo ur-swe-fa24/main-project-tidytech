@@ -86,7 +86,7 @@ void FleetManager::notify(const Event& event, const std::string& data) {
 }
 
 // Wrapper method that just calls the add_robot for the sim and the db
-void FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity) {
+int FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity) {
     RobotSize RsSize;
     if (size == "Small") {
         RsSize = RobotSize::Small;
@@ -96,6 +96,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
         RsSize = RobotSize::Large;
     } else {
         std::cout << "Invalid Robot Size" << std::endl;
+        return false;
     }
 
     RobotType RtType;
@@ -110,6 +111,7 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
     }
     if (robot_count >= 11) {
         std::cerr << "Error: reached the limit of robots" << std::endl;
+        return false;
     }
     robot_count += 1;
     try {
@@ -117,11 +119,14 @@ void FleetManager::add_robot(std::string name, std::string size, std::string typ
         simulator_.add_robot(robot_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available);
     } catch (const std::exception& e) {
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
+        return false;
     }
+
+    return true;
 }
 
 // Wrapper method that just calls the add_floor for the sim and the db
-void FleetManager::add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors) {
+int FleetManager::add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors) {
     FloorSize FsSize;
     FloorType FtType;
     FloorRoomType FrtRoom;
@@ -134,6 +139,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         FrtRoom = FloorRoomType::Room;
     } else {
         std::cout << "Invalid Floor Room Type" << std::endl;
+        return false;
     }
 
     if (type == "Carpet") {
@@ -144,6 +150,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         FtType = FloorType::Tile;
     } else {
         std::cout << "Invalid Floor Type" << std::endl;
+        return false;
     }
 
     if (size == "Small") {
@@ -154,6 +161,7 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         FsSize = FloorSize::Large;
     } else {
         std::cout << "Invalid Floor Size" << std::endl;
+        return false;
     }
 
     if (interaction == "Low") {
@@ -164,10 +172,12 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         FiInteraction = FloorInteraction::High;  
     } else {
         std::cout << "Invalid Floor Interaction" << std::endl;
+        return false;
     }
 
     if (floor_count >= 11) {
         std::cerr << "Error: reached the limit of floors" << std::endl;
+        return false;
     }
     floor_count += 1;
     try {
@@ -175,10 +185,21 @@ void FleetManager::add_floor(std::string name, std::string roomType, std::string
         simulator_.add_floor(floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
     } catch (const std::exception& e) {
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
+        return false;
     }
+    return true;
 }
 
 // Wrapper that just calls the get_all_floor_names() from the sim
 std::vector<std::string> FleetManager::get_all_floor_names() {
     return simulator_.get_all_floor_names();
+}
+
+std::vector<std::string> FleetManager::get_all_robot_names() {
+    return simulator_.get_all_robot_names();
+}
+
+bool FleetManager::add_task(int robot_id, int floor_id) {
+    simulator_.add_task(robot_id, floor_id);
+    return true;
 }
