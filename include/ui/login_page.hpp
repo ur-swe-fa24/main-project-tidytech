@@ -2,6 +2,8 @@
 #define UI_LOGIN_PAGE
 
 #include "ui/user_interface.hpp"
+#include "ui/senior_manager_page.hpp"
+
 #include <wx/wx.h>
  
 class LoginPage : public wxFrame {
@@ -9,6 +11,7 @@ class LoginPage : public wxFrame {
         LoginPage(const wxString& title);
     private:
         void OnButtonClick(wxCommandEvent& evt);
+        void OnSeniorManagerClick(wxCommandEvent& evt);
         UserInterface* userInterface;
 };
 

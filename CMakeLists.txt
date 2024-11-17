@@ -38,6 +38,8 @@ add_library(user_interface
     src/add_robot_window.cpp
     src/add_floor_window.cpp
     src/login_page.cpp
+    src/senior_manager_page.cpp
+    src/add_task_window.cpp
 )
 
 add_library(types INTERFACE)

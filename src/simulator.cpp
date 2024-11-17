@@ -227,3 +227,11 @@ std::vector<std::string> Simulator::get_all_floor_names() {
     }
     return floor_names;
 }
+
+std::vector<std::string> Simulator::get_all_robot_names() {
+    std::vector<std::string> robot_names;
+    for (auto robot : robots_) {
+        robot_names.push_back(robot.get_name());
+    }
+    return robot_names;
+}
