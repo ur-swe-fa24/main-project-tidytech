@@ -54,8 +54,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         DBManager& dbmanager_;
         RobotAdapter robot_adapter_;
         FloorAdapter floor_adapter_;
-        int robot_count;
-        int floor_count;
+        int robot_id_count;
+        int floor_id_count;
 };
 
 #endif

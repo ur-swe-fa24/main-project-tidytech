@@ -10,8 +10,34 @@
 using namespace types;
 
 FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
-                                robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]},
-                                robot_count{(int)dbmanager_.getDatabase()["robots"].count_documents({})}, floor_count{(int)dbmanager_.getDatabase()["floors"].count_documents({})} {
+                                robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]} {
+    // get the last robot id
+    auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
+        bsoncxx::builder::basic::make_document(),
+        mongocxx::options::find{}.sort(
+            bsoncxx::builder::basic::make_document(bsoncxx::builder::basic::kvp("_id", -1))
+        )
+    );
+    if (last_robot) {
+        robot_id_count = std::stoi(last_robot->view()["_id"].get_utf8().value.to_string());
+    } else {
+        robot_id_count = 0;
+    }
+    std::cout << "robot count is: " << robot_id_count << endl;
+    // get the last floor id
+    auto last_floor = dbmanager_.getDatabase()["floors"].find_one(
+    bsoncxx::builder::basic::make_document(),
+    mongocxx::options::find{}.sort(
+        bsoncxx::builder::basic::make_document(bsoncxx::builder::basic::kvp("_id", -1))
+    )
+    );
+    if (last_floor) {
+        floor_id_count = std::stoi(last_floor->view()["_id"].get_utf8().value.to_string());
+    } else {
+        floor_id_count = 0;
+    } 
+    std::cout << "floor count is: " << floor_id_count << endl;
+
     // Subscribe to these two events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
@@ -109,14 +135,14 @@ int FleetManager::add_robot(std::string name, std::string size, std::string type
     } else {
         std::cout << "Invalid Robot Type" << std::endl;
     }
-    if (robot_count >= 11) {
+    if (robot_id_count >= 11) {
         std::cerr << "Error: reached the limit of robots" << std::endl;
         return false;
     }
-    robot_count += 1;
+    robot_id_count += 1;
     try {
-        robot_adapter_.insertRobot(std::to_string(robot_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100");
-        simulator_.add_robot(robot_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available);
+        robot_adapter_.insertRobot(std::to_string(robot_id_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100");
+        simulator_.add_robot(robot_id_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available);
     } catch (const std::exception& e) {
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
         return false;
@@ -175,14 +201,14 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
         return false;
     }
 
-    if (floor_count >= 11) {
+    if (floor_id_count >= 11) {
         std::cerr << "Error: reached the limit of floors" << std::endl;
         return false;
     }
-    floor_count += 1;
+    floor_id_count += 1;
     try {
-        floor_adapter_.insertFloor(std::to_string(floor_count), name, roomType, type, size, interaction, "Not Restricted", "100");
-        simulator_.add_floor(floor_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
+        floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "Not Restricted", "100");
+        simulator_.add_floor(floor_id_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
     } catch (const std::exception& e) {
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
         return false;
