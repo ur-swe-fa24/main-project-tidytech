@@ -34,6 +34,7 @@ class FloorPlan {
         int size_;
         void update_neighbors(const Floor& floor, bool add);
         bool floor_in_frontier(std::queue<Floor> queue, const Floor& floor);
+        bool floor_visited(std::vector<Floor> visited, const Floor& check_floor);
         std::queue<int> get_shortest_path(std::unordered_map<int,int> track_path, int floor_id_goal);
 };
 

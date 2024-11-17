@@ -56,6 +56,10 @@ void Floor::dirty() {
 
 // Floor getting cleaned by different size robot
 void Floor::clean(const RobotSize robot_size) {
+    if (restricted_) {
+        spdlog::error("Attempted to clean a restricted floor");
+        throw std::runtime_error("Cannot clean a restricted floor");
+    }
     switch (robot_size) {
         case RobotSize::Small:
             switch (size_) {

@@ -62,6 +62,10 @@ void Robot::add_tasks_to_front(std::vector<int> floors) {
 
 // Move to next task if it can
 void Robot::move_to_next_task() {
+    if (task_queue_.empty()) {
+        spdlog::error("Task queue is empty for robot {}", id_);
+        throw std::runtime_error("Cannot move to the next task because the task queue is empty.");
+    }
     if (curr_ == task_queue_.front()) {
         // Reached the task floor
         status_ = RobotStatus::Cleaning;
@@ -76,9 +80,13 @@ void Robot::move_to_next_task() {
 // Charge 5 unit power every call
 // Must be at base
 void Robot::charge() {
-    if (curr_ == base_) {
-        battery_ = std::min(100, battery_ + 5); // Charge 5 percentage every tick
-        if(battery_==100){status_ = RobotStatus::Available;} // Set back to Available if battery is 100
+    if (curr_ != base_) {
+        spdlog::error("Robot {} cannot charge because it is not at the base. Current location: {}, Base: {}", id_, curr_, base_);
+        throw std::runtime_error("Robot must be at the base to charge.");
+    }
+    battery_ = std::min(100, battery_ + 5);
+    if (battery_ == 100) {
+        status_ = RobotStatus::Available;
     }
 }
 
@@ -96,6 +104,10 @@ void Robot::go_empty() {
 
 // Consuming power at every tick
 void Robot::consume_power(int amount) {
+    if (amount < 0) {
+        spdlog::error("Power consumption amount cannot be negative: {}", amount);
+        throw std::invalid_argument("Power consumption amount must be non-negative.");
+    }
     battery_ = std::max(0, battery_-amount);
     if (battery_ == 0) {
         status_ = RobotStatus::Unavailable;
@@ -104,12 +116,12 @@ void Robot::consume_power(int amount) {
 
 
 void Robot::move_to_next_floor() {
-    if (!curr_path_.empty()) {
-        curr_ = curr_path_.front();
-        curr_path_.pop();
-    } else {
-        spdlog::error("Path empty for robot {}", id_);
+    if (curr_path_.empty()) {
+        spdlog::error("Robot {} attempted to move but the path is empty.", id_);
+        throw std::runtime_error("Cannot move to the next floor because the path is empty.");
     }
+    curr_ = curr_path_.front();
+    curr_path_.pop();
 }
 
 // Start task by going down the queue
@@ -119,7 +131,9 @@ void Robot::start_task() {
 
 // Robot breaks randomly
 void Robot::break_robot() {
+    // Simulate 1% chance of breaking
     if ((((double)rand()) / INT_MAX) < 0.01) {
+        spdlog::warn("Robot {} has broken. Status set to Unavailable.", id_);
         status_ = RobotStatus::Unavailable;
     }
 }
