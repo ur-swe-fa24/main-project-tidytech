@@ -3,7 +3,6 @@
 
 #include <wx/wx.h>
 #include "../simulation/simulator.hpp"
-#include "../database/database.hpp"
 #include "../sys_manager/fleet_manager.hpp"
 #include "../types/types.hpp"
 #include "pubsub/publisher.hpp"
