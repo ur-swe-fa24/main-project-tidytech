@@ -123,3 +123,15 @@ bool RobotAdapter::deleteRobot(const std::string& robotId) {
     return result && result->deleted_count() > 0;
 }
 
+std::vector<bsoncxx::document::value> RobotAdapter::getAllRobots() {
+    std::vector<bsoncxx::document::value> robots;
+    try {
+        auto cursor = collection_.find({});
+        for (const auto& doc : cursor) {
+            robots.emplace_back(bsoncxx::document::value(doc));
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error fetching all robots: " << e.what() << std::endl;
+    }
+    return robots;
+}

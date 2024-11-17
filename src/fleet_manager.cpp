@@ -38,6 +38,31 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     } 
     std::cout << "floor count is: " << floor_id_count << endl;
 
+    // populate the simulation by using DB data
+    try {
+        auto robots = robot_adapter_.getAllRobots();
+        for (const auto& robot : robots) {
+            int id = std::stoi(robot.view()["_id"].get_utf8().value.to_string());
+            std::string name = robot.view()["name"].get_utf8().value.to_string();
+            std::string size = robot.view()["size"].get_utf8().value.to_string();
+            std::string type = robot.view()["type"].get_utf8().value.to_string();
+            std::string charging_position = robot.view()["baseLocation"].get_utf8().value.to_string();
+            std::string current_position = robot.view()["currentLocation"].get_utf8().value.to_string();
+            std::string status = robot.view()["status"].get_utf8().value.to_string();
+
+            RobotSize rsSize = to_enum_robot_size(size);
+            RobotType rtType = to_enum_robot_type(type);
+            RobotStatus rsStatus = to_enum_robot_status(status);
+            simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus);
+
+            if (id > robot_id_count) {
+                robot_id_count = id;
+            }
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Error populating simulation from DB robot collection: " << e.what() << endl;
+    }
+
     // Subscribe to these two events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
