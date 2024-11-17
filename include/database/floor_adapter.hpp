@@ -17,7 +17,7 @@ public:
 
     // Insert a new floor document
     void insertFloor(const std::string& id, const std::string& name, const std::string& roomType, const std::string& floortype, const std::string& size,
-                     const std::string& interaction, const std::string& restricted, const std::string& clean_level);
+                     const std::string& interaction, const std::string& restricted, const std::string& clean_level, const std::vector<int>& neighbors);
     
 
     // Find a document by floor ID
@@ -26,6 +26,8 @@ public:
     bool updateCleanLevel(const std::string& floorId, const std::string& newCleanLevel);
     bool updateRestriction(const std::string& floorId, const std::string& restricted);
     bool deleteFloor(const std::string& floorId);
+
+    std::vector<bsoncxx::document::value> getAllFloors();
 
 private:
     mongocxx::collection collection_;

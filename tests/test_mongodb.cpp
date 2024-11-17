@@ -66,13 +66,13 @@ TEST_CASE("Floor Adapter Unit Tests") {
     
     //testing inserting and finding floor
     SECTION("Insert and Find Floor") {
-        floorAdapter.insertFloor("1", "floor1", "elevator", "Carpet", "Small", "Medium", "false", "90");
+        floorAdapter.insertFloor("1", "floor1", "elevator", "Carpet", "Small", "Medium", "false", "90", {1,2});
         auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
         REQUIRE(bsoncxx::to_json(*foundFloor).find("1") != std::string::npos);
 
         //exception when trying to insert a floor with a duplicate ID
-        REQUIRE_THROWS(floorAdapter.insertFloor("1", "floor1", "hallway", "Wood", "Large", "High", "true", "85"));
+        REQUIRE_THROWS(floorAdapter.insertFloor("1", "floor1", "hallway", "Wood", "Large", "High", "true", "85", {1,3}));
     }
 
     //testing updating floor clean level

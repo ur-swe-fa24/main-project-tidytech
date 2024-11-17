@@ -26,9 +26,9 @@ public:
     bool updateRobotStatus(const std::string& robotId, const std::string& newStatus);
     bool updateRobotCapacity(const std::string& robotId, const std::string& newCapacity);
     bool deleteRobot(const std::string& robotId);
-
-    // int getLastRobotID()
-
+    
+    std::vector<bsoncxx::document::value> getAllRobots();
+    
 private:
     mongocxx::collection collection_;
 };

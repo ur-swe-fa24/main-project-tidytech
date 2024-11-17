@@ -38,6 +38,63 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     } 
     std::cout << "floor count is: " << floor_id_count << endl;
 
+    // populate the simulation from the database
+    // populate robots
+    try {
+        auto robots = robot_adapter_.getAllRobots();
+        for (const auto& robot : robots) {
+            int id = std::stoi(robot.view()["_id"].get_utf8().value.to_string());
+            std::string name = robot.view()["name"].get_utf8().value.to_string();
+            std::string size = robot.view()["size"].get_utf8().value.to_string();
+            std::string type = robot.view()["type"].get_utf8().value.to_string();
+            std::string charging_position = robot.view()["base_location"].get_utf8().value.to_string();
+            std::string current_position = robot.view()["current_location"].get_utf8().value.to_string();
+            std::string status = robot.view()["status"].get_utf8().value.to_string();
+
+            RobotSize rsSize = to_enum_robot_size(size);
+            RobotType rtType = to_enum_robot_type(type);
+            RobotStatus rsStatus = to_enum_robot_status(status);
+            simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus);
+
+            if (id > robot_id_count) {
+                robot_id_count = id;
+            }
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Error populating simulation from DB robot collection: " << e.what() << endl;
+    }
+
+    // populate floors
+    try {
+        auto floors = floor_adapter_.getAllFloors();
+        for (const auto& floor : floors) {
+            int id = std::stoi(floor.view()["_id"].get_utf8().value.to_string());
+            std::string name = floor.view()["name"].get_utf8().value.to_string();
+            std::string room_type_str = floor.view()["room_type"].get_utf8().value.to_string();
+            std::string floor_type_str = floor.view()["floor_type"].get_utf8().value.to_string();
+            std::string size = floor.view()["size"].get_utf8().value.to_string();
+            std::string interaction_level_str = floor.view()["interaction_level"].get_utf8().value.to_string();
+            std::string restricted_str = floor.view()["restricted"].get_utf8().value.to_string();
+            std::string clean_level = floor.view()["clean_level"].get_utf8().value.to_string();
+
+            std::vector<int> neighbors;
+            auto neighbors_array = floor.view()["neighbors"].get_array().value;
+            for (const auto& neighbor : neighbors_array) {
+                neighbors.push_back(neighbor.get_int32().value);
+            }
+
+            FloorRoomType room_type = to_enum_floor_room_type(room_type_str);
+            FloorType floor_type = to_enum_floor_type(floor_type_str);
+            FloorSize floor_size = to_enum_floor_size(size);
+            FloorInteraction interaction_level = to_enum_floor_interaction(interaction_level_str);
+            bool restricted = restricted_str == "true";
+
+            simulator_.add_floor(id, name, room_type, floor_type, floor_size, interaction_level, restricted, std::stoi(clean_level), neighbors);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error populating floors: " << e.what() << std::endl;
+    }
+
     // Subscribe to these two events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
@@ -113,28 +170,9 @@ void FleetManager::notify(const Event& event, const std::string& data) {
 
 // Wrapper method that just calls the add_robot for the sim and the db
 int FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity) {
-    RobotSize RsSize;
-    if (size == "Small") {
-        RsSize = RobotSize::Small;
-    } else if (size == "Medium") {
-        RsSize = RobotSize::Medium;
-    } else if (size == "Large") {
-        RsSize = RobotSize::Large;
-    } else {
-        std::cout << "Invalid Robot Size" << std::endl;
-        return false;
-    }
+    RobotSize RsSize = to_enum_robot_size(size);
+    RobotType RtType = to_enum_robot_type(type);
 
-    RobotType RtType;
-    if (type == "Shampoo") {
-        RtType = RobotType::Shampoo;
-    } else if (type == "Vacuum") {
-        RtType = RobotType::Vaccum;
-    } else if (type == "Scrubber") {
-        RtType = RobotType::Scrubber;
-    } else {
-        std::cout << "Invalid Robot Type" << std::endl;
-    }
     if (robot_id_count >= 11) {
         std::cerr << "Error: reached the limit of robots" << std::endl;
         return false;
@@ -153,61 +191,19 @@ int FleetManager::add_robot(std::string name, std::string size, std::string type
 
 // Wrapper method that just calls the add_floor for the sim and the db
 int FleetManager::add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors) {
-    FloorSize FsSize;
-    FloorType FtType;
-    FloorRoomType FrtRoom;
-    FloorInteraction FiInteraction;
-    if (roomType == "Elevator") {
-        FrtRoom = FloorRoomType::Elevator;
-    } else if (roomType == "Hallway") {
-        FrtRoom = FloorRoomType::Hallway;
-    } else if (roomType == "Room") {
-        FrtRoom = FloorRoomType::Room;
-    } else {
-        std::cout << "Invalid Floor Room Type" << std::endl;
-        return false;
-    }
-
-    if (type == "Carpet") {
-        FtType = FloorType::Carpet;
-    } else if (type == "Wood") {
-        FtType = FloorType::Wood;
-    } else if (type == "Tile") {
-        FtType = FloorType::Tile;
-    } else {
-        std::cout << "Invalid Floor Type" << std::endl;
-        return false;
-    }
-
-    if (size == "Small") {
-        FsSize = FloorSize::Small;
-    } else if (size == "Medium") {
-        FsSize = FloorSize::Medium;
-    } else if (size == "Large") {
-        FsSize = FloorSize::Large;
-    } else {
-        std::cout << "Invalid Floor Size" << std::endl;
-        return false;
-    }
-
-    if (interaction == "Low") {
-        FiInteraction = FloorInteraction::Low;
-    } else if (interaction == "Moderate") {
-        FiInteraction = FloorInteraction::Moderate;
-    } else if (interaction == "High") {
-        FiInteraction = FloorInteraction::High;  
-    } else {
-        std::cout << "Invalid Floor Interaction" << std::endl;
-        return false;
-    }
+    FloorRoomType FrtRoom = to_enum_floor_room_type(roomType);
+    FloorType FtType = to_enum_floor_type(type);
+    FloorSize FsSize = to_enum_floor_size(size);
+    FloorInteraction FiInteraction = to_enum_floor_interaction(interaction);
 
     if (floor_id_count >= 11) {
         std::cerr << "Error: reached the limit of floors" << std::endl;
         return false;
     }
+
     floor_id_count += 1;
     try {
-        floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "Not Restricted", "100");
+        floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "false", "100", neighbors);
         simulator_.add_floor(floor_id_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
     } catch (const std::exception& e) {
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
