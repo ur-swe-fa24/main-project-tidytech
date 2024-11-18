@@ -8,9 +8,18 @@ ENDIF (${Catch2_FOUND})
 
 add_executable(test_mongodb test_mongodb.cpp)
 
+add_executable(test_simulation test_simulation.cpp)
+
 target_compile_features(test_mongodb PRIVATE cxx_std_17)
 
+target_compile_features(test_simulation PRIVATE cxx_std_17)
+
 target_include_directories(test_mongodb
+    PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+
+target_include_directories(test_simulation
     PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
@@ -21,4 +30,10 @@ target_link_libraries(test_mongodb
     Catch2::Catch2WithMain
     mongodb
     mongo::mongocxx_shared
+)
+
+target_link_libraries(test_simulation
+  PRIVATE
+    Catch2::Catch2WithMain
+    simulator
 )

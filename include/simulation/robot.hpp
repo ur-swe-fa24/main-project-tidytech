@@ -25,11 +25,15 @@ class Robot{
         int get_id() const {return id_;};
         std::string get_name() const {return name_;};
         RobotSize get_size() const {return size_;};
+        RobotType get_type() const {return type_;};
         int get_curr() const {return curr_;};
         int get_base() const {return base_;};
         int get_remaining_capacity() const {return remaining_capacity_;};
         RobotStatus get_status() const {return status_;};
         int get_battery() const {return battery_;};
+        std::vector<int> get_task_queue() const {return task_queue_;};
+        int get_task_size() const {return task_queue_.size();};
+        int get_curr_path_size() const {return curr_path_.size();};
         std::string to_string() const;
 
         void add_tasks_to_back(std::vector<int> floors);
@@ -49,6 +53,7 @@ class Robot{
         bool is_capacity_empty();
         void consume_power(int amount = 1);
         void fix_error() {status_ = RobotStatus::Available; battery_ = 100;}; // Error fix
+        void reset_capacity() {status_ = RobotStatus::Available; remaining_capacity_ = 100;};
         void break_robot();
         
 

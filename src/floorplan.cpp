@@ -17,7 +17,8 @@ Floor FloorPlan::access_floor(int floor_id) {
             return pair.first;
         }
     }
-    throw std::runtime_error("Floor not found");
+    spdlog::error("Floor id {} does not exist in the FloorPlan", floor_id);
+    throw std::runtime_error("Floor not found in the FloorPlan");
 }
 
 // to_string for FloorPlan
@@ -39,6 +40,11 @@ std::string FloorPlan::to_string() const {
 
 // to_string for Floor
 std::string FloorPlan::floor_to_string(const Floor& floor) const {
+    if (floorgraph_.find(floor) == floorgraph_.end()) {
+        spdlog::error("Floor id {} does not exist in the floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan for to_string operation");
+    }
+
     std::string out_str = floor.to_string();
     std::string neighbors_str = "";
     std::vector<Floor> neighbors = floorgraph_.at(floor);
@@ -62,12 +68,12 @@ void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors
     } else {
         // Floor already exist in the graph
         spdlog::error("Floor {} already exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor already in the FloorPlan");
     }
 }
 
 // Remove floor from the FloorPlan
 void FloorPlan::remove_floor(const Floor& floor) {
-    // Check if there is any robot in the floor
     auto remove = floorgraph_.find(floor);
     if (remove != floorgraph_.end()) {
         update_neighbors(floor, false); // Update all other neighbors
@@ -75,6 +81,22 @@ void FloorPlan::remove_floor(const Floor& floor) {
     } else {
         // Floor does not exist in the graph
         spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
+    }
+}
+
+void FloorPlan::update_floor(const Floor& floor) {
+    auto the_floor = floorgraph_.find(floor);
+    auto neighbors = std::vector<Floor>();
+    if (the_floor != floorgraph_.end()) {
+        neighbors = the_floor->second; // Set the old neighbors
+        remove_floor(floor); // Remove the old floor
+        add_floor(floor, neighbors); // Add the new floor
+        auto newfloor = floorgraph_.find(floor);
+    } else {
+        // Floor does not exist in the graph
+        spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
     }
 }
 
@@ -87,11 +109,13 @@ std::vector<Floor> FloorPlan::get_neighbors(const Floor& floor) const {
 void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Floor> neighbors) {
     auto update = floorgraph_.find(floor);
     if (update != floorgraph_.end()) {
-        update_neighbors(floor, false); // Update all other neighbors
+        update_neighbors(floor, false); // Remove floor from old neighbors
         update->second = neighbors;
+        update_neighbors(floor, true); // Update new neighbors
     } else {
         // Floor does not exist in the graph
         spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
     }
 }
 
@@ -99,9 +123,12 @@ void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Flo
 void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     std::vector<Floor> floors_to_modify = floorgraph_[floor];
     if (add) {
-        // append floor to every neighbor's vector
+        // Append floor to every neighbor's vector if not already present
         for (Floor& modify_floor : floors_to_modify) {
-            floorgraph_[modify_floor].push_back(floor);
+            std::vector<Floor>& neighbors = floorgraph_[modify_floor];
+            if (std::find(neighbors.begin(), neighbors.end(), floor) == neighbors.end()) {
+                neighbors.push_back(floor);
+            }
         }
 
     } else {
@@ -109,7 +136,7 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
         for (Floor modify_floor : floors_to_modify) {
             int pos = 0;
             std::vector<Floor> modify_neighbors = floorgraph_[modify_floor];
-            for (int i = 0; i < modify_neighbors.size(); pos++) {
+            for (int i = 0; i < modify_neighbors.size(); i++) {
                 if (modify_neighbors[pos] == floor) {
                     break;
                 }
@@ -125,40 +152,38 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
 
 // Get the shortest path between two floors and return a queue of floor ids
 std::queue<int> FloorPlan::get_path(int floor_id_start, int floor_id_goal) {
+    // Edge Cases
+    if (floorgraph_.empty()) {
+        throw std::runtime_error("The FloorPlan is empty. Cannot compute a path");
+    }
+
     std::queue<Floor> frontier; // Queue
+    std::vector<Floor> visited;
     std::unordered_map<int, int> track_path;
 
     // Initialization
     track_path[floor_id_start] = -1; // Starting point with -1 as its parent id
-    for (const auto& pair : floorgraph_) {
-        if (pair.first.get_id() == floor_id_start) {
-            frontier.push(pair.first); // Push the start node into the frontier
-        }
-    }
+    frontier.push(access_floor(floor_id_start)); // Push the start node into the frontier
 
     while (frontier.size() > 0) {
         int curr_floor_id = frontier.front().get_id();
         if (curr_floor_id == floor_id_goal) {
             return get_shortest_path(track_path, floor_id_goal);
         } else {
-            for (const auto& pair : floorgraph_) {
-                if (pair.first.get_id() == curr_floor_id) {
-                    for (const Floor& floor : pair.second) {
-                        if (floor_in_frontier(frontier, floor)) {
-                            // Push all its neighbors nodes onto the frontier
-                            frontier.push(floor);
-                            track_path[floor.get_id()] = curr_floor_id; // Set parent for all of these floors
-                        }
-                    }
-                } else {
-                    // Cannot find the start node
-                    spdlog::error("Floor {} is not in the FloorPlan.", floor_id_start);
+            Floor curr_floor = access_floor(curr_floor_id);
+            for (const Floor& floor : get_neighbors(curr_floor)) {
+                if ((!floor_in_frontier(frontier, floor)) && (!floor_visited(visited, floor))) {
+                    // Push all its neighbors nodes onto the frontier
+                    frontier.push(floor);
+                    track_path[floor.get_id()] = curr_floor_id; // Set parent for all of these floors
                 }
             }
         }
+        visited.push_back(frontier.front());
         frontier.pop(); // Remove the current floor
     }
-    return std::queue<int>(); // Return empty queue if path not found
+    // Path does not exist
+    throw std::runtime_error("No path found from floor ID " + std::to_string(floor_id_start) + " to floor ID " + std::to_string(floor_id_goal));
 }
 
 bool FloorPlan::floor_in_frontier(std::queue<Floor> queue, const Floor& check_floor) {
@@ -173,12 +198,28 @@ bool FloorPlan::floor_in_frontier(std::queue<Floor> queue, const Floor& check_fl
     return false;
 }
 
+bool FloorPlan::floor_visited(std::vector<Floor> visited, const Floor& check_floor) {
+    // Check if check_floor is in the visited vector
+    for (const auto& floor : visited) {
+        if (floor == check_floor) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 std::queue<int> FloorPlan::get_shortest_path(std::unordered_map<int,int> track_path, int floor_id_goal) {
+    if (track_path.find(floor_id_goal) == track_path.end()) {
+        throw std::runtime_error("Goal floor ID " + std::to_string(floor_id_goal) + " is not reachable");
+    }
+
     // Trace the path
     std::vector<int> path_backward; // stack
     int curr = floor_id_goal;
     while (curr != -1) {
+        //spdlog::info("Curr floor {}", curr);
         path_backward.push_back(curr);
         curr = track_path[curr];
     }
