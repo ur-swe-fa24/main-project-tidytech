@@ -3,6 +3,7 @@
 AddRobotWindow::AddRobotWindow(wxWindow* parent, std::vector<std::string> names)
         : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 450)) {
 
+    std::reverse(names.begin(), names.end());
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
     // Name text field
@@ -38,7 +39,8 @@ AddRobotWindow::AddRobotWindow(wxWindow* parent, std::vector<std::string> names)
     wxBoxSizer* defaultPositionSizer = new wxBoxSizer(wxVERTICAL);
     defaultPositionSizer->Add(new wxStaticText(this, wxID_ANY, "Charging Room:"), 0, wxLEFT | wxRIGHT | wxTOP, 10);
     defaultPositionSizer->Add(new wxRadioButton(this, wxID_ANY, "No Room", wxDefaultPosition, wxDefaultSize, wxRB_GROUP), 0, wxALL, 5);
-    for (int i = 0; i < names.size(); i++) {
+    for (int i = names.size() - 1; i >= 0; i--) {
+    // for (int i = 0; i < names.size(); i++) {
         boxes_[i] = new wxRadioButton(this, wxID_ANY, names[i]);
         defaultPositionSizer->Add(boxes_[i], 0, wxALL, 5);
     }

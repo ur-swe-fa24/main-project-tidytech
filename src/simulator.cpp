@@ -13,6 +13,9 @@ Simulator::~Simulator() {
 
 // Simulate the entire simulation
 void Simulator::simulate() {
+    for (Robot& robot : robots_) {
+                this->notify(Event::FiveSecReport, robot.to_string());
+            }
     while (ticking_) {
         std::cout << clock_ << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -23,11 +26,11 @@ void Simulator::simulate() {
 
 
         // Report status every 5 ticks
-        if (clock_ % 5 == 0) {
+        // if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
                 this->notify(Event::FiveSecReport, robot.to_string());
             }
-        }
+        // }
 
         // End of simulation
         if (clock_ >= MAX_SIM_TIME) {
@@ -207,6 +210,8 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
+            spdlog::info("Robot id: {}, robot_type {}", robot.get_id(), to_string(robot.get_type()));
+
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_back(floor_ids);
                 return;
@@ -215,6 +220,7 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
             }
         }
     }
+    std::cout << "robot not found" << std::endl;
     throw std::runtime_error("Robot not found in Simulator");
 }
 
@@ -252,6 +258,7 @@ bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor
 }
 
 bool Simulator::check_robot_to_floor(RobotType robot_type, FloorType floor_type) {
+    spdlog::info("{}, and  {}", to_string(robot_type), to_string(floor_type));
     switch(robot_type) {
         case RobotType::Scrubber:
             switch (floor_type) {

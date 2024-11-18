@@ -12,8 +12,8 @@ class AddTaskWindow : public wxDialog {
                 try {
                     if (robots_[i]->GetValue()) {
                         sol = i + 1;
+                        return std::to_string(sol);
                     }
-                    return std::to_string(sol);
                 } catch (...) {
                     continue;
                 }
@@ -27,8 +27,8 @@ class AddTaskWindow : public wxDialog {
                 try {
                     if (floors_[i]->GetValue()) {
                         sol = i + 1;
+                        return std::to_string(sol);
                     }
-                    return std::to_string(sol);
                 } catch (...) {
                     continue;
                 }

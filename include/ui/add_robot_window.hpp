@@ -36,8 +36,8 @@ class AddRobotWindow : public wxDialog {
                 try {
                     if (boxes_[i]->GetValue()) {
                         sol = i + 1;
+                        return std::to_string(sol);
                     }
-                    return std::to_string(sol);
                 } catch (...) {
                     continue;
                 }
