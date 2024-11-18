@@ -262,4 +262,78 @@ TEST_CASE("Testing FloorPlan and Floor Unit Tests") {
 
 }
 
+TEST_CASE("Simulator Unit Tests") {
+    Simulator sim{};
 
+    SECTION("Add Robot to Simulator") {
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
+        sim.add_robot(2, "Tommy", RobotSize::Medium, RobotType::Scrubber, 1, 1, RobotStatus::Available);
+        REQUIRE(sim.get_num_robots() == 2);
+        REQUIRE(sim.get_robot(2).get_id() == 2);
+    }
+
+    SECTION("Add Floor to Simulator") {
+        sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Wood, FloorSize::Large, FloorInteraction::High, false, 100, {});
+        sim.add_floor(2, "Elevator", FloorRoomType::Elevator, FloorType::Tile, FloorSize::Small, FloorInteraction::High, false, 100, {1});
+
+        REQUIRE(sim.get_num_floors() == 2);
+        REQUIRE(sim.get_neighbors(1).size() == 1); // One neighbor
+    }
+
+    SECTION("Add tasks to robot in Simulator") {
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
+        sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
+        sim.add_floor(2, "Office", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
+        sim.add_floor(3, "Living Room", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
+        sim.add_floor(4, "Bedroom", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
+
+
+        sim.add_task_to_back(1, {1,2});
+        REQUIRE(sim.get_robot(1).get_task_size() == 2);
+
+        sim.add_task_to_front(1, {3,4});
+        REQUIRE(sim.get_robot(1).get_task_size() == 4);
+        REQUIRE(sim.get_robot(1).get_task_queue()[0] == 3);
+    }
+
+    SECTION("Check compatibility") {
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
+        sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
+
+        REQUIRE_THROWS(sim.add_task_to_back(1, {2}));
+        REQUIRE_THROWS(sim.add_task_to_front(2, {1}));
+        REQUIRE_NOTHROW(sim.add_task_to_back(1, {1}));
+    }
+
+    SECTION("Notify testing") {
+        REQUIRE_NOTHROW(sim.notify(Event::FiveSecReport, "Example message"));
+    }
+    
+
+    SECTION("Simulation") {
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
+        sim.add_robot(2, "Tom", RobotSize::Small, RobotType::Vaccum, 1, 1, RobotStatus::Available);
+
+        sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 90, {});
+        sim.add_floor(2, "Office", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 80, {1});
+        sim.add_floor(3, "Living Room", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 10, {2});
+        sim.add_floor(4, "Bedroom", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
+
+        sim.add_task_to_back(1, {1,2});
+        sim.add_task_to_front(2, {2,3});
+
+        // Simulate for 4 ticks
+        for (int i = 0; i < 4; i++) {
+            sim.simulate_robots();
+            sim.simulate_floors();
+        }
+
+        REQUIRE(sim.get_robot(1).get_curr() == 2); // Should be in room2
+        REQUIRE(sim.get_robot(2).get_curr() == 2); // Should be in room2
+        REQUIRE(sim.get_robot(1).get_status() == RobotStatus::Cleaning);
+        REQUIRE(sim.get_robot(2).get_status() == RobotStatus::Cleaning);
+        REQUIRE(!sim.get_floor(1).get_getting_clean()); // Not getting clean right now
+        REQUIRE(sim.get_floor(2).get_getting_clean()); // floor 2 is getting clean right now
+
+    }
+}

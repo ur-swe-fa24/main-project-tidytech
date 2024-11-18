@@ -74,11 +74,25 @@ void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors
 
 // Remove floor from the FloorPlan
 void FloorPlan::remove_floor(const Floor& floor) {
-    // Check if there is any robot in the floor
     auto remove = floorgraph_.find(floor);
     if (remove != floorgraph_.end()) {
         update_neighbors(floor, false); // Update all other neighbors
         floorgraph_.erase(remove);
+    } else {
+        // Floor does not exist in the graph
+        spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
+    }
+}
+
+void FloorPlan::update_floor(const Floor& floor) {
+    auto the_floor = floorgraph_.find(floor);
+    auto neighbors = std::vector<Floor>();
+    if (the_floor != floorgraph_.end()) {
+        neighbors = the_floor->second; // Set the old neighbors
+        remove_floor(floor); // Remove the old floor
+        add_floor(floor, neighbors); // Add the new floor
+        auto newfloor = floorgraph_.find(floor);
     } else {
         // Floor does not exist in the graph
         spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
@@ -122,7 +136,7 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
         for (Floor modify_floor : floors_to_modify) {
             int pos = 0;
             std::vector<Floor> modify_neighbors = floorgraph_[modify_floor];
-            for (int i = 0; i < modify_neighbors.size(); pos++) {
+            for (int i = 0; i < modify_neighbors.size(); i++) {
                 if (modify_neighbors[pos] == floor) {
                     break;
                 }

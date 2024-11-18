@@ -17,6 +17,7 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base,
 
 // to_string for robot object
 std::string Robot::to_string() const {
+
     std::string str_tasks = "";
     std::string str_path = "";
 
@@ -29,8 +30,9 @@ std::string Robot::to_string() const {
     }
 
     std::queue<int> tmp = curr_path_; // Copy curr_path_
-    while (!tmp.empty()) {
+    while (!tmp.empty()) { 
         str_path += std::to_string(tmp.front()) + ", ";
+        tmp.pop();
     }
 
     if (str_path.length() >= 2) {
