@@ -39,13 +39,13 @@ void Floor::dirty() {
     if (!getting_clean_) {
         switch (interaction_) {
             case FloorInteraction::Low:
-                clean_level_ = std::max(0, clean_level_-2);
+                clean_level_ = std::max(0, clean_level_-1);
                 break;
             case FloorInteraction::Moderate:
-                clean_level_ = std::max(0, clean_level_-4);
+                clean_level_ = std::max(0, clean_level_-2);
                 break;
             case FloorInteraction::High:
-                clean_level_ = std::max(0, clean_level_-8);
+                clean_level_ = std::max(0, clean_level_-3);
                 break;
         }
     } else {

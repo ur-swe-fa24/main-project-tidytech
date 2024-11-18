@@ -204,7 +204,7 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
     floor_id_count += 1;
     try {
         floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "false", "100", neighbors);
-        simulator_.add_floor(floor_id_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 100, neighbors);
+        simulator_.add_floor(floor_id_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 50, neighbors);
     } catch (const std::exception& e) {
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
         return false;
@@ -221,7 +221,7 @@ std::vector<std::string> FleetManager::get_all_robot_names() {
     return simulator_.get_all_robot_names();
 }
 
-bool FleetManager::add_task(int robot_id, int floor_id) {
-    simulator_.add_task(robot_id, floor_id);
+bool FleetManager::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
+    simulator_.add_task_to_back(robot_id, floor_ids);
     return true;
 }

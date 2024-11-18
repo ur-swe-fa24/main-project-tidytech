@@ -97,7 +97,10 @@ void UserInterface::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
     AddTaskWindow taskForm(this, floor_names, robot_names, num_added_);
     if (taskForm.ShowModal() == wxID_OK) {
-        if (fm_.add_task(std::stoi(taskForm.get_robot()), std::stoi(taskForm.get_floor()))) {
+        std::vector<int> tmp;
+        tmp.push_back(std::stoi(taskForm.get_floor()));
+        if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), tmp)) {
+
             wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
