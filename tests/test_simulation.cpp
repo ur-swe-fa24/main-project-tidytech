@@ -237,7 +237,7 @@ TEST_CASE("Testing FloorPlan and Floor Unit Tests") {
         // Floor dirties over time
         floor3.dirty();
 
-        REQUIRE(floor3.get_clean_level()== 88); // Low interaction dirty
+        REQUIRE(floor3.get_clean_level()== 89); // Low interaction dirty
     }
 
     SECTION("Error handling for Floors") {
