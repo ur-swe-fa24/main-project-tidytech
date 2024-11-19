@@ -49,11 +49,11 @@ class Robot{
         void go_charge();
         void go_empty();
         void charge();
-        void clean() {remaining_capacity_ = max(0, remaining_capacity_-3);};
+        void clean() {remaining_capacity_ = max(0, remaining_capacity_-3);}; // Cleaning takes away 3 capacity unit
         bool is_capacity_empty();
         void consume_power(int amount = 1);
         void fix_error() {status_ = RobotStatus::Available; battery_ = 100;}; // Error fix
-        void reset_capacity() {status_ = RobotStatus::Available; remaining_capacity_ = 100;};
+        void reset_capacity() {status_ = RobotStatus::Available; remaining_capacity_ = 100;}; // Reset Capacity
         void break_robot();
         
 
