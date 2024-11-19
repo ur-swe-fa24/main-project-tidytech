@@ -116,7 +116,7 @@ void Robot::consume_power(int amount) {
     }
 };
 
-
+// Move to next floor in the path
 void Robot::move_to_next_floor() {
     if (curr_path_.empty()) {
         spdlog::error("Robot {} attempted to move but the path is empty.", id_);

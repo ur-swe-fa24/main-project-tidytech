@@ -13,24 +13,21 @@ Simulator::~Simulator() {
 
 // Simulate the entire simulation
 void Simulator::simulate() {
-    for (Robot& robot : robots_) {
-                this->notify(Event::FiveSecReport, robot.to_string());
-            }
     while (ticking_) {
         std::cout << clock_ << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         clock_++;
 
-        simulate_robots();
-        simulate_floors();
+        simulate_robots(); // Simulate all the robots
+        simulate_floors(); // Simulate all the floors
 
 
         // Report status every 5 ticks
-        // if (clock_ % 5 == 0) {
+        if (clock_ % 5 == 0) {
             for (Robot& robot : robots_) {
                 this->notify(Event::FiveSecReport, robot.to_string());
             }
-        // }
+        }
 
         // End of simulation
         if (clock_ >= MAX_SIM_TIME) {
@@ -77,6 +74,7 @@ void Simulator::simulate_robots() {
                     if (robot.at_base()) {
                         robot.charge(); // only charge if you reached base
                     } else {
+                        // Keep moving to base
                         robot.consume_power();
                         robot.move_to_next_floor();
                     }
@@ -108,6 +106,7 @@ void Simulator::simulate_robots() {
                 case RobotStatus::NeedEmpty:
                     if (robot.at_base()) {
                         // Notify operator
+                        // TODO: Add event to report error
                     } else {
                         robot.consume_power();
                         robot.move_to_next_floor();
@@ -120,6 +119,7 @@ void Simulator::simulate_robots() {
         } else {
             // Set status
             if (robot.get_status() != RobotStatus::Charging) {
+                // Set the path back to base to charge
                 robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
                 robot.set_status(RobotStatus::Charging);
             }
@@ -144,12 +144,14 @@ void Simulator::simulate_floors() {
             if ((robot.get_curr() == floor.get_id()) && (robot.get_status()==RobotStatus::Cleaning)) {
                 floor.set_getting_clean(true);
                 floor.clean(robot.get_size());
+                // Update the floor in floorplan
                 floorplan_.update_floor(floor);
             }
         }
         // Get dirty if no robots are cleaning
         if (!floor.get_getting_clean()) {
             floor.dirty();
+            // Update the floor in floorplan
             floorplan_.update_floor(floor);
         }
     }
@@ -194,24 +196,23 @@ void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorTyp
         Floor new_floor(id, name, room, floortype, size, interaction_level, restriction, clean_level);
         std::vector<Floor> neighbor_floors;
         for (const auto& floor : floorplan_.get_all_floor()) {
+            // Push all the floor neighbors
             if (std::find(neighbors.begin(), neighbors.end(), floor.get_id()) != neighbors.end()) {
                 neighbor_floors.push_back(floor);
             }
         }
-        floorplan_.add_floor(std::ref(new_floor), neighbor_floors);
+        floorplan_.add_floor(std::ref(new_floor), neighbor_floors); // Add the floor to floorplan
     } else {
         spdlog::error("MAXIMUM NUMBER OF FLOORS REACHED! Current: {} floors", floorplan_.get_all_floor().size());
     }
 }
     
 
-// Add task at the end
+// Add tasks at the end
 void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
-            spdlog::info("Robot id: {}, robot_type {}", robot.get_id(), to_string(robot.get_type()));
-
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_back(floor_ids);
                 return;
@@ -220,11 +221,10 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
             }
         }
     }
-    std::cout << "robot not found" << std::endl;
     throw std::runtime_error("Robot not found in Simulator");
 }
 
-// Add task at the front
+// Add tasks at the front
 void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
@@ -237,10 +237,11 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
             }
         }
     }
+    spdlog::error("Robot {} is not in Simulator", robot_id);
     throw std::runtime_error("Robot not found in Simulator");
 }
 
-// Check RobotType and FloorType
+// Check RobotType with floor types
 bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor_ids) {
     auto all_floors = floorplan_.get_all_floor();
     bool floor_not_found = true;
@@ -257,8 +258,8 @@ bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor
     return !floor_not_found;
 }
 
+// Check RobotType and Floortype
 bool Simulator::check_robot_to_floor(RobotType robot_type, FloorType floor_type) {
-    spdlog::info("{}, and  {}", to_string(robot_type), to_string(floor_type));
     switch(robot_type) {
         case RobotType::Scrubber:
             switch (floor_type) {
@@ -279,17 +280,11 @@ bool Simulator::check_robot_to_floor(RobotType robot_type, FloorType floor_type)
                     return true;
             }
         case RobotType::Vaccum:
-            switch (floor_type) {
-                case FloorType::Wood:
-                    return true;
-                case FloorType::Tile:
-                    return true;
-                case FloorType::Carpet:
-                    return true;
-            }
+            return true;
     }
 }
 
+// Access the robot
 Robot Simulator::get_robot(int robot_id) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
@@ -301,6 +296,7 @@ Robot Simulator::get_robot(int robot_id) {
     throw std::invalid_argument("Robot not found in Simulator");
 }
 
+// Access the floor
 Floor Simulator::get_floor(int floor_id) {
     std::lock_guard<std::mutex> lock(floors_mutex);
     for (Floor& floor : floorplan_.get_all_floor()) {
@@ -335,6 +331,7 @@ std::string Simulator::status_report(int robot_id) {
     return std::to_string(robot_id) + " not found.";
 }
 
+// Check if the robot can move
 bool Simulator::can_move(Robot& robot) {
     int path_base_distance = floorplan_.get_path(robot.get_curr(), robot.get_base()).size() + 3; // +3 to account for cleaning this current room
     if (path_base_distance < robot.get_battery()) {
@@ -372,6 +369,7 @@ std::vector<std::string> Simulator::get_all_floor_names() {
     return floor_names;
 }
 
+// Return all robot names in string vector
 std::vector<std::string> Simulator::get_all_robot_names() {
     std::vector<std::string> robot_names;
     for (auto robot : robots_) {
