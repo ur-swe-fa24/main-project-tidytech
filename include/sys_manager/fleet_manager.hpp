@@ -34,10 +34,12 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void subscribe(const Event& event);
         void unsubscribe(const Event& event);
         void update(const Event& event, const std::string& data) override;
+        void update(const Event& even, const int id, const std::vector<int>& data) override;
 
         void subscribe(Subscriber* subscriber, const Event& event) override;
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
         void notify(const Event& event, const std::string& data) override;
+        void notify(const Event& event, const int id, const std::vector<int>& data) override;
 
         // Run simulation methods
         void start_sim() {simulator_.start_simulation();};
@@ -47,6 +49,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Methods to handle the different events
         void handle_five_sec_ping(const std::string& data);
         void handle_finished_ping(const std::string& data);
+        void update_neighbors_db(const int id, const std::vector<int>& data);
 
         std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
         

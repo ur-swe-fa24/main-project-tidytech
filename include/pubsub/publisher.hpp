@@ -14,6 +14,7 @@ class Publisher {
         virtual void subscribe(Subscriber* subscriber, const types::Event& event) = 0;
         virtual void unsubscribe(Subscriber* subscriber, const types::Event& event) = 0;
         virtual void notify(const types::Event& event, const std::string& data) = 0;
+        virtual void notify(const types::Event& event, const int id, const std::vector<int>& data) = 0;
         
 };
 

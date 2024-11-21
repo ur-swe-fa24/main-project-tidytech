@@ -55,6 +55,8 @@ class Simulator : public Publisher {
         void subscribe(Subscriber* subscriber, const Event& event) override;
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
         void notify(const Event& event, const std::string& data) override;
+        void notify(const Event& event, const int id, const std::vector<int>& data) override;
+
     private:
         FloorPlan floorplan_;
         mutable std::mutex floors_mutex; // Mutex to protect floors
