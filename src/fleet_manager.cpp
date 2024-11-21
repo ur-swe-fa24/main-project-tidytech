@@ -88,7 +88,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
             FloorSize floor_size = to_enum_floor_size(size);
             FloorInteraction interaction_level = to_enum_floor_interaction(interaction_level_str);
             bool restricted = restricted_str == "true";
-
+            
             simulator_.add_floor(id, name, room_type, floor_type, floor_size, interaction_level, restricted, std::stoi(clean_level), neighbors);
         }
     } catch (const std::exception& e) {
@@ -98,6 +98,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     // Subscribe to these two events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
+    subscribe(Event::UpdateFloorNeighbors);
 }
 
 void FleetManager::write_output(string filepath, string message) {
@@ -138,6 +139,12 @@ void FleetManager::update(const Event& event, const std::string& data) {
     }
 }
 
+void FleetManager::update(const Event& event, const int id, const std::vector<int> data) {
+    if (event == Event::UpdateFloorNeighbors) {
+        update_neighbors_db(id, data);
+    }
+}
+
 void FleetManager::handle_five_sec_ping(const std::string& data) {
     // Prints data
     std::cout << data << std::endl;
@@ -148,6 +155,10 @@ void FleetManager::handle_finished_ping(const std::string& data) {
     std::string message = "Final Report Summary:\n" + data;
     notify(Event::DisplayText, data);
     // write_output("../app/output.txt", message);
+}
+
+void FleetManager::update_neighbors_db(const int id, const std::vector<int>& data) {
+    floor_adapter_.updateNeighbors(std::to_string(id), data);
 }
 
 

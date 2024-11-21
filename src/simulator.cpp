@@ -201,7 +201,22 @@ void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorTyp
                 neighbor_floors.push_back(floor);
             }
         }
-        floorplan_.add_floor(std::ref(new_floor), neighbor_floors); // Add the floor to floorplan
+
+        try {
+            floorplan_.add_floor(std::ref(new_floor), neighbor_floors); // Add the floor to floorplan
+        } catch (const std::runtime_error) {
+            floorplan_.update_floor_neighbors(std::ref(new_floor), neighbor_floors); // Update the floor neighbors
+        }
+
+        // Update database push
+        for (const Floor& floor : neighbor_floors) {
+            std::vector<Floor> neighbors = floorplan_.get_neighbors(floor);
+            std::vector<int> neighbors_ids;
+            for (const Floor& floor : neighbors) {
+                neighbors_ids.push_back(floor.get_id());
+            }
+            notify(Event::UpdateFloorNeighbors, floor.get_id(), neighbors_ids);
+        }
     } else {
         spdlog::error("MAXIMUM NUMBER OF FLOORS REACHED! Current: {} floors", floorplan_.get_all_floor().size());
     }
@@ -356,6 +371,13 @@ void Simulator::unsubscribe(Subscriber* subscriber, const Event& event) {
 void Simulator::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
+    }
+}
+
+// Notify all the subscribers
+void Simulator::notify(const Event& event, const int id, const vector<int>& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, data);
     }
 }
 
