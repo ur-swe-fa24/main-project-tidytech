@@ -9,7 +9,7 @@ using bsoncxx::builder::basic::kvp;
 
 void RobotAdapter::insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
                                 const std::string& baseLocation, const std::string& currentLocation,
-                                const std::string& status, const std::string& capacity) {
+                                const std::string& status, const std::string& capacity, const std::vector<int>& taskQueue, const std::vector<int>& path) {
 
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
@@ -27,6 +27,14 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
     else if (existing_name){
         throw std::invalid_argument("the robot cannot be added to database because of duplicate name");
     } else {
+        bsoncxx::builder::basic::array task_queue;
+        for (const auto& task : taskQueue) {
+            task_queue.append(task);
+        };
+        bsoncxx::builder::basic::array robot_path;
+        for (const auto& step : path) {
+            robot_path.append(step);
+        };
         auto robot_doc = make_document(
             kvp("_id", id),
             kvp("name", name),
@@ -35,7 +43,9 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
             kvp("base_location", baseLocation),
             kvp("current_location", currentLocation),
             kvp("status", status),
-            kvp("capacity", capacity));
+            kvp("capacity", capacity),
+            kvp("task_queue", task_queue),
+            kvp("path", robot_path));
         collection_.insert_one(robot_doc.view());
     }
 }
@@ -56,6 +66,7 @@ std::optional<bsoncxx::document::value> RobotAdapter::findDocumentById(const std
     }
 }
 
+/*
 bool RobotAdapter::updateRobotStatus(const std::string& robotId, const std::string& newStatus) {
     auto query_doc = make_document(
         kvp("_id", robotId)
@@ -112,6 +123,36 @@ bool RobotAdapter::updateRobotCapacity(const std::string& robotId, const std::st
     // execute the update operation
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0; 
+}
+*/
+
+bool RobotAdapter::updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path) {
+    auto query_doc = make_document(
+        kvp("_id", id)
+    );
+    bsoncxx::builder::basic::array task_queue;
+    for (const auto& task : taskQueue) {
+        task_queue.append(task);
+    };
+    bsoncxx::builder::basic::array robot_path;
+    for (const auto& step : path) {
+        robot_path.append(step);
+    };
+    auto update_doc = make_document(
+        kvp("$set", 
+            make_document(
+                kvp("status", status),
+                kvp("current_location", currentLocation),
+                kvp("capacity", capacity),
+                kvp("task_queue", task_queue),
+                kvp("path", robot_path)
+            )
+        )
+    );
+
+    auto result = collection_.update_one(query_doc.view(), update_doc.view());
+    return result && result->modified_count() > 0;
 }
 
 bool RobotAdapter::deleteRobot(const std::string& robotId) {

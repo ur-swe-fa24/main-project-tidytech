@@ -183,7 +183,7 @@ void Simulator::reset_simulation() {
 
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status) {
+void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path) {
     Robot robot(id, name, size, type, base, curr, status);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them

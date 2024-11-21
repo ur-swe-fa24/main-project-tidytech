@@ -50,11 +50,26 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
             std::string charging_position = robot.view()["base_location"].get_utf8().value.to_string();
             std::string current_position = robot.view()["current_location"].get_utf8().value.to_string();
             std::string status = robot.view()["status"].get_utf8().value.to_string();
+            std::string remaining_capacity = robot.view()["capacity"].get_utf8().value.to_string();
+            std::vector<int> task_queue;
+            // Extract task_queue as a BSON array
+            auto taskQueueArray = robot.view()["task_queue"].get_array().value;
+            // Convert BSON array to std::vector<int>
+            for (const auto& element : taskQueueArray) {
+                task_queue.push_back(element.get_int32());
+            }
+            std::vector<int> path;
+            // Extract task_queue as a BSON array
+            auto pathArray = robot.view()["path"].get_array().value;
+            // Convert BSON array to std::vector<int>
+            for (const auto& step : pathArray) {
+                path.push_back(step.get_int32());
+            }
 
             RobotSize rsSize = to_enum_robot_size(size);
             RobotType rtType = to_enum_robot_type(type);
             RobotStatus rsStatus = to_enum_robot_status(status);
-            simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus);
+            simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus, std::stoi(remaining_capacity), task_queue, path);
 
             if (id > robot_id_count) {
                 robot_id_count = id;
@@ -169,7 +184,7 @@ void FleetManager::notify(const Event& event, const std::string& data) {
 }
 
 // Wrapper method that just calls the add_robot for the sim and the db
-int FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, std::string capacity) {
+int FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, int capacity, std::vector<int> task_queue, std::vector<int> path) {
     RobotSize RsSize = to_enum_robot_size(size);
     RobotType RtType = to_enum_robot_type(type);
 
@@ -179,8 +194,8 @@ int FleetManager::add_robot(std::string name, std::string size, std::string type
     }
     robot_id_count += 1;
     try {
-        robot_adapter_.insertRobot(std::to_string(robot_id_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100");
-        simulator_.add_robot(robot_id_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available);
+        robot_adapter_.insertRobot(std::to_string(robot_id_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100", {}, {});
+        simulator_.add_robot(robot_id_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available, 100, {}, {});
     } catch (const std::exception& e) {
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
         return false;
