@@ -201,6 +201,13 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
         return false;
     }
 
+    std::cout <<"Reached here: Neighbor size: ";
+    std::cout << neighbors.size() << std::endl;
+    for (int n : neighbors) {
+        std::cout << name + " neighbors: ";
+        std::cout << n << std::endl;
+    }
+
     floor_id_count += 1;
     try {
         floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "false", "100", neighbors);
