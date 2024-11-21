@@ -11,8 +11,10 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base,
     base_ = base;
     curr_ = curr;
     battery_ = 100;
-    remaining_capacity_ = 100;
     status_ = status;
+    remaining_capacity_ = 100;
+    task_queue_ = {};
+    curr_path_ = {};
 } 
 
 // to_string for robot object
