@@ -240,6 +240,12 @@ std::vector<std::string> FleetManager::get_all_robot_names() {
 }
 
 bool FleetManager::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
-    simulator_.add_task_to_back(robot_id, floor_ids);
-    return true;
+    try {
+        simulator_.add_task_to_back(robot_id, floor_ids);      
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Error adding tasks to back: " << e.what() << std::endl;
+        return false;
+    }
+
 }

@@ -204,7 +204,8 @@ void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorTyp
 
         try {
             floorplan_.add_floor(std::ref(new_floor), neighbor_floors); // Add the floor to floorplan
-        } catch (const std::runtime_error) {
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
             floorplan_.update_floor_neighbors(std::ref(new_floor), neighbor_floors); // Update the floor neighbors
         }
 
