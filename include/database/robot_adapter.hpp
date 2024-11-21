@@ -17,16 +17,18 @@ public:
     // Insert a new robot document
     void insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
                     const std::string& baseLocation, const std::string& currentLocation,
-                    const std::string& status);
+                    const std::string& status, const std::string& capacity);
 
     // Find a document by robot ID
     std::optional<bsoncxx::document::value> findDocumentById(const std::string& robotId);
 
     bool updateRobotLocation(const std::string& robotId, const std::string& newLocation);
     bool updateRobotStatus(const std::string& robotId, const std::string& newStatus);
-
+    bool updateRobotCapacity(const std::string& robotId, const std::string& newCapacity);
     bool deleteRobot(const std::string& robotId);
-
+    
+    std::vector<bsoncxx::document::value> getAllRobots();
+    
 private:
     mongocxx::collection collection_;
 };

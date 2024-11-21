@@ -1,9 +1,11 @@
 #include "ui/add_floor_window.hpp"
 #include "simulation/floorplan.hpp"
 
-AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
+AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names, int num_added)
         : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 500)) {
 
+    
+    num_added_ = num_added;
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
     // Floor name
@@ -55,9 +57,9 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names)
     sizer->Add(new wxStaticText(this, wxID_ANY, "Interaction Level:"), 0, wxLEFT | wxRIGHT, 10);
     sizer->Add(floorInteractionSizer, 0, wxLEFT | wxRIGHT, 10);
 
-    // TODO: Store the information in the checkboxes
-    for (std::string name : names) {
-        sizer->Add(new wxCheckBox(this, wxID_ANY, name), 0, wxALL, 10);
+    for (int i = 0; i < names.size(); i++) {
+        boxes_[i] = new wxCheckBox(this, wxID_ANY, names[i]);
+        sizer->Add(boxes_[i], 0, wxALL, 10);
     }
 
     // Submit button

@@ -10,7 +10,6 @@ target_include_directories(demo1
 
 target_link_libraries(demo1
     PRIVATE
-        database
         fleet_manager
         simulator
         pubsub

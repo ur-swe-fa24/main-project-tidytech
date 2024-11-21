@@ -39,13 +39,13 @@ void Floor::dirty() {
     if (!getting_clean_) {
         switch (interaction_) {
             case FloorInteraction::Low:
-                clean_level_ = std::max(0, clean_level_-2);
+                clean_level_ = std::max(0, clean_level_-1);
                 break;
             case FloorInteraction::Moderate:
-                clean_level_ = std::max(0, clean_level_-4);
+                clean_level_ = std::max(0, clean_level_-2);
                 break;
             case FloorInteraction::High:
-                clean_level_ = std::max(0, clean_level_-8);
+                clean_level_ = std::max(0, clean_level_-3);
                 break;
         }
     } else {
@@ -56,7 +56,10 @@ void Floor::dirty() {
 
 // Floor getting cleaned by different size robot
 void Floor::clean(const RobotSize robot_size) {
-    getting_clean_ = true;
+    if (restricted_) {
+        spdlog::error("Attempted to clean a restricted floor");
+        throw std::runtime_error("Cannot clean a restricted floor");
+    }
     switch (robot_size) {
         case RobotSize::Small:
             switch (size_) {

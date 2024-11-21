@@ -5,7 +5,7 @@
 
 class AddRobotWindow : public wxDialog {
     public:
-        AddRobotWindow(wxWindow* parent);
+        AddRobotWindow(wxWindow* parent, std::vector<std::string> names);
 
         // Everything below this is just a getter for the form rows
         std::string get_type() {
@@ -30,8 +30,21 @@ class AddRobotWindow : public wxDialog {
                 return "Error";
             }
         };
-        std::string get_current_position() { return std::string(current_position_->GetValue().mb_str()); };
-        std::string get_charging_position() { return std::string(charging_position_->GetValue().mb_str()); };
+        std::string get_charging_position() {
+            int sol;
+            for (int i = 0; i < 11; i++) {
+                try {
+                    if (boxes_[i]->GetValue()) {
+                        sol = i + 1;
+                        return std::to_string(sol);
+                    }
+                } catch (...) {
+                    continue;
+                }
+            }
+            return "-1";
+        };
+        
         std::string get_name() { return std::string(robot_name_->GetValue().mb_str()); };
     private:
         // members for all the options in the form
@@ -44,6 +57,19 @@ class AddRobotWindow : public wxDialog {
         wxTextCtrl* current_position_;
         wxTextCtrl* charging_position_;
         wxTextCtrl* robot_name_;
+        wxRadioButton* floor1;
+        wxRadioButton* floor2;
+        wxRadioButton* floor3;
+        wxRadioButton* floor4;
+        wxRadioButton* floor5;
+        wxRadioButton* floor6;
+        wxRadioButton* floor7;
+        wxRadioButton* floor8;
+        wxRadioButton* floor9;
+        wxRadioButton* floor10;
+        wxRadioButton* floor11;
+        int num_added_;
+        std::vector<wxRadioButton*> boxes_ = {floor1, floor2, floor3, floor4, floor5, floor6, floor7, floor8, floor9, floor10, floor11};
 };
 
 #endif

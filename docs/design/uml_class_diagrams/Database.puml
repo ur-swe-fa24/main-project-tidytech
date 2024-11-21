@@ -2,28 +2,62 @@
 skinparam dpi 200
 skinparam DefaultFontName Inconsolata
 ' To produce the UML png
-class Database {
-    - robots_ : unordered_map<int, vector<string>>
-    - floors_ : unordered_map<int, vector<string>>
-    - tasks_ : unordered_map<int, vector<string>>
+package Database {
+    class DBManager {
+        + static DBManager& getInstance(const string& uri, const string& dbName)
+        + mongocxx::database getDatabase() const
+        - mongocxx::instance instance_
+        - mongocxx::client client_
+        - mongocxx::database database_
+        - DBManager(const sstring& uri, const string& dbName)
+        - DBManager(const DBManager&)
+        - operator=(const DBManager&)
+    }
+    class FloorAdapter{
+        + FloorAdapter(mongocxx::collection collection)
+        + void insertFloor(const ststring& id, const string& name, const string& roomType, const string& floortype, \
+            
+            const string& size, const string& interaction, const string& restricted, const string& clean_level)
+        + optional<bsoncxx::document::value> findDocumentById(const string& floorId)
+        + bool updateCleanLevel(const string& floorId, const string& newCleanLevel)
+        + bool updateRestriction(const string& floorId, const string& restricted)
+        + bool deleteFloor(const string& floorId)
+        + vector<bsoncxx::document::value> getAllFloors()
+        - mongocxx::collection collection_
+    }
+    class RobotAdapter {
+        + RobotAdapter(mongocxx::collection collection)
+        + void insertRobot(const ststring& id, const string& name, const string& size, const string& type, \
+        
+            const string& baseLocation, const string& currentLocation, const string& status, const string& capacity)
+        + optional<bsoncxx::document::value> findDocumentById(const string& robotId)
+        + bool updateRobotLocation(const string& robotId, const string& newLocation)
+        + bool updateRobotStatus(const string& robotId, const string& newStatus)
+        + bool updateRobotCapacity(const string& robotId, const string& newCapacity)
+        + bool deleteRobot(const string& robotId)
+        + vector<bsoncxx::document::value> getAllRobots();
+        - mongocxx::collection collection_
 
-    + Database()
-    
-    + add_robot(id : int, type : string, available : int, location : int)
-    + add_floor(id : int, name : string, type : string)
-    + add_task(id : int, robot_assigned : vector<int>, room_assigned : vector<int>, status : string)
-    
-    + get_robot(id : int) : vector<string>
-    + get_floor(id : int) : vector<string>
-    + get_task(id : int) : vector<string>
-    
-    + update_robot(id : int, type : string, available : int, location : int)
-    + update_floor(id : int, name : string, type : string)
-    + update_task(id : int, robot_assigned : vector<int>, room_assigned : vector<int>, status : string)
-    
-    + delete_robot(id : int)
-    + delete_floor(id : int)
-    + delete_task(id : int)
+    } 
+    class TaskAdapter {
+        + TaskAdapter(mongocxx::collection collection)
+        + void insertTask(const string& id, const string& name, const string& description, const string& start_time, \
+            
+            const string& end_time, const string& status, const string& completion, const <string>& assigned_robots)
+        + optional<bsoncxx::document::value> findDocumentById(const string& taskId)
+        + bool updateTaskStartTime(const string& taskId, const string& start_time)
+        + bool updateTaskEndTime(const string& taskId, const string& end_time)
+        + bool updateTaskStatus(const string& taskId, const string& status)
+        + bool updateTaskCompletion(const string& taskId, const string& completion)
+        + bool updateTaskRobotAssignment(const string& taskId, const <string>& assigned_robots)
+        + bool deleteTask(const string& taskId)
+        - mongocxx::collection collection_
+    }
+
+    DBManager *-- FloorAdapter 
+    DBManager *-- RobotAdapter 
+    DBManager *-- TaskAdapter 
+
 }
 
 @enduml

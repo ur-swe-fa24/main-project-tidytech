@@ -10,30 +10,46 @@ std::vector<Floor> FloorPlan::get_all_floor() const {
     return floors;
 }
 
+// Access a Floor with int
+Floor FloorPlan::access_floor(int floor_id) {
+    for (const auto& pair : floorgraph_) {
+        if (floor_id == pair.first.get_id()) {
+            return pair.first;
+        }
+    }
+    spdlog::error("Floor id {} does not exist in the FloorPlan", floor_id);
+    throw std::runtime_error("Floor not found in the FloorPlan");
+}
+
 // to_string for FloorPlan
 std::string FloorPlan::to_string() const {
     std::string out_str = "FloorPlan: \n";
     for (const auto& pair : floorgraph_) {
-        out_str += "Id: " + std::to_string(pair.first.get_id()) + ", Number of Robots: " + std::to_string(get_num_robots(pair.first)) + ", Adjacent Floors: ";
+        out_str += "Id: " + std::to_string(pair.first.get_id()) + ", Adjacent Floors: ";
         std::string neighbors_str = "";
-        for (const auto& neighbor : pair.second) {
+        for (const Floor& neighbor : pair.second) {
             neighbors_str += std::to_string(neighbor.get_id()) + ", ";
         }
         if (neighbors_str.length() >= 2) {
         neighbors_str.erase(neighbors_str.length() - 2, 2); // Remove last two characters
         }
-        out_str += neighbors_str = "\n";
+        out_str += neighbors_str + "\n";
     }
     return out_str;
 }
 
 // to_string for Floor
 std::string FloorPlan::floor_to_string(const Floor& floor) const {
+    if (floorgraph_.find(floor) == floorgraph_.end()) {
+        spdlog::error("Floor id {} does not exist in the floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan for to_string operation");
+    }
+
     std::string out_str = floor.to_string();
     std::string neighbors_str = "";
     std::vector<Floor> neighbors = floorgraph_.at(floor);
     for (const auto& neighbor : neighbors) {
-        neighbors_str += std::to_string(neighbor.get_id()) + ", ";
+        neighbors_str += neighbor.get_name() + ", ";
     }
 
     if (neighbors_str.length() >= 2) {
@@ -48,31 +64,39 @@ std::string FloorPlan::floor_to_string(const Floor& floor) const {
 void FloorPlan::add_floor(const Floor& floor, const std::vector<Floor> neighbors) {
     if (floorgraph_.count(floor) != 1) {
         floorgraph_[floor] = neighbors;
-        floor_to_robots_[floor] = std::vector<RobotSize>(); // add to floor_to_robots
         update_neighbors(floor, true); // Update all other neighbors
     } else {
         // Floor already exist in the graph
         spdlog::error("Floor {} already exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor already in the FloorPlan");
     }
 }
 
 // Remove floor from the FloorPlan
 void FloorPlan::remove_floor(const Floor& floor) {
-    // Check if there is any robot in the floor
-    auto remove_floor_to_robot = floor_to_robots_.find(floor);
-    if ((remove_floor_to_robot != floor_to_robots_.end()) && (remove_floor_to_robot->second.size() == 0)) {
-        auto remove = floorgraph_.find(floor);
-        if (remove != floorgraph_.end()) {
-            update_neighbors(floor, false); // Update all other neighbors
-            floorgraph_.erase(remove);
-            floor_to_robots_.erase(remove_floor_to_robot);
-        } else {
-            // Floor does not exist in the graph
-            spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
-        }
+    auto remove = floorgraph_.find(floor);
+    if (remove != floorgraph_.end()) {
+        update_neighbors(floor, false); // Update all other neighbors
+        floorgraph_.erase(remove);
     } else {
-        // Floor does not exist in the floor_to_robots or there are robots in the floor
-        spdlog::error("Floor {} either has robots or does not exist in the Floor_to_Robot", floor.get_id());
+        // Floor does not exist in the graph
+        spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
+    }
+}
+
+void FloorPlan::update_floor(const Floor& floor) {
+    auto the_floor = floorgraph_.find(floor);
+    auto neighbors = std::vector<Floor>();
+    if (the_floor != floorgraph_.end()) {
+        neighbors = the_floor->second; // Set the old neighbors
+        remove_floor(floor); // Remove the old floor
+        add_floor(floor, neighbors); // Add the new floor
+        auto newfloor = floorgraph_.find(floor);
+    } else {
+        // Floor does not exist in the graph
+        spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
     }
 }
 
@@ -85,11 +109,13 @@ std::vector<Floor> FloorPlan::get_neighbors(const Floor& floor) const {
 void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Floor> neighbors) {
     auto update = floorgraph_.find(floor);
     if (update != floorgraph_.end()) {
-        update_neighbors(floor, false); // Update all other neighbors
+        update_neighbors(floor, false); // Remove floor from old neighbors
         update->second = neighbors;
+        update_neighbors(floor, true); // Update new neighbors
     } else {
         // Floor does not exist in the graph
         spdlog::error("Floor {} does not exist in the Floorplan", floor.get_id());
+        throw std::runtime_error("Floor not found in the FloorPlan");
     }
 }
 
@@ -97,9 +123,12 @@ void FloorPlan::update_floor_neighbors(const Floor& floor, const std::vector<Flo
 void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     std::vector<Floor> floors_to_modify = floorgraph_[floor];
     if (add) {
-        // append floor to every neighbor's vector
-        for (Floor modify_floor : floors_to_modify) {
-            floorgraph_[modify_floor].push_back(floor);
+        // Append floor to every neighbor's vector if not already present
+        for (Floor& modify_floor : floors_to_modify) {
+            std::vector<Floor>& neighbors = floorgraph_[modify_floor];
+            if (std::find(neighbors.begin(), neighbors.end(), floor) == neighbors.end()) {
+                neighbors.push_back(floor);
+            }
         }
 
     } else {
@@ -107,7 +136,7 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
         for (Floor modify_floor : floors_to_modify) {
             int pos = 0;
             std::vector<Floor> modify_neighbors = floorgraph_[modify_floor];
-            for (int i = 0; i < modify_neighbors.size(); pos++) {
+            for (int i = 0; i < modify_neighbors.size(); i++) {
                 if (modify_neighbors[pos] == floor) {
                     break;
                 }
@@ -121,18 +150,86 @@ void FloorPlan::update_neighbors(const Floor& floor, bool add) {
     }
 }
 
-// Add robotsize to the floor_to_robots_
-void FloorPlan::add_robot_to_floor(const Floor& floor, const RobotSize robot_size) {
-    floor_to_robots_.at(floor).push_back(robot_size);
+// Get the shortest path between two floors and return a queue of floor ids
+std::queue<int> FloorPlan::get_path(int floor_id_start, int floor_id_goal) {
+    // Edge Cases
+    if (floorgraph_.empty()) {
+        throw std::runtime_error("The FloorPlan is empty. Cannot compute a path");
+    }
+
+    std::queue<Floor> frontier; // Queue
+    std::vector<Floor> visited;
+    std::unordered_map<int, int> track_path;
+
+    // Initialization
+    track_path[floor_id_start] = -1; // Starting point with -1 as its parent id
+    frontier.push(access_floor(floor_id_start)); // Push the start node into the frontier
+
+    while (frontier.size() > 0) {
+        int curr_floor_id = frontier.front().get_id();
+        if (curr_floor_id == floor_id_goal) {
+            return get_shortest_path(track_path, floor_id_goal);
+        } else {
+            Floor curr_floor = access_floor(curr_floor_id);
+            for (const Floor& floor : get_neighbors(curr_floor)) {
+                if ((!floor_in_frontier(frontier, floor)) && (!floor_visited(visited, floor))) {
+                    // Push all its neighbors nodes onto the frontier
+                    frontier.push(floor);
+                    track_path[floor.get_id()] = curr_floor_id; // Set parent for all of these floors
+                }
+            }
+        }
+        visited.push_back(frontier.front());
+        frontier.pop(); // Remove the current floor
+    }
+    // Path does not exist
+    throw std::runtime_error("No path found from floor ID " + std::to_string(floor_id_start) + " to floor ID " + std::to_string(floor_id_goal));
 }
 
-// Remove an instance of robotsize from the floor_to_robots_
-void FloorPlan::remove_robot_from_floor(const Floor& floor, const RobotSize robot_size) {
-    auto remove = floor_to_robots_.find(floor);
-    if (remove != floor_to_robots_.end()) {
-        floor_to_robots_.erase(remove);
-    } else {
-        // RobotSize does not exist in the Floor
-        spdlog::error("RobotSize does not exist in the Floor {}", std::to_string(floor.get_id()));
+bool FloorPlan::floor_in_frontier(std::queue<Floor> queue, const Floor& check_floor) {
+    // Check if check_floor is in queue
+    while (!queue.empty()) {
+        if (check_floor == queue.front()) {
+            return true;
+        }
+        queue.pop();
     }
+
+    return false;
+}
+
+bool FloorPlan::floor_visited(std::vector<Floor> visited, const Floor& check_floor) {
+    // Check if check_floor is in the visited vector
+    for (const auto& floor : visited) {
+        if (floor == check_floor) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+std::queue<int> FloorPlan::get_shortest_path(std::unordered_map<int,int> track_path, int floor_id_goal) {
+    if (track_path.find(floor_id_goal) == track_path.end()) {
+        throw std::runtime_error("Goal floor ID " + std::to_string(floor_id_goal) + " is not reachable");
+    }
+
+    // Trace the path
+    std::vector<int> path_backward; // stack
+    int curr = floor_id_goal;
+    while (curr != -1) {
+        //spdlog::info("Curr floor {}", curr);
+        path_backward.push_back(curr);
+        curr = track_path[curr];
+    }
+
+    std::queue<int> path_forward;
+    while(!path_backward.empty()) {
+        path_forward.push(path_backward.back());
+        path_backward.pop_back();
+    }
+
+    return path_forward;
+    
 }
