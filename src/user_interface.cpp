@@ -145,6 +145,12 @@ void UserInterface::notify(const Event& event, const std::string& data) {
     }
 }
 
+// void UserInterface::notify(const Event& event, const int id, const std::vector<int>& data) {
+//     for (auto& subscriber : subscribers_[event]) {
+//         subscriber->update(event, id, data);
+//     }
+// }
+
 void UserInterface::subscribe(const Event& event) {
     // subscribe to an event
     fm_.subscribe(this, event);
@@ -161,6 +167,10 @@ void UserInterface::update(const Event& event, const std::string& data) {
         handle_display_text(data);
     }
 }
+
+// void UserInterface::update(const Event& event, const int id, const std::vector<int>& data) {
+//     // changes needed here
+// }
 
 // Method called after event "display_text" occurs
 void UserInterface::handle_display_text(const std::string& data) {
