@@ -154,9 +154,15 @@ void FleetManager::update(const Event& event, const std::string& data) {
     }
 }
 
-void FleetManager::update(const Event& event, const int id, const std::vector<int> data) {
+void FleetManager::update(const Event& event, const int id, const std::vector<int>& data) {
     if (event == Event::UpdateFloorNeighbors) {
         update_neighbors_db(id, data);
+    }
+}
+
+void FleetManager::notify(const Event& event, const int id, const std::vector<int>& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, data);
     }
 }
 
