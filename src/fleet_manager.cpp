@@ -160,6 +160,12 @@ void FleetManager::update(const Event& event, const int id, const std::vector<in
     }
 }
 
+void FleetManager::notify(const Event& event, const int id, const std::vector<int>& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, data);
+    }
+}
+
 void FleetManager::handle_five_sec_ping(const std::string& data) {
     // Prints data
     std::cout << data << std::endl;
