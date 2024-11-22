@@ -45,7 +45,7 @@ class Simulator : public Publisher {
         int get_num_floors() const {return floorplan_.get_all_floor().size();};
 
         void add_floor(int id, std::string name, FloorRoomType room, FloorType floortype, FloorSize size, FloorInteraction interaction_level, bool restriction, int clean_level, std::vector<int> neighbors);
-        void add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path);
+        void add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path, int total_battery_used, int error_count, int rooms_cleaned);
         std::string status_report(int robot_id);
         void add_task_to_front(int robot_id, std::vector<int> floor_ids);
         void add_task_to_back(int robot_id, std::vector<int> floor_ids);

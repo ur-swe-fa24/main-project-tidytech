@@ -9,7 +9,8 @@ using bsoncxx::builder::basic::kvp;
 
 void RobotAdapter::insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
                                 const std::string& baseLocation, const std::string& currentLocation,
-                                const std::string& status, const std::string& capacity, const std::vector<int>& taskQueue, const std::vector<int>& path) {
+                                const std::string& status, const std::string& capacity, const std::vector<int>& taskQueue, const std::vector<int>& path,
+                                const int& totalBatteryUsed, const int& errorCount, const int& roomsCleaned) {
 
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
@@ -45,7 +46,10 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
             kvp("status", status),
             kvp("capacity", capacity),
             kvp("task_queue", task_queue),
-            kvp("path", robot_path));
+            kvp("path", robot_path),
+            kvp("total_battery_used", totalBatteryUsed),
+            kvp("error_count", errorCount),
+            kvp("rooms_cleaned", roomsCleaned));
         collection_.insert_one(robot_doc.view());
     }
 }
@@ -127,7 +131,7 @@ bool RobotAdapter::updateRobotCapacity(const std::string& robotId, const std::st
 */
 
 bool RobotAdapter::updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed, const int& errorCount, const int& roomsCleaned) {
     auto query_doc = make_document(
         kvp("_id", id)
     );
@@ -146,7 +150,10 @@ bool RobotAdapter::updateRobot(const std::string& id, const std::string& current
                 kvp("current_location", currentLocation),
                 kvp("capacity", capacity),
                 kvp("task_queue", task_queue),
-                kvp("path", robot_path)
+                kvp("path", robot_path),
+                kvp("total_battery_used", totalBatteryUsed),
+                kvp("error_count", errorCount),
+                kvp("rooms_cleaned", roomsCleaned)
             )
         )
     );

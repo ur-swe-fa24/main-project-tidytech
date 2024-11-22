@@ -21,7 +21,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Constructor
         FleetManager();
 
-        int add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, int capacity, std::vector<int> task_queue, std::vector<int> path);
+        int add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, int capacity, std::vector<int> task_queue, std::vector<int> path, int total_battery_used, int error_count, int rooms_cleaned);
         int add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
         bool add_task_to_front(int robot_id, std::vector<int> floor_ids);
         bool add_task_to_back(int robot_id, std::vector<int> floor_ids);

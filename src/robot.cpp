@@ -15,6 +15,10 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base,
     remaining_capacity_ = 100;
     task_queue_ = {};
     curr_path_ = {};
+    total_battery_used = 0;
+    error_count = 0;
+    rooms_cleaned = 0;
+
 } 
 
 // to_string for robot object
@@ -52,6 +56,9 @@ std::string Robot::to_string() const {
             "Current Location: " + std::to_string(curr_) + "\n" +
             "Current Path: " + str_path + "\n" +
             "Tasks: " + str_tasks + "\n";
+            "Total Battery Used: " + std::to_string(total_battery_used) + "\n" +
+            "Error Count: " + std::to_string(error_count) + "\n" +
+            "Rooms Cleaned: " + std::to_string(rooms_cleaned);
 }
 
 // Add tasks at the back of the queue
