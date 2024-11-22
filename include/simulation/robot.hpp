@@ -69,6 +69,9 @@ class Robot{
         std::vector<int> task_queue_;
         RobotStatus status_;
         std::queue<int> curr_path_; // Shortest path from one floor to another
+        int total_battery_used;
+        int error_count;
+        int rooms_cleaned;
         
 };
 
