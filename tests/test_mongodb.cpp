@@ -90,7 +90,13 @@ TEST_CASE("Floor Adapter Unit Tests") {
         auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
         REQUIRE(bsoncxx::to_json(*foundFloor).find("true") != std::string::npos);
+    }
 
+    SECTION("Update Floor neighbors") {
+        floorAdapter.updateNeighbors("1", {1, 2, 3});
+        auto foundFloor = floorAdapter.findDocumentById("1");
+        REQUIRE(foundFloor);
+        // REQUIRE(bsoncxx::to_json(*foundFloor).find("") != std::string::npos);
     }
 
     //testing delete floor
