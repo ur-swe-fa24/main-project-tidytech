@@ -34,7 +34,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void subscribe(const Event& event);
         void unsubscribe(const Event& event);
         void update(const Event& event, const std::string& data) override;
-        void update(const Event& even, const int id, const std::vector<int>& data) override;
+        void update(const Event& event, const int id, const std::vector<int>& data) override;
 
         void subscribe(Subscriber* subscriber, const Event& event) override;
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
