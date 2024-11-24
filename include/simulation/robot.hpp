@@ -33,6 +33,7 @@ class Robot{
         int get_battery() const {return battery_;};
         std::vector<int> get_task_queue() const {return task_queue_;};
         int get_task_size() const {return task_queue_.size();};
+        std::queue<int> get_curr_path() const {return curr_path_;};
         int get_curr_path_size() const {return curr_path_.size();};
         std::string to_string() const;
 
