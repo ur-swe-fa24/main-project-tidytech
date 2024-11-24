@@ -143,18 +143,14 @@ void FleetManager::unsubscribe(const Event& event) {
 
 void FleetManager::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
-    switch (event) {
-        case Event::FiveSecReport:
-            handle_five_sec_ping(data);
-            break;
-        case Event::FinalReport:
-            handle_finished_ping(data);
-            break;
-        case Event::ErrorReport:
-            // TODO
-            break;
-        case Event::DisplayText:
-            break;
+    if (event == Event::FiveSecReport) {
+        handle_five_sec_ping(data);
+    } elif (event == Event::FinalReport) {
+        handle_finished_ping(data);
+    } elif (event == Event::ErrorReport) {
+        // TODO
+    } elif (event == Event::DisplayText) {
+        // TODO
     }
 }
 
@@ -235,13 +231,6 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
     if (floor_id_count >= 11) {
         std::cerr << "Error: reached the limit of floors" << std::endl;
         return false;
-    }
-
-    std::cout <<"Reached here: Neighbor size: ";
-    std::cout << neighbors.size() << std::endl;
-    for (int n : neighbors) {
-        std::cout << name + " neighbors: ";
-        std::cout << n << std::endl;
     }
 
     floor_id_count += 1;

@@ -82,9 +82,6 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
     AddFloorWindow floorForm(this, names, num_added_+names.size());
     if (floorForm.ShowModal() == wxID_OK) {
-        std::vector<int> tmp = floorForm.get_floor_neighbors();
-        std::cout << "In UI, OnAddFloor method. Size of neighbors: ";
-        std::cout << tmp.size() <<endl;
         if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
             wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
             num_added_++;
