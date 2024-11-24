@@ -87,51 +87,10 @@ bool RobotAdapter::updateRobotStatus(const std::string& robotId, const std::stri
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0;
 }
-
-bool RobotAdapter::updateRobotLocation(const std::string& robotId, const std::string& newLocation) {
-    // build the query document to find the robot by ID
-    auto query_doc = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("_id", robotId)
-    );
-
-    // build the update document for the current location
-    auto update_doc = make_document(
-        kvp("$set", 
-            make_document(
-                kvp("current_location", newLocation)
-            )
-        )
-    );
-
-    // execute the update operation
-    auto result = collection_.update_one(query_doc.view(), update_doc.view());
-    return result && result->modified_count() > 0; 
-}
-
-
-bool RobotAdapter::updateRobotCapacity(const std::string& robotId, const std::string& newCapacity) {
-    // build the query document to find the robot by ID
-    auto query_doc = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("_id", robotId)
-    );
-
-    // build the update document for the current capacity
-    auto update_doc = make_document(
-        kvp("$set", 
-            make_document(
-                kvp("capacity", newCapacity)
-            )
-        )
-    );
-
-    // execute the update operation
-    auto result = collection_.update_one(query_doc.view(), update_doc.view());
-    return result && result->modified_count() > 0; 
-}
 */
 
 bool RobotAdapter::updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed, const int& errorCount, const int& roomsCleaned) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& battery_changed) {
     auto query_doc = make_document(
         kvp("_id", id)
     );
@@ -150,16 +109,50 @@ bool RobotAdapter::updateRobot(const std::string& id, const std::string& current
                 kvp("current_location", currentLocation),
                 kvp("capacity", capacity),
                 kvp("task_queue", task_queue),
-                kvp("path", robot_path),
-                kvp("total_battery_used", totalBatteryUsed),
-                kvp("error_count", errorCount),
-                kvp("rooms_cleaned", roomsCleaned)
+                kvp("path", robot_path)
+            )
+        ),
+        kvp("$inc", 
+            make_document(
+                kvp("total_battery_used", battery_changed)
             )
         )
     );
-
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0;
+}
+
+
+bool RobotAdapter::updateRobotErrorCount(const std::string& id) {
+    auto query_doc = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("_id", id)
+    );
+
+    auto update_doc = make_document(
+        kvp("$inc", 
+            make_document(
+                kvp("error_count", 1)
+            )
+        )
+    );
+    auto result = collection_.update_one(query_doc.view(), update_doc.view());
+    return result && result->modified_count() > 0; 
+}
+
+bool RobotAdapter::updateRobotRoomsCleaned(const std::string& id) {
+    auto query_doc = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("_id", id)
+    );
+
+    auto update_doc = make_document(
+        kvp("$inc", 
+            make_document(
+                kvp("rooms_cleaned", 1)
+            )
+        )
+    );
+    auto result = collection_.update_one(query_doc.view(), update_doc.view());
+    return result && result->modified_count() > 0; 
 }
 
 bool RobotAdapter::deleteRobot(const std::string& robotId) {
