@@ -19,14 +19,14 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
         void notify(const Event& event, const std::string& data) override;
         void notify(const Event& event, const int id, const std::vector<int>& data) override;
         void notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) override;
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) override;
 
         void subscribe(const Event& event);
         void unsubscribe(const Event& event);
         void update(const Event& event, const std::string& data) override;
         void update(const Event& event, const int id, const std::vector<int>& data) override;
         void update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) override;
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) override;
         
     private:
         void OnStartSimulation(wxCommandEvent& evt);

@@ -16,15 +16,15 @@ public:
 
     // Insert a new robot document
     void insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
-                    const std::string& baseLocation, const std::string& currentLocation,
-                    const std::string& status, const std::string& capacity, const std::vector<int>& taskQueue, const std::vector<int>& path,
+                    const std::string& baseLocation, const std::string& currentLocation, const std::string& status,
+                    const std::string& capacity, const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery,
                     const int& totalBatteryUsed, const int& errorCount, const int& roomsCleaned);
 
     // Find a document by robot ID
     std::optional<bsoncxx::document::value> findDocumentById(const std::string& robotId);
 
     bool updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed);
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery, const int& totalBatteryUsed);
     bool updateRobotErrorCount(const std::string& id);
     bool updateRobotRoomsCleaned(const std::string& id);
     bool deleteRobot(const std::string& robotId);

@@ -74,12 +74,14 @@ void Simulator::simulate_robots() {
                 case RobotStatus::Charging:
                     if (robot.at_base()) {
                         robot.charge(); // only charge if you reached base
+                        update_robot_db(robot, 0);
                     } else {
                         // Keep moving to base
                         robot.consume_power();
                         robot.move_to_next_floor();
+                        update_robot_db(robot, 1);
                     }
-                    update_robot_db(robot, 0);
+                    
                     break;
                 case RobotStatus::Traveling:
                     robot.consume_power(); // traveling power consumption
@@ -192,8 +194,8 @@ void Simulator::reset_simulation() {
 
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path, int total_battery_used, int error_count, int rooms_cleaned) {
-    Robot robot(id, name, size, type, base, curr, status);
+void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path, int current_battery, int total_battery_used, int error_count, int rooms_cleaned) {
+    Robot robot(id, name, size, type, base, curr, status, current_battery);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
 }
@@ -207,7 +209,7 @@ void Simulator::update_robot_db(Robot& robot, int powerUsed) {
         curr_path.push_back(tmp_queue.front());
         tmp_queue.pop();
     }
-    notify(Event::UpdateRobotParameters, std::to_string(robot.get_id()), std::to_string(robot.get_curr()), to_string(robot.get_status()), std::to_string(robot.get_remaining_capacity()), robot.get_task_queue(), curr_path, 1); // Consume 1 power unit
+    notify(Event::UpdateRobotParameters, std::to_string(robot.get_id()), std::to_string(robot.get_curr()), to_string(robot.get_status()), std::to_string(robot.get_remaining_capacity()), robot.get_task_queue(), curr_path, robot.get_battery(), powerUsed); // Consume 1 power unit
 }
 
 // Add floor to the vector of floors_
@@ -405,9 +407,9 @@ void Simulator::notify(const Event& event, const int id, const vector<int>& data
 
 // Notify all the subscribers
 void Simulator::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
     for (auto& subscriber : subscribers_[event]) {
-        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
     }
 }
 

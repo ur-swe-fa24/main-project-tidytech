@@ -24,18 +24,18 @@ TEST_CASE("Robot Adapter Unit Tests") {
 
     //testing inserting and finding robot
     SECTION("Insert and Find Robot") {
-        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active", "100", {1, 2, 3}, {1, 2, 3}, 10, 0, 0);
+        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active", "100", {1, 2, 3}, {1, 2, 3}, 100, 10, 0, 0);
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
         REQUIRE(bsoncxx::to_json(*foundRobot).find("1") != std::string::npos);
 
         //exception when trying to insert a robot with a duplicate ID
-        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive", "100", {1, 2, 3}, {1, 2, 3}, 0, 0, 0));
+        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive", "100", {1, 2, 3}, {1, 2, 3}, 100, 0, 0, 0));
     }
 
     //testing updating robot
     SECTION("Update Robot") {
-        robotAdapter.updateRobot("1", "office2", "active", "100", {1, 2, 3}, {1, 2, 3}, 20);
+        robotAdapter.updateRobot("1", "office2", "active", "100", {1, 2, 3}, {1, 2, 3}, 80, 20);
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
         REQUIRE(bsoncxx::to_json(*foundRobot).find("office2") != std::string::npos);

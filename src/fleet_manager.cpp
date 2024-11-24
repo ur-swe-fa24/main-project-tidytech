@@ -72,15 +72,49 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
             for (const auto& step : pathArray) {
                 path.push_back(step.get_int32());
             }
-            int total_battery_used = std::stoi(robot.view()["total_battery_used"].get_utf8().value.to_string());
-            int error_count = std::stoi(robot.view()["error_count"].get_utf8().value.to_string());
-            int rooms_cleaned = std::stoi(robot.view()["rooms_cleaned"].get_utf8().value.to_string());
+            // int current_battery = std::stoi(robot.view()["current_battery"].get_utf8().value.to_string());
+            // int total_battery_used = std::stoi(robot.view()["total_battery_used"].get_utf8().value.to_string());
+            // int error_count = std::stoi(robot.view()["error_count"].get_utf8().value.to_string());
+            // int rooms_cleaned = std::stoi(robot.view()["rooms_cleaned"].get_utf8().value.to_string());
+            int current_battery = 0;
+            int total_battery_used = 0;
+            int error_count = 0;
+            int rooms_cleaned = 0;
+            if (robot.view()["current_battery"].type() == bsoncxx::type::k_int32) {
+                current_battery = robot.view()["current_battery"].get_int32();
+            } else if (robot.view()["current_battery"].type() == bsoncxx::type::k_int64) {
+                current_battery = static_cast<int>(robot.view()["current_battery"].get_int64());
+            } else {
+                throw std::runtime_error("Unexpected type for current_battery field");
+            }
+            if (robot.view()["total_battery_used"].type() == bsoncxx::type::k_int32) {
+                total_battery_used = robot.view()["total_battery_used"].get_int32();
+            } else if (robot.view()["total_battery_used"].type() == bsoncxx::type::k_int64) {
+                total_battery_used = static_cast<int>(robot.view()["total_battery_used"].get_int64());
+            } else {
+                throw std::runtime_error("Unexpected type for total_battery_used field");
+            }
+            if (robot.view()["rooms_cleaned"].type() == bsoncxx::type::k_int32) {
+                rooms_cleaned = robot.view()["rooms_cleaned"].get_int32();
+            } else if (robot.view()["rooms_cleaned"].type() == bsoncxx::type::k_int64) {
+                rooms_cleaned = static_cast<int>(robot.view()["rooms_cleaned"].get_int64());
+            } else {
+                throw std::runtime_error("Unexpected type for rooms_cleaned field");
+            }
 
+            // Retrieve and process "error_count"
+            if (robot.view()["error_count"].type() == bsoncxx::type::k_int32) {
+                error_count = robot.view()["error_count"].get_int32();
+            } else if (robot.view()["error_count"].type() == bsoncxx::type::k_int64) {
+                error_count = static_cast<int>(robot.view()["error_count"].get_int64());
+            } else {
+                throw std::runtime_error("Unexpected type for error_count field");
+            }
 
             RobotSize rsSize = to_enum_robot_size(size);
             RobotType rtType = to_enum_robot_type(type);
             RobotStatus rsStatus = to_enum_robot_status(status);
-            simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus, std::stoi(remaining_capacity), task_queue, path, total_battery_used, error_count, rooms_cleaned);
+            simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus, std::stoi(remaining_capacity), task_queue, path, current_battery, total_battery_used, error_count, rooms_cleaned);
 
             if (id > robot_id_count) {
                 robot_id_count = id;
@@ -165,9 +199,9 @@ void FleetManager::update(const Event& event, const int id, const std::vector<in
 }
 
 void FleetManager::update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
     if (event == Event::UpdateRobotParameters) {
-        robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+        robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
     }
 }
 
@@ -185,9 +219,9 @@ void FleetManager::notify(const Event& event, const int id, const std::vector<in
 }
 
 void FleetManager::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
     for (auto& subscriber : subscribers_[event]) {
-        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
     }
 }
 
@@ -218,8 +252,8 @@ void FleetManager::update_neighbors_db(const int id, const std::vector<int>& dat
 }
 
 void FleetManager::update_robot_db(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
-    robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
+    robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
 }
 
 
@@ -234,8 +268,8 @@ int FleetManager::add_robot(std::string name, std::string size, std::string type
     }
     robot_id_count += 1;
     try {
-        robot_adapter_.insertRobot(std::to_string(robot_id_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100", {}, {}, 0, 0, 0);
-        simulator_.add_robot(robot_id_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available, 100, {}, {}, 0, 0, 0);
+        robot_adapter_.insertRobot(std::to_string(robot_id_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100", {}, {}, 100, 0, 0, 0);
+        simulator_.add_robot(robot_id_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
     } catch (const std::exception& e) {
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
         return false;
@@ -259,7 +293,7 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
 
     floor_id_count += 1;
     try {
-        floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "false", "100", neighbors);
+        floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "false", "50", neighbors);
         simulator_.add_floor(floor_id_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 50, neighbors);
     } catch (const std::exception& e) {
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
