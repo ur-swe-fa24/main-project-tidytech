@@ -8,6 +8,7 @@
 #include "database/task_adapter.hpp" 
 #include <bsoncxx/json.hpp>
 #include "database/floor_adapter.hpp" 
+#include "database/error_adapter.hpp" 
 
 // create the MongoDB instance
 mongocxx::instance instance{};
@@ -184,5 +185,74 @@ TEST_CASE("Task Adapter Unit Tests") {
         foundTask = taskAdapter.findDocumentById("1");
         REQUIRE(!foundTask);
     }
-
 }
+/**
+ * unit tests for error adapter
+ */
+TEST_CASE("Error Adapter Unit Tests") {
+    auto db = client["test_database"];
+    auto collection = db["errors"];
+    ErrorAdapter errorAdapter(collection);
+
+    // Testing inserting and finding error
+    SECTION("Insert and Find Error") {
+        errorAdapter.insertError("1", "1", "Out of Battery", 0);
+        auto foundError = errorAdapter.findDocumentById("1");
+        REQUIRE(foundError);
+        REQUIRE(bsoncxx::to_json(*foundError).find("Out of Battery") != std::string::npos);
+
+        // Exception when trying to insert an error with a duplicate ID
+        REQUIRE_THROWS(errorAdapter.insertError("1", "2", "Random Break", 0));
+    }
+
+    // Testing finding errors by robot ID
+    SECTION("Find Error by Robot ID") {
+        errorAdapter.insertError("2", "2", "Random Break", 0);
+        errorAdapter.insertError("3", "2", "Out of Battery", 1);
+
+        auto errorsForRobot2 = errorAdapter.findErrorByRobotID("2");
+        REQUIRE(errorsForRobot2.size() == 2);  // Two errors associated with robot2
+        REQUIRE(bsoncxx::to_json(errorsForRobot2[0]).find("Random Break") != std::string::npos);
+        REQUIRE(bsoncxx::to_json(errorsForRobot2[1]).find("Out of Battery") != std::string::npos);
+    }
+
+    // Testing updating error
+    SECTION("Update Error") {
+        errorAdapter.updateError("1", "1", "Out of Battery", 1);  // Resolve the error
+        auto updatedError = errorAdapter.findDocumentById("1");
+        REQUIRE(updatedError);
+        auto view = updatedError->view();
+        REQUIRE(view["resolved"].get_int32() == 1);
+    }
+
+    // Testing deleting an error
+    SECTION("Delete Error") {
+        errorAdapter.deleteError("2");
+        auto foundError = errorAdapter.findDocumentById("2");
+        REQUIRE(!foundError);
+    }
+
+    // Testing getting all errors
+    SECTION("Get All Errors") {
+        errorAdapter.insertError("4", "3", "Out of Battery", 0);
+        errorAdapter.insertError("5", "4", "Random Break", 1);
+
+        auto allErrors = errorAdapter.getAllErrors();
+        REQUIRE(allErrors.size() >= 2);  // At least two errors should exist in the collection
+        bool foundOutOfBattery = false;
+        bool foundRandomBreak = false;
+
+        for (const auto& errorDoc : allErrors) {
+            std::string errorJson = bsoncxx::to_json(errorDoc);
+            if (errorJson.find("Out of Battery") != std::string::npos) {
+                foundOutOfBattery = true;
+            }
+            if (errorJson.find("Random Break") != std::string::npos) {
+                foundRandomBreak = true;
+            }
+        }
+        REQUIRE(foundOutOfBattery);
+        REQUIRE(foundRandomBreak);
+    }
+}
+
