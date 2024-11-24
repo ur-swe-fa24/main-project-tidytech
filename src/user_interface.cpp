@@ -148,9 +148,9 @@ void UserInterface::notify(const Event& event, const int id, const std::vector<i
 }
 
 void UserInterface::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
     for (auto& subscriber : subscribers_[event]) {
-        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
     }
 }
 
@@ -176,7 +176,7 @@ void UserInterface::update(const Event& event, const int id, const std::vector<i
 }
 
 void UserInterface::update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
-                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
     // do nothing
 }
 
