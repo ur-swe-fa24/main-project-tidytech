@@ -84,7 +84,6 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     if (floorForm.ShowModal() == wxID_OK) {
         if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
             wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
-            num_added_++;
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
         }
@@ -94,7 +93,7 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
 void UserInterface::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> floor_names = fm_.get_all_floor_names();
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
-    AddTaskWindow taskForm(this, floor_names, robot_names, num_added_);
+    AddTaskWindow taskForm(this, floor_names, robot_names, floor_names.size());
     if (taskForm.ShowModal() == wxID_OK) {
         std::vector<int> tmp;
         tmp.push_back(std::stoi(taskForm.get_floor()));
@@ -148,6 +147,13 @@ void UserInterface::notify(const Event& event, const int id, const std::vector<i
     }
 }
 
+void UserInterface::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+    }
+}
+
 void UserInterface::subscribe(const Event& event) {
     // subscribe to an event
     fm_.subscribe(this, event);
@@ -166,7 +172,12 @@ void UserInterface::update(const Event& event, const std::string& data) {
 }
 
 void UserInterface::update(const Event& event, const int id, const std::vector<int>& data) {
-    // changes needed here
+    // do nothing
+}
+
+void UserInterface::update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+    // do nothing
 }
 
 // Method called after event "display_text" occurs
