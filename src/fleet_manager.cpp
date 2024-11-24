@@ -11,6 +11,12 @@ using namespace types;
 
 FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
                                 robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]} {
+    
+    // Subscribe to these two events upon initialization
+    subscribe(Event::FiveSecReport);
+    subscribe(Event::FinalReport);
+    subscribe(Event::UpdateFloorNeighbors);
+
     // get the last robot id
     auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
         bsoncxx::builder::basic::make_document(),
@@ -114,10 +120,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
         std::cerr << "Error populating floors: " << e.what() << std::endl;
     }
 
-    // Subscribe to these two events upon initialization
-    subscribe(Event::FiveSecReport);
-    subscribe(Event::FinalReport);
-    subscribe(Event::UpdateFloorNeighbors);
+    
 }
 
 void FleetManager::write_output(string filepath, string message) {
@@ -145,12 +148,12 @@ void FleetManager::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
     if (event == Event::FiveSecReport) {
         handle_five_sec_ping(data);
-    } elif (event == Event::FinalReport) {
+    } else if (event == Event::FinalReport) {
         handle_finished_ping(data);
-    } elif (event == Event::ErrorReport) {
-        // TODO
-    } elif (event == Event::DisplayText) {
-        // TODO
+    } else if (event == Event::ErrorReport) {
+        std::cout << "Error Report Event" << std::endl;
+    } else if (event == Event::DisplayText) {
+        std::cout << "DisplayText Event" << std::endl;
     }
 }
 
