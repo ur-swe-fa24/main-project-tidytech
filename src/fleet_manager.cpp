@@ -16,6 +16,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
+    subscribe(Event::UpdateRobotParameters);
 
     // get the last robot id
     auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
@@ -163,10 +164,41 @@ void FleetManager::update(const Event& event, const int id, const std::vector<in
     }
 }
 
+void FleetManager::update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+    if (event == Event::UpdateRobotParameters) {
+        update_neighbors_db(id, data);
+    }
+}
+
+// Notify all the subscribers
+void FleetManager::notify(const Event& event, const std::string& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, data);
+    }
+}
+
 void FleetManager::notify(const Event& event, const int id, const std::vector<int>& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id, data);
     }
+}
+
+void FleetManager::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
+    }
+}
+
+void FleetManager::subscribe(Subscriber* subscriber, const Event& event) {
+    subscribers_[event].push_back(subscriber);
+}
+
+// Let the subscriber unsubscribe from an event
+void FleetManager::unsubscribe(Subscriber* subscriber, const Event& event) {
+    auto& subs = subscribers_[event];
+    subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
 }
 
 void FleetManager::handle_five_sec_ping(const std::string& data) {
@@ -185,23 +217,11 @@ void FleetManager::update_neighbors_db(const int id, const std::vector<int>& dat
     floor_adapter_.updateNeighbors(std::to_string(id), data);
 }
 
-
-void FleetManager::subscribe(Subscriber* subscriber, const Event& event) {
-    subscribers_[event].push_back(subscriber);
+void FleetManager::update_robot_db(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+    robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
 }
 
-// Let the subscriber unsubscribe from an event
-void FleetManager::unsubscribe(Subscriber* subscriber, const Event& event) {
-    auto& subs = subscribers_[event];
-    subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
-}
-
-// Notify all the subscribers
-void FleetManager::notify(const Event& event, const std::string& data) {
-    for (auto& subscriber : subscribers_[event]) {
-        subscriber->update(event, data);
-    }
-}
 
 // Wrapper method that just calls the add_robot for the sim and the db
 int FleetManager::add_robot(std::string name, std::string size, std::string type, std::string charging_position, std::string current_position, int capacity, std::vector<int> task_queue, std::vector<int> path, int total_battery_used, int error_count, int rooms_cleaned) {

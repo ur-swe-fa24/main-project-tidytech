@@ -6,8 +6,9 @@ using namespace std;
 
 namespace types {
     // Events
-    enum class Event {FiveSecReport, FinalReport, ErrorReport, UpdateFloorNeighbors,
-                      DisplayText};
+    enum class Event {FiveSecReport, FinalReport, ErrorReport, 
+                        UpdateFloorNeighbors, UpdateRobotParameters,
+                        DisplayText};
 
     // Simulation Enum Classes //
     // Robot enum classes

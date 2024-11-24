@@ -69,6 +69,7 @@ void Simulator::simulate_robots() {
                             robot.go_charge();
                         }
                     }
+                    update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Charging:
                     if (robot.at_base()) {
@@ -78,10 +79,12 @@ void Simulator::simulate_robots() {
                         robot.consume_power();
                         robot.move_to_next_floor();
                     }
+                    update_robot_db(robot, 0);
                     break;
                 case RobotStatus::Traveling:
                     robot.consume_power(); // traveling power consumption
                     robot.move_to_next_task();
+                    update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Cleaning:
                     robot.consume_power(3); // Cleaning power consumption
@@ -90,6 +93,7 @@ void Simulator::simulate_robots() {
                         // Set the path to base
                         robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
                         robot.go_empty();
+                        update_robot_db(robot, 3);
                         break;
                     }
                     // Check if room is clean
@@ -102,18 +106,21 @@ void Simulator::simulate_robots() {
                             robot.set_status(RobotStatus::Available);
                         }
                     }
+                    update_robot_db(robot, 3);
                     break;
                 case RobotStatus::NeedEmpty:
+                    robot.consume_power();
                     if (robot.at_base()) {
                         // Notify operator
                         // TODO: Add event to report error
                     } else {
-                        robot.consume_power();
                         robot.move_to_next_floor();
                     }
+                    update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Unavailable:
                     notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
+                    update_robot_db(robot, 0);
                     break;
             }
         } else {
@@ -126,9 +133,11 @@ void Simulator::simulate_robots() {
             // Go back and charge
             if (robot.at_base()) {
                 robot.charge(); // only charge if you reached base
+                update_robot_db(robot, 0);
             } else {
                 robot.consume_power();
                 robot.move_to_next_floor();
+                update_robot_db(robot, 1);
             }
         }
     }
@@ -187,6 +196,18 @@ void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType ty
     Robot robot(id, name, size, type, base, curr, status);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
+}
+
+// Update robot in db
+void Simulator::update_robot_db(Robot& robot, int powerUsed) {
+    // Update db
+    vector<int> curr_path;
+    queue<int> tmp_queue = robot.get_curr_path();
+    while (!tmp_queue.empty()) {
+        curr_path.push_back(tmp_queue.front());
+        tmp_queue.pop();
+    }
+    notify(Event::UpdateRobotParameters, std::to_string(robot.get_id()), std::to_string(robot.get_curr()), to_string(robot.get_status()), std::to_string(robot.get_remaining_capacity()), robot.get_task_queue(), curr_path, 1); // Consume 1 power unit
 }
 
 // Add floor to the vector of floors_
@@ -379,6 +400,14 @@ void Simulator::notify(const Event& event, const std::string& data) {
 void Simulator::notify(const Event& event, const int id, const vector<int>& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id, data);
+    }
+}
+
+// Notify all the subscribers
+void Simulator::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
     }
 }
 
