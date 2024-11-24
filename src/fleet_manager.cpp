@@ -167,7 +167,7 @@ void FleetManager::update(const Event& event, const int id, const std::vector<in
 void FleetManager::update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& totalBatteryUsed) {
     if (event == Event::UpdateRobotParameters) {
-        update_neighbors_db(id, data);
+        robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, totalBatteryUsed);
     }
 }
 
@@ -250,6 +250,7 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
     FloorType FtType = to_enum_floor_type(type);
     FloorSize FsSize = to_enum_floor_size(size);
     FloorInteraction FiInteraction = to_enum_floor_interaction(interaction);
+
 
     if (floor_id_count >= 11) {
         std::cerr << "Error: reached the limit of floors" << std::endl;
