@@ -53,11 +53,21 @@ package Database {
         + bool deleteTask(const string& taskId)
         - mongocxx::collection collection_
     }
+    class ErrorAdapter {
+        + ErrorAdapter(mongocxx::collection collection)
+        + void insertError(const string& id, const string& robotID, const string& errorType, const int& resolved)
+        + optional<bsoncxx::document::value> findDocumentById(const string& errorId)
+        + vector<bsoncxx::document::value> findErrorByRobotID(const string& robotId)
+        + bool updateError(const string& id, const string& robotID, const string& errorType, const int& resolved)
+        + bool deleteError(const string& errorId)
+        + vector<bsoncxx::document::value> getAllErrors()
+        - mongocxx::collection collection_
+    }
 
     DBManager *-- FloorAdapter 
     DBManager *-- RobotAdapter 
-    DBManager *-- TaskAdapter 
-
+    DBManager *-- TaskAdapter
+    DBManager *-- ErrorAdapter
 }
 
 @enduml
