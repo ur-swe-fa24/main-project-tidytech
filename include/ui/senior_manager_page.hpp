@@ -2,6 +2,9 @@
 #define UI_SENIOR_MANAGER_PAGE
 
 #include <wx/wx.h>
+#include <wx/grid.h>
+#include "sys_manager/fleet_manager.hpp"
+
  
 class SeniorManagerPage : public wxFrame {
     public:
@@ -9,6 +12,11 @@ class SeniorManagerPage : public wxFrame {
     private:
         void OnButtonClick(wxCommandEvent& evt);
         void OnSeniorManagerClick(wxCommandEvent& evt);
+        DBManager& dbmanager_;
+        RobotAdapter robot_adapter_;
+        FloorAdapter floor_adapter_;
+        FleetManager fm_;
+        void Logout(wxCommandEvent& evt);
 };
 
 #endif

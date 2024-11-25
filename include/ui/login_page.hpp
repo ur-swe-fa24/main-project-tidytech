@@ -5,6 +5,8 @@
 #include "ui/senior_manager_page.hpp"
 
 #include <wx/wx.h>
+
+class UserInterface;
  
 class LoginPage : public wxFrame {
     public:

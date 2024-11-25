@@ -15,7 +15,7 @@ Simulator::~Simulator() {
 void Simulator::simulate() {
     while (ticking_) {
         std::cout << clock_ << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         clock_++;
 
         simulate_robots(); // Simulate all the robots
@@ -23,7 +23,7 @@ void Simulator::simulate() {
 
 
         // Report status every 5 ticks
-        if (clock_ % 5 == 0) {
+        if (clock_ % 1 == 0) {
             for (Robot& robot : robots_) {
                 this->notify(Event::FiveSecReport, robot.to_string());
             }

@@ -22,7 +22,7 @@ using namespace types;
 
 class Simulator : public Publisher {
     public:
-        static const int MAX_SIM_TIME = 14; //Max simulation time
+        static const int MAX_SIM_TIME = 105; //Max simulation time
         static const int MAX_NUM_FLOORS = 11; // Max num of floors in a floorplan
 
         Simulator(); // Default constructor
