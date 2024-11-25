@@ -104,6 +104,8 @@ void Simulator::simulate_robots() {
                     }
                     // Check if room is clean
                     if (floorplan_.access_floor(robot.get_curr()).is_clean()) {
+                        std::cout << "room got clean" << std::endl;
+                        notify(Event::UpdateNumFloorsClean, robot.get_id());
                         if (!robot.tasks_empty()) {
                             // Set the path to task
                             robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
@@ -111,7 +113,6 @@ void Simulator::simulate_robots() {
                         } else {
                             robot.set_status(RobotStatus::Available);
                         }
-                        notify(Event::UpdateNumFloorsClean, robot.get_id());
                     }
                     update_robot_db(robot, 3);
                     break;
@@ -261,6 +262,7 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
         if (robot.get_id() == robot_id) {
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_back(floor_ids);
+                update_robot_db(robot, 0);
                 return;
             } else {
                 throw std::invalid_argument("In compatible robot type to floor type");
@@ -277,6 +279,7 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
         if (robot.get_id() == robot_id) {
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_front(floor_ids);
+                update_robot_db(robot, 0);
                 return;
             } else {
                 throw std::invalid_argument("Incompatible robot type to floor type");
