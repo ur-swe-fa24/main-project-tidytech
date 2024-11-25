@@ -141,6 +141,18 @@ void UserInterface::notify(const Event& event, const std::string& data) {
     }
 }
 
+void UserInterface::notify(const Event& event, const int id) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id);
+    }
+}
+
+void UserInterface::notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, error_type, resolved);
+    }
+}
+
 void UserInterface::notify(const Event& event, const int id, const std::vector<int>& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id, data);
@@ -172,6 +184,14 @@ void UserInterface::update(const Event& event, const std::string& data) {
 }
 
 void UserInterface::update(const Event& event, const int id, const std::vector<int>& data) {
+    // do nothing
+}
+
+void UserInterface::update(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+    // do nothing
+}
+
+void UserInterface::update(const types::Event& event, const int id) {
     // do nothing
 }
 

@@ -10,13 +10,15 @@
 using namespace types;
 
 FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
-                                robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]} {
+                                robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]}, error_adapter_{dbmanager_.getDatabase()["errors"]} {
     
     // Subscribe to these two events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
     subscribe(Event::UpdateRobotParameters);
+    subscribe(Event::RobotError);
+    subscribe(Event::UpdateNumFloorsClean);
 
     // get the last robot id
     auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
@@ -72,10 +74,6 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
             for (const auto& step : pathArray) {
                 path.push_back(step.get_int32());
             }
-            // int current_battery = std::stoi(robot.view()["current_battery"].get_utf8().value.to_string());
-            // int total_battery_used = std::stoi(robot.view()["total_battery_used"].get_utf8().value.to_string());
-            // int error_count = std::stoi(robot.view()["error_count"].get_utf8().value.to_string());
-            // int rooms_cleaned = std::stoi(robot.view()["rooms_cleaned"].get_utf8().value.to_string());
             int current_battery = 0;
             int total_battery_used = 0;
             int error_count = 0;
@@ -185,12 +183,23 @@ void FleetManager::update(const Event& event, const std::string& data) {
         handle_five_sec_ping(data);
     } else if (event == Event::FinalReport) {
         handle_finished_ping(data);
-    } else if (event == Event::ErrorReport) {
-        std::cout << "Error Report Event" << std::endl;
     } else if (event == Event::DisplayText) {
         std::cout << "DisplayText Event" << std::endl;
     }
 }
+
+void FleetManager::update(const types::Event& event, const int id) {
+    if (event == Event::UpdateNumFloorsClean) {
+        update_db_num_floors_clean(id);
+    }
+}
+
+void FleetManager::update(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+    if (event == Event::UpdateRobotError) {
+        update_db_robot_error(id, error_type, resolved);
+    }
+}
+
 
 void FleetManager::update(const Event& event, const int id, const std::vector<int>& data) {
     if (event == Event::UpdateFloorNeighbors) {
@@ -209,6 +218,18 @@ void FleetManager::update(const types::Event& event, const std::string& id, cons
 void FleetManager::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
+    }
+}
+
+void FleetManager::notify(const types::Event& event, const int id) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id);
+    }
+}
+
+void FleetManager::notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, error_type, resolved);
     }
 }
 
@@ -254,6 +275,29 @@ void FleetManager::update_neighbors_db(const int id, const std::vector<int>& dat
 void FleetManager::update_robot_db(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
     robot_adapter_.updateRobot(id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
+}
+
+void FleetManager::update_db_num_floors_clean(const int id) {
+    robot_adapter_.updateRobotRoomsCleaned(std::to_string(id));
+}
+
+void FleetManager::update_db_robot_error(const int id, const ErrorType error_type, const bool resolve) {
+    if (!resolve) {
+        try {
+            int error_size = error_adapter_.getAllErrors().size() + 1;
+            error_adapter_.insertError(error_size, id, to_string(error_type), 0);
+            robot_adapter_.updateRobotErrorCount(id); // Increment error count by one
+        } catch (std::exception& e) {
+            std::cerr << e.what << std::endl;
+        }
+    } else {
+        try {
+            error_adapter_.resolveError(id);
+        } catch (std::exception& e) {
+            std::cerr << e.what << std::endl;
+        }
+    }
+    
 }
 
 
