@@ -26,7 +26,7 @@ public:
 
     std::vector<bsoncxx::document::value> getAllErrors();
     bool allErrorIsResolved(const std::string& robotID);
-    std::optionl<bsoncxx::document: 
+    void resolveError(const std::string& robotID);
 
 private:
     mongocxx::collection collection_;

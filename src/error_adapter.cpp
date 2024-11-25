@@ -89,3 +89,17 @@ std::vector<bsoncxx::document::value> ErrorAdapter::getAllErrors() {
     }
     return errors;
 }
+
+void ErrorAdapter::resolveError(const std::string& robotID) {
+    auto query_doc = make_document(kvp("robot_id", robotID), kvp("resolved", 0)); 
+    auto update_doc = make_document(
+        kvp("$set", make_document(kvp("resolved", 1)))
+    );
+    auto result = collection_.find_one_and_update(
+        query_doc.view(), 
+        update_doc.view()
+    );
+    if (!result) {
+        throw std::runtime_error("No unresolved error found for the given robot id.");
+    }
+}

@@ -17,7 +17,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
     subscribe(Event::UpdateRobotParameters);
-    subscribe(Event::RobotError);
+    subscribe(Event::UpdateRobotError);
     subscribe(Event::UpdateNumFloorsClean);
 
     // get the last robot id
@@ -194,7 +194,7 @@ void FleetManager::update(const types::Event& event, const int id) {
     }
 }
 
-void FleetManager::update(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+void FleetManager::update(const types::Event& event, const int id, const types::ErrorType error_type, const bool resolved) {
     if (event == Event::UpdateRobotError) {
         update_db_robot_error(id, error_type, resolved);
     }
@@ -285,16 +285,16 @@ void FleetManager::update_db_robot_error(const int id, const ErrorType error_typ
     if (!resolve) {
         try {
             int error_size = error_adapter_.getAllErrors().size() + 1;
-            error_adapter_.insertError(error_size, id, to_string(error_type), 0);
-            robot_adapter_.updateRobotErrorCount(id); // Increment error count by one
+            error_adapter_.insertError(std::to_string(error_size), std::to_string(id), to_string(error_type), 0);
+            robot_adapter_.updateRobotErrorCount(std::to_string(id)); // Increment error count by one
         } catch (std::exception& e) {
-            std::cerr << e.what << std::endl;
+            std::cerr << e.what() << std::endl;
         }
     } else {
         try {
-            error_adapter_.resolveError(id);
+            error_adapter_.resolveError(std::to_string(id));
         } catch (std::exception& e) {
-            std::cerr << e.what << std::endl;
+            std::cerr << e.what() << std::endl;
         }
     }
     
@@ -315,6 +315,7 @@ int FleetManager::add_robot(std::string name, std::string size, std::string type
         robot_adapter_.insertRobot(std::to_string(robot_id_count), name, size, type, charging_position, current_position, types::to_string(RobotStatus::Available), "100", {}, {}, 100, 0, 0, 0);
         simulator_.add_robot(robot_id_count, name, RsSize, RtType, std::stoi(charging_position), std::stoi(current_position), RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
     } catch (const std::exception& e) {
+        robot_id_count -= 1;
         std::cerr << "Error adding robot to the database: " << e.what() << std::endl;
         return false;
     }
@@ -340,6 +341,7 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
         floor_adapter_.insertFloor(std::to_string(floor_id_count), name, roomType, type, size, interaction, "false", "50", neighbors);
         simulator_.add_floor(floor_id_count, name, FrtRoom, FtType, FsSize, FiInteraction, false, 50, neighbors);
     } catch (const std::exception& e) {
+        floor_id_count -= 1;
         std::cerr << "Error adding floor to the database: " << e.what() << std::endl;
         return false;
     }
@@ -357,7 +359,7 @@ std::vector<std::string> FleetManager::get_all_robot_names() {
 
 bool FleetManager::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
     try {
-        simulator_.add_task_to_back(robot_id, floor_ids);      
+        simulator_.add_task_to_back(robot_id, floor_ids);   
         return true;
     } catch (const std::exception& e) {
         std::cerr << "Error adding tasks to back: " << e.what() << std::endl;

@@ -143,7 +143,7 @@ void Robot::start_task() {
 // Robot breaks randomly
 void Robot::break_robot() {
     // Simulate 1% chance of breaking
-    if ((((double)rand()) / INT_MAX) < 0.0001) {
+    if ((((double)rand()) / INT_MAX) < 0.001) {
         spdlog::warn("Robot {} has broken. Status set to Unavailable.", id_);
         status_ = RobotStatus::Unavailable;
     }
