@@ -58,6 +58,7 @@ void Simulator::simulate_robots() {
             switch (robot.get_status()) {
                 case RobotStatus::Available:
                     robot.consume_power();
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     if (!robot.tasks_empty()) {
                         // Set the path to task
                         robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
@@ -78,6 +79,7 @@ void Simulator::simulate_robots() {
                     } else {
                         // Keep moving to base
                         robot.consume_power();
+                        check_out_of_battery(robot.get_id(), robot.get_battery());
                         robot.move_to_next_floor();
                         update_robot_db(robot, 1);
                     }
@@ -85,11 +87,13 @@ void Simulator::simulate_robots() {
                     break;
                 case RobotStatus::Traveling:
                     robot.consume_power(); // traveling power consumption
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     robot.move_to_next_task();
                     update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Cleaning:
                     robot.consume_power(3); // Cleaning power consumption
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     robot.clean(); // lower capacity
                     if (robot.is_capacity_empty()) {
                         // Set the path to base
@@ -107,11 +111,13 @@ void Simulator::simulate_robots() {
                         } else {
                             robot.set_status(RobotStatus::Available);
                         }
+                        notify(Event::UpdateNumFloorsClean, robot.get_id());
                     }
                     update_robot_db(robot, 3);
                     break;
                 case RobotStatus::NeedEmpty:
                     robot.consume_power();
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     if (robot.at_base()) {
                         // Notify operator
                         // TODO: Add event to report error
@@ -121,8 +127,8 @@ void Simulator::simulate_robots() {
                     update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Unavailable:
-                    notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
                     update_robot_db(robot, 0);
+                    notify(Event::UpdateRobotError, robot.get_id(), ErrorType::RandomBreak, false);
                     break;
             }
         } else {
@@ -138,6 +144,7 @@ void Simulator::simulate_robots() {
                 update_robot_db(robot, 0);
             } else {
                 robot.consume_power();
+                check_out_of_battery(robot.get_id(), robot.get_battery());
                 robot.move_to_next_floor();
                 update_robot_db(robot, 1);
             }
@@ -280,6 +287,14 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
     throw std::runtime_error("Robot not found in Simulator");
 }
 
+// Check if robot battery is out
+void Simulator::check_out_of_battery(int id, int battery) {
+    if (battery < 1) {
+        notify(Event::UpdateRobotError, id, ErrorType::OutOfBattery, false);
+    }
+}
+
+
 // Check RobotType with floor types
 bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor_ids) {
     auto all_floors = floorplan_.get_all_floor();
@@ -402,6 +417,18 @@ void Simulator::notify(const Event& event, const std::string& data) {
 void Simulator::notify(const Event& event, const int id, const vector<int>& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id, data);
+    }
+}
+
+void Simulator::notify(const types::Event& event, const int id) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id);
+    }
+}
+
+void Simulator::notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, error_type, resolved);
     }
 }
 

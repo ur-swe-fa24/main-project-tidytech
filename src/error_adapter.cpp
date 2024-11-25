@@ -11,9 +11,10 @@ void ErrorAdapter::insertError(const std::string& id, const std::string& robotID
 
     auto query_doc = make_document(kvp("_id", id));
     auto existing_doc = collection_.find_one(query_doc.view());
-
     if (existing_doc) {
         throw std::invalid_argument("The error document cannot be added to the database because of a duplicate ID.");
+    } else if (!allErrorIsResolved(robotID)) {
+        throw std::invalid_argument("The error document cannot be added to the database because there exists an error of the same robot that has not been resolved.");
     } else {
         auto error_doc = make_document(
             kvp("_id", id),
@@ -23,6 +24,12 @@ void ErrorAdapter::insertError(const std::string& id, const std::string& robotID
         );
         collection_.insert_one(error_doc.view());
     }
+}
+
+bool ErrorAdapter::allErrorIsResolved(const std::string& robotID) {
+    auto query_doc = make_document(kvp("robot_id", robotID), kvp("resolved", 0));
+    auto unresolved_count = collection_.count_documents(query_doc.view());
+    return unresolved_count == 0;
 }
 
 std::optional<bsoncxx::document::value> ErrorAdapter::findDocumentById(const std::string& errorId) {

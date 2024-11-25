@@ -10,6 +10,7 @@
 #include "database/db_manager.hpp"
 #include "database/robot_adapter.hpp"
 #include "database/floor_adapter.hpp"
+#include "database/error_adapter.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
 #include "types/types.hpp"
@@ -34,6 +35,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void subscribe(const Event& event);
         void unsubscribe(const Event& event);
         void update(const Event& event, const std::string& data) override;
+        void update(const types::Event& event, const int id) override;
+        void update(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) override;
         void update(const Event& event, const int id, const std::vector<int>& data) override;
         void update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) override;
@@ -41,6 +44,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void subscribe(Subscriber* subscriber, const Event& event) override;
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
         void notify(const Event& event, const std::string& data) override;
+        void notify(const types::Event& event, const int id) override;
+        void notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) override;
         void notify(const Event& event, const int id, const std::vector<int>& data) override;
         void notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) override;
@@ -56,6 +61,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void update_neighbors_db(const int id, const std::vector<int>& data);
         void update_robot_db(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed);
+        void update_db_num_floors_clean(const int id);
+        void update_db_robot_error(const int id, const int id, const ErrorType error_type, const bool resolved);
 
         std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
         
@@ -64,6 +71,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         DBManager& dbmanager_;
         RobotAdapter robot_adapter_;
         FloorAdapter floor_adapter_;
+        ErrorAdapter error_adapter_;
         int robot_id_count;
         int floor_id_count;
 };
