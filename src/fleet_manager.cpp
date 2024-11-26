@@ -15,6 +15,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     
     // Subscribe to these events upon initialization
     subscribe(Event::FiveSecReport);
+    subscribe(Event::FiveSecReportFloors);
     subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
     subscribe(Event::UpdateRobotParameters);
@@ -184,6 +185,8 @@ void FleetManager::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
     if (event == Event::FiveSecReport) {
         handle_five_sec_ping(data);
+    } else if (event == Event::FiveSecReportFloors) {
+        handle_five_sec_floors(data);
     } else if (event == Event::FinalReport) {
         handle_finished_ping(data);
     } else if (event == Event::DisplayText) {
@@ -282,6 +285,10 @@ void FleetManager::handle_five_sec_ping(const std::string& data) {
 void FleetManager::handle_finished_ping(const std::string& data) {
     // Calls write_output to write data to a file
     notify(Event::DisplayText, data);
+}
+
+void FleetManager::handle_five_sec_floors(const std::string& data) {
+    notify(Event::FiveSecReportFloors, data);
 }
 
 void FleetManager::update_neighbors_db(const int id, const std::vector<int>& data) {
@@ -426,6 +433,12 @@ unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_dat
             sol["interaction"].push_back(interaction_level_str);
             std::string clean_level = floor.view()["clean_level"].get_utf8().value.to_string();
             sol["clean_level"].push_back(clean_level);
+            std::string neighbors = "";
+            auto neighbors_array = floor.view()["neighbors"].get_array().value;
+            for (const auto& neighbor : neighbors_array) {
+                neighbors += std::to_string(neighbor.get_int32().value) + ", ";
+            }
+            sol["neighbors"].push_back(neighbors.substr(0, neighbors.size() - 2));
         }
     } catch (const std::exception& e) {
         std::cerr << "Error populating floors: " << e.what() << std::endl;

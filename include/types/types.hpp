@@ -7,10 +7,10 @@ using namespace std;
 
 namespace types {
     // Events
-    enum class Event {FiveSecReport, FinalReport, 
-                        UpdateFloorNeighbors, UpdateFloorCleanLevel,
-                        UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean, AlertEmpty,
-                        AlertUiRobotError, AlertUiEmpty, DisplayText};
+    enum class Event {FiveSecReport, FiveSecReportFloors, FinalReport, 
+                        UpdateFloorNeighbors, 
+                        UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean,
+                        AlertUiRobotError, DisplayText};
 
     // Error
     enum class ErrorType {OutOfBattery, RandomBreak};

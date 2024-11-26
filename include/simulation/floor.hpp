@@ -26,6 +26,7 @@ class Floor {
         std::string get_name() const {return name_;}
         FloorType get_floortype() const {return floortype_;};
         int get_clean_level() const {return clean_level_;};
+        std::string get_id_and_clean_level() {return std::to_string(id_) + "," + std::to_string(clean_level_);};
         bool get_getting_clean() const {return getting_clean_;};
         std::string to_string() const;
 

@@ -11,8 +11,10 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     // To be able to change the main text on the panel
     subscribe(Event::DisplayText);
     subscribe(Event::FiveSecReport);
+    subscribe(Event::FiveSecReportFloors);
 
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &UserInterface::OnUpdateGrid, this, 1);
+    Bind(wxEVT_COMMAND_BUTTON_CLICKED, &UserInterface::OnUpdateGridFloors, this, 2);
 
     wxScrolledWindow* scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
     scrolledWindow->SetScrollRate(5, 5);
@@ -54,7 +56,7 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     std::cout << robots["name"].size() << std::endl;
     
     int rows = robots["name"].size();
-    int cols = 6;
+    int cols = 8;
     grid->CreateGrid(rows, cols);
 
     grid->SetDefaultColSize(90, true);
@@ -67,6 +69,8 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     grid->SetColLabelValue(3, "Battery");
     grid->SetColLabelValue(4, "Capacity");
     grid->SetColLabelValue(5, "Status");
+    grid->SetColLabelValue(6, "Cur Room");
+    grid->SetColLabelValue(7, "Tasks");
 
     for (int row = 0; row < rows; ++row) {
         grid->SetRowLabelValue(row, "Robot " + std::to_string(row + 1));
@@ -100,7 +104,7 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     grid2 = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
     
     int rows2 = floors["name"].size();
-    int cols2 = 6;
+    int cols2 = 7;
     grid2->CreateGrid(rows2, cols2);
 
     grid2->SetDefaultColSize(90, true);
@@ -113,6 +117,7 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     grid2->SetColLabelValue(3, "Floor Type");
     grid2->SetColLabelValue(4, "Interaction");
     grid2->SetColLabelValue(5, "Clean Level");
+    grid2->SetColLabelValue(6, "Neighbors");
 
     for (int row = 0; row < rows2; ++row) {
         grid2->SetRowLabelValue(row, "Floor " + std::to_string(row + 1));
@@ -132,6 +137,8 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
                 grid2->SetCellValue(row, col, floors["interaction"][row]); 
             } else if (col == 5) {
                 grid2->SetCellValue(row, col, floors["clean_level"][row]); 
+            } else if (col == 6) {
+               grid2->SetCellValue(row, col, floors["neighbors"][row]); 
             } else {
                 grid2->SetCellValue(row, col, "-");  
             }
@@ -191,9 +198,10 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     AddFloorWindow floorForm(this, names, names.size());
     if (floorForm.ShowModal() == wxID_OK) {
         if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
-            wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
-            std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(),floorForm.get_floor_interaction(), std::to_string(100)};
+            wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION); 
+            std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(),floorForm.get_floor_interaction(), std::to_string(50), "Please Refresh"};
             AddRowToGridFloor(new_row_info);
+            update_grid_neighbors();
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
         }
@@ -205,10 +213,7 @@ void UserInterface::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
     AddTaskWindow taskForm(this, floor_names, robot_names, floor_names.size());
     if (taskForm.ShowModal() == wxID_OK) {
-        std::vector<int> tmp;
-        tmp.push_back(std::stoi(taskForm.get_floor()));
-        if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), tmp)) {
-
+        if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
             wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
@@ -281,6 +286,8 @@ void UserInterface::update(const Event& event, const std::string& data) {
         handle_display_text(data);
     } else if (event == Event::FiveSecReport) {
         handle_five_sec(data);
+    } else if (event == Event::FiveSecReportFloors) {
+        handle_five_sec_floors(data);
     }
 }
 
@@ -313,6 +320,10 @@ void UserInterface::handle_display_text(const std::string& data) {
 void UserInterface::handle_five_sec(const std::string& data) {
     std::vector<std::vector<std::string>> updated_table_info = extract_five_ping(data);
     update_grid(updated_table_info);
+}
+
+void UserInterface::handle_five_sec_floors(const std::string& data) {
+    update_grid_floors(data);
 }
 
 void UserInterface::Logout(wxCommandEvent& evt) {
@@ -351,6 +362,7 @@ void UserInterface::AddRowToGridFloor(std::vector<std::string> row_info) {
     grid2->SetCellValue(row, 3, row_info[3]);
     grid2->SetCellValue(row, 4, row_info[4]);
     grid2->SetCellValue(row, 5, row_info[5]);
+    grid2->SetCellValue(row, 6, row_info[6]);
 
     grid2->Refresh();
 }
@@ -360,7 +372,7 @@ std::vector<std::vector<std::string>> UserInterface::extract_five_ping(std::stri
     std::vector<std::vector<std::string>> robots;
     std::istringstream stream(input);
     std::string line;
-    std::string id, name, status, battery, capacity, type;
+    std::string id, name, status, battery, capacity, type, current_location, tasks;
 
     while (std::getline(stream, line)) {
         if (line.find("Robot Id:") != std::string::npos) {
@@ -373,6 +385,12 @@ std::vector<std::vector<std::string>> UserInterface::extract_five_ping(std::stri
             battery = line.substr(line.find("Battery:") + 9, line.find(",", line.find("Battery:")) - (line.find("Battery:") + 9));
             capacity = line.substr(line.find("Remaining Capacity:") + 20);
             robots.push_back({id, name, type, battery, capacity, status});
+        } else if (line.find("Current Location:") != std::string::npos) {
+            current_location = line.substr(line.find("Current Location:") + 17);
+        } else if (line.find("Tasks:") != std::string::npos) {
+            tasks = line.substr(line.find("Tasks:") + 7);
+            robots.back().push_back(current_location);
+            robots.back().push_back(tasks);
         }
     }
 
@@ -380,7 +398,7 @@ std::vector<std::vector<std::string>> UserInterface::extract_five_ping(std::stri
 }
 
 void UserInterface::update_grid(const std::vector<std::vector<std::string>>& robotData) {
-    for (int col = 0; col < 6; col++) {
+    for (int col = 0; col < 8; col++) {
         std::string value = robotData[0][col];
         // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
         wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, 1);
@@ -399,5 +417,39 @@ void UserInterface::OnUpdateGrid(wxCommandEvent& evt) {
     grid->ForceRefresh(); 
 }
 
+void UserInterface::update_grid_floors(std::string cleanLevel) {
+    // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
+    // Find the position of the comma
+    size_t pos = cleanLevel.find(',');
+
+    // Extract the parts before and after the comma
+    std::string id = cleanLevel.substr(0, pos);
+    std::string level = cleanLevel.substr(pos + 1);
+
+    wxCommandEvent event2(wxEVT_COMMAND_BUTTON_CLICKED, 2);
+    event2.SetString(level.c_str());
+    event2.SetInt(std::stoi(id) - 1);
+    event2.SetExtraLong(5);
+    wxPostEvent(this, event2);
+}
+
+void UserInterface::OnUpdateGridFloors(wxCommandEvent& evt) {
+    int row = evt.GetInt();
+    int col = 5;
+    std::string value = std::string(evt.GetString().mb_str());
+    grid2->SetCellValue(row, col, value);  
+    grid2->ForceRefresh(); 
+}
+
+
+void UserInterface::update_grid_neighbors() {
+    unordered_map<std::string, std::vector<std::string>> updatedFloors = fm_.get_table_data_floors();
+    int rows = updatedFloors["name"].size();
+    for (int row = 0; row < rows; ++row) {
+        std::string newNeighbors = updatedFloors["neighbors"][row];
+        grid2->SetCellValue(row, 6, newNeighbors);
+    }
+    grid2->ForceRefresh();
+}
 
 
