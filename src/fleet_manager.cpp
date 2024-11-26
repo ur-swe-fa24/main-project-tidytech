@@ -20,6 +20,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     subscribe(Event::UpdateRobotParameters);
     subscribe(Event::UpdateRobotError);
     subscribe(Event::UpdateNumFloorsClean);
+    subscribe(Event::AlertEmpty);
 
     // get the last robot id
     auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
@@ -192,6 +193,8 @@ void FleetManager::update(const Event& event, const std::string& data) {
 void FleetManager::update(const types::Event& event, const int id) {
     if (event == Event::UpdateNumFloorsClean) {
         update_db_num_floors_clean(id);
+    } else if (event == Event::AlertEmpty) {
+        alert_empty(id);
     }
 }
 
@@ -298,6 +301,11 @@ void FleetManager::update_db_robot_error(const int id, const ErrorType error_typ
         }
     }
     
+}
+
+void FleetManager::alert_empty(const int id) {
+    // Alert the UI
+    notify(Event::AlertUiEmpty, id);
 }
 
 

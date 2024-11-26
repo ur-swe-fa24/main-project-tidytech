@@ -120,8 +120,7 @@ void Simulator::simulate_robots() {
                     robot.consume_power();
                     check_out_of_battery(robot.get_id(), robot.get_battery());
                     if (robot.at_base()) {
-                        // Notify operator
-                        // TODO: Add event to report error
+                        notify(Event::AlertEmpty, robot.get_id());
                     } else {
                         robot.move_to_next_floor();
                     }
