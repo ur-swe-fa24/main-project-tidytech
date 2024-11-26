@@ -157,7 +157,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
         std::cerr << "Error populating floors: " << e.what() << std::endl;
     }
 
-    
+    start_sim();
 }
 
 void FleetManager::write_output(string filepath, string message) {

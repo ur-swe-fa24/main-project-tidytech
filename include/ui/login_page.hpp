@@ -6,15 +6,16 @@
 
 #include <wx/wx.h>
 
-class UserInterface;
+// class UserInterface;
  
 class LoginPage : public wxFrame {
     public:
-        LoginPage(const wxString& title);
+        LoginPage(const wxString& title, FleetManager* fm);
     private:
-        void OnButtonClick(wxCommandEvent& evt);
-        void OnSeniorManagerClick(wxCommandEvent& evt);
-        UserInterface* userInterface;
+        void OnButtonClick(wxCommandEvent& evt, FleetManager* fm);
+        void OnSeniorManagerClick(wxCommandEvent& evt, FleetManager* fm);
+        FleetManager* fm_;
+        // UserInterface* userInterface;
 };
 
 #endif

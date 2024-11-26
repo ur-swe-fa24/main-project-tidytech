@@ -7,11 +7,13 @@
 #include <regex>
 #include <sstream>
 
-UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
+UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(nullptr, wxID_ANY, title), fm_(*fm) {
     // To be able to change the main text on the panel
     subscribe(Event::DisplayText);
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
+
+    Bind(wxEVT_CLOSE_WINDOW, &UserInterface::OnClose, this);
 
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &UserInterface::OnUpdateGrid, this, 1);
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &UserInterface::OnUpdateGridFloors, this, 2);
@@ -53,7 +55,7 @@ UserInterface::UserInterface(const wxString& title) : wxFrame(nullptr, wxID_ANY,
     // int tableHeight = 100 + 25 * robots["name"].size();
     grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
 
-    std::cout << robots["name"].size() << std::endl;
+    // std::cout << robots["name"].size() << std::endl;
     
     int rows = robots["name"].size();
     int cols = 8;
@@ -328,9 +330,8 @@ void UserInterface::handle_five_sec_floors(const std::string& data) {
 
 void UserInterface::Logout(wxCommandEvent& evt) {
     this->Hide();
-
     // Show or create the UserInterface window
-    LoginPage* login = new LoginPage("Login");
+    LoginPage* login = new LoginPage("Login", &fm_);
     login->SetClientSize(800, 600);
     login->Center();
     login->Show();
@@ -452,4 +453,6 @@ void UserInterface::update_grid_neighbors() {
     grid2->ForceRefresh();
 }
 
-
+void UserInterface::OnClose(wxCloseEvent& event) {
+    // delete &fm_;
+}

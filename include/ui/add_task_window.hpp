@@ -24,7 +24,6 @@ class AddTaskWindow : public wxDialog {
         std::vector<int> get_floor(int num_floors) {
             std::vector<int> sol;
             for (int i = 0; i < num_floors; i++) {
-                std::cout << "here" << i << std::endl;
                 try {
                     if (floors_[i]->GetValue()) {
                         sol.push_back(i + 1);
