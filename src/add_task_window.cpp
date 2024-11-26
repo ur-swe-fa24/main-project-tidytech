@@ -19,7 +19,7 @@ AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_na
     wxBoxSizer* floorSizer = new wxBoxSizer(wxVERTICAL);
     floorSizer->Add(new wxStaticText(this, wxID_ANY, "Floor:"), 0, wxLEFT | wxRIGHT | wxTOP, 10);
     for (int i = floor_names.size() - 1; i >= 0; i--) {
-        floors_[i] = new wxRadioButton(this, wxID_ANY, floor_names[i], wxDefaultPosition, wxDefaultSize, i == floor_names.size() - 1 ? wxRB_GROUP : 0);
+        floors_[i] = new wxCheckBox(this, wxID_ANY, floor_names[i]);
         floorSizer->Add(floors_[i], 0, wxALL, 5);
     }
     sizer->Add(floorSizer, 0, wxLEFT | wxRIGHT, 10);

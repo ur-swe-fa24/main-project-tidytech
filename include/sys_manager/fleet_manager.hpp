@@ -61,6 +61,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         // Methods to handle the different events
         void handle_five_sec_ping(const std::string& data);
         void handle_finished_ping(const std::string& data);
+        void handle_five_sec_floors(const std::string& data);
         void update_neighbors_db(const int id, const std::vector<int>& data);
         void update_robot_db(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed);

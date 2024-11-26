@@ -21,19 +21,19 @@ class AddTaskWindow : public wxDialog {
             return "-1";
         };
 
-        std::string get_floor() {
-            int sol;
-            for (int i = 0; i < 11; i++) {
+        std::vector<int> get_floor(int num_floors) {
+            std::vector<int> sol;
+            for (int i = 0; i < num_floors; i++) {
+                std::cout << "here" << i << std::endl;
                 try {
                     if (floors_[i]->GetValue()) {
-                        sol = i + 1;
-                        return std::to_string(sol);
+                        sol.push_back(i + 1);
                     }
                 } catch (...) {
                     continue;
                 }
             }
-            return "-1";
+            return sol;
         };
 
 
@@ -52,19 +52,19 @@ class AddTaskWindow : public wxDialog {
         wxRadioButton* robot9;
         wxRadioButton* robot10;
         wxRadioButton* robot11;
-        wxRadioButton* floor1;
-        wxRadioButton* floor2;
-        wxRadioButton* floor3;
-        wxRadioButton* floor4;
-        wxRadioButton* floor5;
-        wxRadioButton* floor6;
-        wxRadioButton* floor7;
-        wxRadioButton* floor8;
-        wxRadioButton* floor9;
-        wxRadioButton* floor10;
-        wxRadioButton* floor11;
+        wxCheckBox* floor1;
+        wxCheckBox* floor2;
+        wxCheckBox* floor3;
+        wxCheckBox* floor4;
+        wxCheckBox* floor5;
+        wxCheckBox* floor6;
+        wxCheckBox* floor7;
+        wxCheckBox* floor8;
+        wxCheckBox* floor9;
+        wxCheckBox* floor10;
+        wxCheckBox* floor11;
         int num_added_;
-        std::vector<wxRadioButton*> floors_ = {floor1, floor2, floor3, floor4, floor5, floor6, floor7, floor8, floor9, floor10, floor11};
+        std::vector<wxCheckBox*> floors_ = {floor1, floor2, floor3, floor4, floor5, floor6, floor7, floor8, floor9, floor10, floor11};
         std::vector<wxRadioButton*> robots_ = {robot1, robot2, robot3, robot4, robot5, robot6, robot7, robot8, robot9, robot10, robot11};
 };
 

@@ -41,11 +41,19 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
         void OnAddTask(wxCommandEvent& event);
         void OnUpdateGrid(wxCommandEvent& evt);
         void handle_display_text(const std::string& data);
+
         void handle_five_sec(const std::string& data);
+        void handle_five_sec_floors(const std::string& data);
         void Logout(wxCommandEvent& evt);
 
         void AddRowToGrid(std::vector<std::string> row_info);
         void AddRowToGridFloor(std::vector<std::string> row_info);
+
+        void update_grid_floors(std::string cleanLevel);
+        void OnUpdateGridFloors(wxCommandEvent& evt);
+
+
+        void update_grid_neighbors();
 
         void update_grid(const std::vector<std::vector<std::string>>& new_data);
 

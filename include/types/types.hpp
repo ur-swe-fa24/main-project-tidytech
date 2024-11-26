@@ -6,7 +6,7 @@ using namespace std;
 
 namespace types {
     // Events
-    enum class Event {FiveSecReport, FinalReport, 
+    enum class Event {FiveSecReport, FiveSecReportFloors, FinalReport, 
                         UpdateFloorNeighbors, 
                         UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean,
                         AlertUiRobotError, DisplayText};
