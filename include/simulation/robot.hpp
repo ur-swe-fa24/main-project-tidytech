@@ -12,7 +12,7 @@ using namespace types;
 
 class Robot{
     public:
-        Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int battery); // Constructor
+        Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int battery, int remaining_capacity); // Constructor
         ~Robot() {}; // Destructor
 
         bool operator==(const Robot& other) const {return id_ == other.id_;} // Overriding Robot comparison

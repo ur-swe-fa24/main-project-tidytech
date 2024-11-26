@@ -203,7 +203,7 @@ void Simulator::reset_simulation() {
 
 // Add robot to the vector of robots_
 void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path, int current_battery, int total_battery_used, int error_count, int rooms_cleaned) {
-    Robot robot(id, name, size, type, base, curr, status, current_battery);
+    Robot robot(id, name, size, type, base, curr, status, current_battery, remaining_capacity);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
 }
@@ -260,8 +260,6 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
-            std::cout << "Simulator::Robot_id: ";
-            std::cout << std::to_string(robot.get_id()) <<std::endl;
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_back(floor_ids);
                 update_robot_db(robot, 0);
@@ -319,8 +317,6 @@ bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor
 
 // Check RobotType and Floortype
 bool Simulator::check_robot_to_floor(RobotType robot_type, FloorType floor_type) {
-    std::cout << "Simulator::RobotType: ";
-    std::cout << to_string(robot_type) << std::endl;
     switch(robot_type) {
         case RobotType::Scrubber:
             switch (floor_type) {

@@ -3,7 +3,7 @@
 
 // Robot constructor
 // Initialize all variables
-Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int battery) {
+Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int battery, int remaining_capacity) {
     id_ = id;
     name_ = name;
     size_ = size;
@@ -12,7 +12,7 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base,
     curr_ = curr;
     battery_ = battery;
     status_ = status;
-    remaining_capacity_ = 100;
+    remaining_capacity_ = remaining_capacity;
     task_queue_ = {};
     curr_path_ = {};
     total_battery_used = 0;

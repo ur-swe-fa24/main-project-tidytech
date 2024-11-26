@@ -13,7 +13,7 @@ using namespace types;
 FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
                                 robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]}, error_adapter_{dbmanager_.getDatabase()["errors"]} {
     
-    // Subscribe to these two events upon initialization
+    // Subscribe to these events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
@@ -21,6 +21,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     subscribe(Event::UpdateRobotError);
     subscribe(Event::UpdateNumFloorsClean);
     subscribe(Event::AlertEmpty);
+    subscribe(Event::UpdateFloorCleanLevel);
 
     // get the last robot id
     auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
@@ -114,9 +115,6 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
             RobotSize rsSize = to_enum_robot_size(size);
             RobotType rtType = to_enum_robot_type(type);
             RobotStatus rsStatus = to_enum_robot_status(status);
-            std::cout << "FleetManager::rtType is ";
-            std::cout << type;
-            std::cout << to_string(rtType) << std::endl;
             simulator_.add_robot(id, name, rsSize, rtType, std::stoi(charging_position), std::stoi(current_position), rsStatus, std::stoi(remaining_capacity), task_queue, path, current_battery, total_battery_used, error_count, rooms_cleaned);
 
             if (id > robot_id_count) {
