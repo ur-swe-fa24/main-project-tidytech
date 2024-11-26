@@ -8,7 +8,7 @@
 
 bool FleetManager::OnInit() {
     // UserInterface* ui = new UserInterface("C++ GUI");
-    LoginPage* ui = new LoginPage("Login");
+    LoginPage* ui = new LoginPage("Login", this);
     
     ui->SetClientSize(800, 600);
     ui->Center();

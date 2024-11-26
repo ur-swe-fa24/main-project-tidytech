@@ -13,7 +13,7 @@ using namespace types;
  
 class UserInterface : public wxFrame, public Publisher, public Subscriber {
     public:
-        UserInterface(const wxString& title);
+        UserInterface(const wxString& title, FleetManager* fm_);
 
         void subscribe(Subscriber* subscriber, const Event& event) override;
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
@@ -36,6 +36,7 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) override;
         
     private:
+        void OnClose(wxCloseEvent& event);
         void OnStartSimulation(wxCommandEvent& evt);
         void OnAddRobot(wxCommandEvent& event);
         // void OnRobotAdded(wxCommandEvent& event); 
@@ -62,7 +63,7 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
 
         std::vector<std::vector<std::string>> extract_five_ping(std::string str);
         // wxDECLARE_EVENT_TABLE();
-        FleetManager fm_;
+        FleetManager& fm_;
         wxStaticText* display_text_;
         int num_added_ = 0;
         wxGrid* grid;

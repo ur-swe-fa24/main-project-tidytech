@@ -3,14 +3,14 @@
 #include <wx/grid.h>
 #include "ui/login_page.hpp"
 
-SeniorManagerPage::SeniorManagerPage(const wxString& title) 
-    : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)), dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
+SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) 
+    : fm_(*fm), wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)), dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
                                 robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]} {
     wxPanel* panel = new wxPanel(this);
     wxGrid* grid = new wxGrid(panel, wxID_ANY, wxDefaultPosition, wxSize(800, 600));
 
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
-    std::cout << robots["name"].size() << std::endl;
+    // std::cout << robots["name"].size() << std::endl;
     
     int rows = robots["name"].size();
     int cols = 6;
@@ -63,7 +63,7 @@ void SeniorManagerPage::Logout(wxCommandEvent& evt) {
     this->Hide();
 
     // Show or create the UserInterface window
-    LoginPage* login = new LoginPage("Login");
+    LoginPage* login = new LoginPage("Login", &fm_);
     login->SetClientSize(800, 600);
     login->Center();
     login->Show();

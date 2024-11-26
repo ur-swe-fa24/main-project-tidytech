@@ -25,7 +25,7 @@ void Simulator::simulate() {
         // Report status every 5 ticks
         if (clock_ % 1 == 0) {
             for (Robot& robot : robots_) {
-                std::cout << robot.to_string() << std::endl;
+                // std::cout << robot.to_string() << std::endl;
                 this->notify(Event::FiveSecReport, robot.to_string());
             }
 
@@ -109,7 +109,6 @@ void Simulator::simulate_robots() {
                     }
                     // Check if room is clean
                     if (floorplan_.access_floor(robot.get_curr()).is_clean()) {
-                        std::cout << "room got clean" << std::endl;
                         notify(Event::UpdateNumFloorsClean, robot.get_id());
                         if (!robot.tasks_empty()) {
                             // Set the path to task
