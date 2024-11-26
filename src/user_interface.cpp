@@ -188,11 +188,10 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
 // Have a dialogue (form) for when you click the add floor
 void UserInterface::OnAddFloor(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
-    AddFloorWindow floorForm(this, names, num_added_+names.size());
+    AddFloorWindow floorForm(this, names, names.size());
     if (floorForm.ShowModal() == wxID_OK) {
         if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
             wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION);
-            num_added_++;
             std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(),floorForm.get_floor_interaction(), std::to_string(100)};
             AddRowToGridFloor(new_row_info);
         } else {
@@ -238,6 +237,12 @@ void UserInterface::notify(const Event& event, const std::string& data) {
 void UserInterface::notify(const Event& event, const int id) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id);
+    }
+}
+
+void UserInterface::notify(const Event& event, const int id, const int val) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, val);
     }
 }
 
@@ -288,6 +293,10 @@ void UserInterface::update(const types::Event& event, const int id, const ErrorT
 }
 
 void UserInterface::update(const types::Event& event, const int id) {
+    // do nothing
+}
+
+void UserInterface::update(const types::Event& event, const int id, const int val) {
     // do nothing
 }
 

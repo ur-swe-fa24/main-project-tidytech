@@ -2,12 +2,13 @@
 #define TYPES_HPP
 
 #include <string>
+#include <iostream>
 using namespace std;
 
 namespace types {
     // Events
     enum class Event {FiveSecReport, FinalReport, 
-                        UpdateFloorNeighbors, 
+                        UpdateFloorNeighbors, UpdateFloorCleanLevel,
                         UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean, AlertEmpty,
                         AlertUiRobotError, AlertUiEmpty, DisplayText};
 

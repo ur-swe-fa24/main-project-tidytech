@@ -13,7 +13,7 @@ using namespace types;
 FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
                                 robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]}, error_adapter_{dbmanager_.getDatabase()["errors"]} {
     
-    // Subscribe to these two events upon initialization
+    // Subscribe to these events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
@@ -21,6 +21,7 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     subscribe(Event::UpdateRobotError);
     subscribe(Event::UpdateNumFloorsClean);
     subscribe(Event::AlertEmpty);
+    subscribe(Event::UpdateFloorCleanLevel);
 
     // get the last robot id
     auto last_robot = dbmanager_.getDatabase()["robots"].find_one(
@@ -198,6 +199,12 @@ void FleetManager::update(const types::Event& event, const int id) {
     }
 }
 
+void FleetManager::update(const types::Event& event, const int id, const int val) {
+    if (event == Event::UpdateFloorCleanLevel) {
+        update_db_num_floor_clean_level(id, val);
+    }
+}
+
 void FleetManager::update(const types::Event& event, const int id, const types::ErrorType error_type, const bool resolved) {
     if (event == Event::UpdateRobotError) {
         update_db_robot_error(id, error_type, resolved);
@@ -228,6 +235,12 @@ void FleetManager::notify(const Event& event, const std::string& data) {
 void FleetManager::notify(const types::Event& event, const int id) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id);
+    }
+}
+
+void FleetManager::notify(const Event& event, const int id, const int val) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, val);
     }
 }
 
@@ -273,6 +286,10 @@ void FleetManager::handle_finished_ping(const std::string& data) {
 
 void FleetManager::update_neighbors_db(const int id, const std::vector<int>& data) {
     floor_adapter_.updateNeighbors(std::to_string(id), data);
+}
+
+void FleetManager::update_db_num_floor_clean_level(const int id, const int clean_level) {
+    floor_adapter_.updateCleanLevel(std::to_string(id), std::to_string(clean_level));
 }
 
 void FleetManager::update_robot_db(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
@@ -337,8 +354,7 @@ int FleetManager::add_floor(std::string name, std::string roomType, std::string 
     FloorType FtType = to_enum_floor_type(type);
     FloorSize FsSize = to_enum_floor_size(size);
     FloorInteraction FiInteraction = to_enum_floor_interaction(interaction);
-
-
+    
     if (floor_id_count >= 11) {
         std::cerr << "Error: reached the limit of floors" << std::endl;
         return false;
