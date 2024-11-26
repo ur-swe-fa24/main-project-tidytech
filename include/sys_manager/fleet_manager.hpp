@@ -63,6 +63,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed);
         void update_db_num_floors_clean(const int id);
         void update_db_robot_error(const int robotid, const ErrorType error_type, const bool resolved);
+        void alert_empty(const int robotid);
 
         std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
         
