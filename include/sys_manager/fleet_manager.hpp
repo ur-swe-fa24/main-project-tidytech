@@ -28,6 +28,9 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         bool add_task_to_back(int robot_id, std::vector<int> floor_ids);
         void write_output(std::string filepath, std::string message); // outputs to a file
 
+        unordered_map<std::string, std::vector<std::string>> get_table_data();
+        unordered_map<std::string, std::vector<std::string>> get_table_data_floors();
+
         std::vector<std::string> get_all_floor_names();
         std::vector<std::string> get_all_robot_names();
 

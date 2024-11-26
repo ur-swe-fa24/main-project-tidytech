@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <regex>
 
 using namespace types;
 
@@ -258,14 +259,13 @@ void FleetManager::unsubscribe(Subscriber* subscriber, const Event& event) {
 
 void FleetManager::handle_five_sec_ping(const std::string& data) {
     // Prints data
-    std::cout << data << std::endl;
+    // std::cout << data << std::endl;
+    notify(Event::FiveSecReport, data);
 }
 
 void FleetManager::handle_finished_ping(const std::string& data) {
     // Calls write_output to write data to a file
-    std::string message = "Final Report Summary:\n" + data;
     notify(Event::DisplayText, data);
-    // write_output("../app/output.txt", message);
 }
 
 void FleetManager::update_neighbors_db(const int id, const std::vector<int>& data) {
@@ -365,5 +365,46 @@ bool FleetManager::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
         std::cerr << "Error adding tasks to back: " << e.what() << std::endl;
         return false;
     }
+}
 
+unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_data() {
+    unordered_map<std::string, std::vector<std::string>> sol;
+    try {
+        auto robots = robot_adapter_.getAllRobots();
+        for (const auto& robot : robots) {
+            std::string id = robot.view()["_id"].get_utf8().value.to_string();
+            sol["id"].push_back(id);
+            std::string name = robot.view()["name"].get_utf8().value.to_string();
+            sol["name"].push_back(name);
+            std::string type = robot.view()["type"].get_utf8().value.to_string();
+            sol["type"].push_back(type);
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Error populating simulation from DB robot collection: " << e.what() << endl;
+    }
+    return sol;
+}
+
+unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_data_floors() {
+    unordered_map<std::string, std::vector<std::string>> sol;
+    try {
+        auto floors = floor_adapter_.getAllFloors();
+        for (const auto& floor : floors) {
+            std::string id = floor.view()["_id"].get_utf8().value.to_string();
+            sol["id"].push_back(id);
+            std::string name = floor.view()["name"].get_utf8().value.to_string();
+            sol["name"].push_back(name);
+            std::string room_type_str = floor.view()["room_type"].get_utf8().value.to_string();
+            sol["room_type"].push_back(room_type_str);
+            std::string floor_type_str = floor.view()["floor_type"].get_utf8().value.to_string();
+            sol["floor_type"].push_back(floor_type_str);
+            std::string interaction_level_str = floor.view()["interaction_level"].get_utf8().value.to_string();
+            sol["interaction"].push_back(interaction_level_str);
+            std::string clean_level = floor.view()["clean_level"].get_utf8().value.to_string();
+            sol["clean_level"].push_back(clean_level);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error populating floors: " << e.what() << std::endl;
+    }
+    return sol;
 }
