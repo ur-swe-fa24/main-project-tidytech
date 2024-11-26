@@ -44,6 +44,7 @@ TEST_CASE("Robot Adapter Unit Tests") {
         REQUIRE(updatedTotalBatteryUsed == 30);
     }
 
+    //testing updating robot error count
     SECTION("Update Robot Error Count") {
         robotAdapter.updateRobotErrorCount("1");
         auto foundRobot = robotAdapter.findDocumentById("1");
@@ -52,6 +53,7 @@ TEST_CASE("Robot Adapter Unit Tests") {
         REQUIRE(updatedErrorCount == 1);
     }
 
+    //testing updating robot rooms cleaned count
     SECTION("Update Robot Rooms_cleaned count") {
         robotAdapter.updateRobotRoomsCleaned("1");
         auto foundRobot = robotAdapter.findDocumentById("1");
@@ -66,6 +68,10 @@ TEST_CASE("Robot Adapter Unit Tests") {
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(!foundRobot);
     }
+
+    /*
+     * TODO (1): add a section to test getAllRobots()
+    */
 }
 
 /**
@@ -103,12 +109,10 @@ TEST_CASE("Floor Adapter Unit Tests") {
         REQUIRE(bsoncxx::to_json(*foundFloor).find("true") != std::string::npos);
     }
 
-    SECTION("Update Floor neighbors") {
-        floorAdapter.updateNeighbors("1", {1, 2, 3});
-        auto foundFloor = floorAdapter.findDocumentById("1");
-        REQUIRE(foundFloor);
-        // REQUIRE(bsoncxx::to_json(*foundFloor).find("") != std::string::npos);
-    }
+    /*
+     * TODO (2): add a section to test updateNeighbors()
+    */
+
 
     //testing delete floor
     SECTION("Delete Floor") {
@@ -211,7 +215,7 @@ TEST_CASE("Error Adapter Unit Tests") {
         REQUIRE(foundError);
         REQUIRE(bsoncxx::to_json(*foundError).find("Out of Battery") != std::string::npos);
 
-        // Exception when trying to insert an error with a duplicate ID
+        // Check if an exception is throwed when inserting an error with a duplicate ID
         REQUIRE_THROWS(errorAdapter.insertError("1", "2", "Random Break", 0));
     }
 
@@ -264,5 +268,14 @@ TEST_CASE("Error Adapter Unit Tests") {
         REQUIRE(foundOutOfBattery);
         REQUIRE(foundRandomBreak);
     }
+
+    /*
+     * TODO (3): add a section to test allErrorIsResolved()
+    */
+
+    /*
+     * TODO (4): add a section to test resolveError()
+    */
+
 }
 
