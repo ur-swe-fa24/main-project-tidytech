@@ -172,6 +172,7 @@ void Simulator::simulate_floors() {
             // Update the floor in floorplan
             floorplan_.update_floor(floor);
         }
+        notify(Event::UpdateFloorCleanLevel, floor.get_id(), floor.get_clean_level());
     }
 }
 
@@ -259,6 +260,8 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
+            std::cout << "Simulator::Robot_id: ";
+            std::cout << std::to_string(robot.get_id()) <<std::endl;
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_back(floor_ids);
                 update_robot_db(robot, 0);
@@ -316,6 +319,8 @@ bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor
 
 // Check RobotType and Floortype
 bool Simulator::check_robot_to_floor(RobotType robot_type, FloorType floor_type) {
+    std::cout << "Simulator::RobotType: ";
+    std::cout << to_string(robot_type) << std::endl;
     switch(robot_type) {
         case RobotType::Scrubber:
             switch (floor_type) {
@@ -412,6 +417,12 @@ void Simulator::unsubscribe(Subscriber* subscriber, const Event& event) {
 void Simulator::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
+    }
+}
+
+void Simulator::notify(const Event& event, const int id, const int val) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, val);
     }
 }
 

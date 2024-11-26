@@ -2,12 +2,13 @@
 #define TYPES_HPP
 
 #include <string>
+#include <iostream>
 using namespace std;
 
 namespace types {
     // Events
     enum class Event {FiveSecReport, FinalReport, 
-                        UpdateFloorNeighbors, 
+                        UpdateFloorNeighbors, UpdateFloorCleanLevel,
                         UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean, AlertEmpty,
                         AlertUiRobotError, AlertUiEmpty, DisplayText};
 
@@ -69,11 +70,15 @@ namespace types {
     }
 
     inline RobotType to_enum_robot_type(string type) {
+        std::cout << "Types:: type is ";
+        std::cout << type << std::endl;
         if (type == "Scrubber") {
             return RobotType::Scrubber;
         } else if (type == "Vaccum") {
+            std::cout << "Types:: 1 " << std::endl;
             return RobotType::Vaccum;
         } else if (type == "Shampoo") {
+            std::cout << "Types:: 2 " << std::endl;
             return RobotType::Shampoo;
         }
     }
