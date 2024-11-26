@@ -8,6 +8,7 @@
 #include "database/task_adapter.hpp" 
 #include <bsoncxx/json.hpp>
 #include "database/floor_adapter.hpp" 
+#include "database/error_adapter.hpp" 
 
 // create the MongoDB instance
 mongocxx::instance instance{};
@@ -23,29 +24,40 @@ TEST_CASE("Robot Adapter Unit Tests") {
 
     //testing inserting and finding robot
     SECTION("Insert and Find Robot") {
-        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active", "100");
+        robotAdapter.insertRobot("1", "robot1", "medium", "typeA", "baseLocationA", "currentLocationA", "active", "100", {1, 2, 3}, {1, 2, 3}, 100, 10, 0, 0);
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
         REQUIRE(bsoncxx::to_json(*foundRobot).find("1") != std::string::npos);
 
         //exception when trying to insert a robot with a duplicate ID
-        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive", "100"));
+        REQUIRE_THROWS(robotAdapter.insertRobot("1", "robot1","small", "typeB", "baseLocationB", "currentLocationB", "inactive", "100", {1, 2, 3}, {1, 2, 3}, 100, 0, 0, 0));
     }
 
-    //testing updating robot location
-    SECTION("Update Robot Location") {
-        robotAdapter.updateRobotLocation("1", "newLocationA");
+    //testing updating robot
+    SECTION("Update Robot") {
+        robotAdapter.updateRobot("1", "office2", "active", "100", {1, 2, 3}, {1, 2, 3}, 80, 20);
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
-        REQUIRE(bsoncxx::to_json(*foundRobot).find("newLocationA") != std::string::npos);
+        REQUIRE(bsoncxx::to_json(*foundRobot).find("office2") != std::string::npos);
+        REQUIRE(bsoncxx::to_json(*foundRobot).find("active") != std::string::npos);
+        auto updatedTotalBatteryUsed = foundRobot->view()["total_battery_used"].get_int32().value;
+        REQUIRE(updatedTotalBatteryUsed == 30);
     }
 
-    //testing update robot status
-    SECTION("Update Robot Status") {
-        robotAdapter.updateRobotStatus("1", "inactive");
+    SECTION("Update Robot Error Count") {
+        robotAdapter.updateRobotErrorCount("1");
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(foundRobot);
-        REQUIRE(bsoncxx::to_json(*foundRobot).find("inactive") != std::string::npos);
+        auto updatedErrorCount = foundRobot->view()["error_count"].get_int32().value;
+        REQUIRE(updatedErrorCount == 1);
+    }
+
+    SECTION("Update Robot Rooms_cleaned count") {
+        robotAdapter.updateRobotRoomsCleaned("1");
+        auto foundRobot = robotAdapter.findDocumentById("1");
+        REQUIRE(foundRobot);
+        auto updatedRoomsCleanedCount = foundRobot->view()["rooms_cleaned"].get_int32().value;
+        REQUIRE(updatedRoomsCleanedCount == 1);
     }
 
     //testing delete robot
@@ -89,7 +101,13 @@ TEST_CASE("Floor Adapter Unit Tests") {
         auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
         REQUIRE(bsoncxx::to_json(*foundFloor).find("true") != std::string::npos);
+    }
 
+    SECTION("Update Floor neighbors") {
+        floorAdapter.updateNeighbors("1", {1, 2, 3});
+        auto foundFloor = floorAdapter.findDocumentById("1");
+        REQUIRE(foundFloor);
+        // REQUIRE(bsoncxx::to_json(*foundFloor).find("") != std::string::npos);
     }
 
     //testing delete floor
@@ -177,5 +195,74 @@ TEST_CASE("Task Adapter Unit Tests") {
         foundTask = taskAdapter.findDocumentById("1");
         REQUIRE(!foundTask);
     }
-
 }
+/**
+ * unit tests for error adapter
+ */
+TEST_CASE("Error Adapter Unit Tests") {
+    auto db = client["test_database"];
+    auto collection = db["errors"];
+    ErrorAdapter errorAdapter(collection);
+
+    // Testing inserting and finding error
+    SECTION("Insert and Find Error") {
+        errorAdapter.insertError("1", "1", "Out of Battery", 0);
+        auto foundError = errorAdapter.findDocumentById("1");
+        REQUIRE(foundError);
+        REQUIRE(bsoncxx::to_json(*foundError).find("Out of Battery") != std::string::npos);
+
+        // Exception when trying to insert an error with a duplicate ID
+        REQUIRE_THROWS(errorAdapter.insertError("1", "2", "Random Break", 0));
+    }
+
+    // Testing finding errors by robot ID
+    SECTION("Find Error by Robot ID") {
+        errorAdapter.insertError("2", "2", "Random Break", 0);
+        errorAdapter.insertError("3", "2", "Out of Battery", 1);
+
+        auto errorsForRobot2 = errorAdapter.findErrorByRobotID("2");
+        REQUIRE(errorsForRobot2.size() == 2);  // Two errors associated with robot2
+        REQUIRE(bsoncxx::to_json(errorsForRobot2[0]).find("Random Break") != std::string::npos);
+        REQUIRE(bsoncxx::to_json(errorsForRobot2[1]).find("Out of Battery") != std::string::npos);
+    }
+
+    // Testing updating error
+    SECTION("Update Error") {
+        errorAdapter.updateError("1", "1", "Out of Battery", 1);  // Resolve the error
+        auto updatedError = errorAdapter.findDocumentById("1");
+        REQUIRE(updatedError);
+        auto view = updatedError->view();
+        REQUIRE(view["resolved"].get_int32() == 1);
+    }
+
+    // Testing deleting an error
+    SECTION("Delete Error") {
+        errorAdapter.deleteError("2");
+        auto foundError = errorAdapter.findDocumentById("2");
+        REQUIRE(!foundError);
+    }
+
+    // Testing getting all errors
+    SECTION("Get All Errors") {
+        errorAdapter.insertError("4", "3", "Out of Battery", 0);
+        errorAdapter.insertError("5", "4", "Random Break", 1);
+
+        auto allErrors = errorAdapter.getAllErrors();
+        REQUIRE(allErrors.size() >= 2);  // At least two errors should exist in the collection
+        bool foundOutOfBattery = false;
+        bool foundRandomBreak = false;
+
+        for (const auto& errorDoc : allErrors) {
+            std::string errorJson = bsoncxx::to_json(errorDoc);
+            if (errorJson.find("Out of Battery") != std::string::npos) {
+                foundOutOfBattery = true;
+            }
+            if (errorJson.find("Random Break") != std::string::npos) {
+                foundRandomBreak = true;
+            }
+        }
+        REQUIRE(foundOutOfBattery);
+        REQUIRE(foundRandomBreak);
+    }
+}
+

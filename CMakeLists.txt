@@ -14,6 +14,7 @@ add_library(mongodb
     src/robot_adapter.cpp
     src/task_adapter.cpp
     src/floor_adapter.cpp
+    src/error_adapter.cpp
 )
 
 add_library(fleet_manager

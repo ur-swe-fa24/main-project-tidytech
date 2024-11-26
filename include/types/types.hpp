@@ -6,8 +6,13 @@ using namespace std;
 
 namespace types {
     // Events
-    enum class Event {FiveSecReport, FinalReport, ErrorReport,
-                      DisplayText};
+    enum class Event {FiveSecReport, FinalReport, 
+                        UpdateFloorNeighbors, 
+                        UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean,
+                        AlertUiRobotError, DisplayText};
+
+    // Error
+    enum class ErrorType {OutOfBattery, RandomBreak};
 
     // Simulation Enum Classes //
     // Robot enum classes
@@ -21,6 +26,15 @@ namespace types {
     enum class FloorInteraction {Low, Moderate, High};
 
     // String format for every enum class
+    inline string to_string(ErrorType error) {
+        switch(error) {
+            case ErrorType::OutOfBattery:
+                return "Out of Battery";
+            case ErrorType::RandomBreak:
+                return "Unknown Cause";
+        }
+    }
+
     inline string to_string(RobotSize size) {
         switch(size) {
             case RobotSize::Large:

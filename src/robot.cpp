@@ -3,16 +3,22 @@
 
 // Robot constructor
 // Initialize all variables
-Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status) {
+Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int battery) {
     id_ = id;
     name_ = name;
     size_ = size;
     type_ = type;
     base_ = base;
     curr_ = curr;
-    battery_ = 100;
-    remaining_capacity_ = 100;
+    battery_ = battery;
     status_ = status;
+    remaining_capacity_ = 100;
+    task_queue_ = {};
+    curr_path_ = {};
+    total_battery_used = 0;
+    error_count = 0;
+    rooms_cleaned = 0;
+
 } 
 
 // to_string for robot object
@@ -50,6 +56,9 @@ std::string Robot::to_string() const {
             "Current Location: " + std::to_string(curr_) + "\n" +
             "Current Path: " + str_path + "\n" +
             "Tasks: " + str_tasks + "\n";
+            "Total Battery Used: " + std::to_string(total_battery_used) + "\n" +
+            "Error Count: " + std::to_string(error_count) + "\n" +
+            "Rooms Cleaned: " + std::to_string(rooms_cleaned);
 }
 
 // Add tasks at the back of the queue
@@ -134,7 +143,7 @@ void Robot::start_task() {
 // Robot breaks randomly
 void Robot::break_robot() {
     // Simulate 1% chance of breaking
-    if ((((double)rand()) / INT_MAX) < 0.0001) {
+    if ((((double)rand()) / INT_MAX) < 0.001) {
         spdlog::warn("Robot {} has broken. Status set to Unavailable.", id_);
         status_ = RobotStatus::Unavailable;
     }

@@ -8,8 +8,9 @@ using bsoncxx::builder::basic::make_document;
 using bsoncxx::builder::basic::kvp;
 
 void RobotAdapter::insertRobot(const std::string& id, const std::string& name, const std::string& size, const std::string& type,
-                                const std::string& baseLocation, const std::string& currentLocation,
-                                const std::string& status, const std::string& capacity) {
+                                const std::string& baseLocation, const std::string& currentLocation, const std::string& status, 
+                                const std::string& capacity, const std::vector<int>& taskQueue, const std::vector<int>& path,
+                                const int& curBattery, const int& totalBatteryUsed, const int& errorCount, const int& roomsCleaned) {
 
     auto query_doc = bsoncxx::builder::basic::make_document(
         bsoncxx::builder::basic::kvp("_id", id)
@@ -27,6 +28,14 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
     else if (existing_name){
         throw std::invalid_argument("the robot cannot be added to database because of duplicate name");
     } else {
+        bsoncxx::builder::basic::array task_queue;
+        for (const auto& task : taskQueue) {
+            task_queue.append(task);
+        };
+        bsoncxx::builder::basic::array robot_path;
+        for (const auto& step : path) {
+            robot_path.append(step);
+        };
         auto robot_doc = make_document(
             kvp("_id", id),
             kvp("name", name),
@@ -35,7 +44,13 @@ void RobotAdapter::insertRobot(const std::string& id, const std::string& name, c
             kvp("base_location", baseLocation),
             kvp("current_location", currentLocation),
             kvp("status", status),
-            kvp("capacity", capacity));
+            kvp("capacity", capacity),
+            kvp("task_queue", task_queue),
+            kvp("path", robot_path),
+            kvp("current_battery", curBattery),
+            kvp("total_battery_used", totalBatteryUsed),
+            kvp("error_count", errorCount),
+            kvp("rooms_cleaned", roomsCleaned));
         collection_.insert_one(robot_doc.view());
     }
 }
@@ -56,6 +71,7 @@ std::optional<bsoncxx::document::value> RobotAdapter::findDocumentById(const std
     }
 }
 
+/*
 bool RobotAdapter::updateRobotStatus(const std::string& robotId, const std::string& newStatus) {
     auto query_doc = make_document(
         kvp("_id", robotId)
@@ -72,44 +88,71 @@ bool RobotAdapter::updateRobotStatus(const std::string& robotId, const std::stri
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0;
 }
+*/
 
-bool RobotAdapter::updateRobotLocation(const std::string& robotId, const std::string& newLocation) {
-    // build the query document to find the robot by ID
-    auto query_doc = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("_id", robotId)
+bool RobotAdapter::updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery, const int& battery_changed) {
+    auto query_doc = make_document(
+        kvp("_id", id)
     );
-
-    // build the update document for the current location
+    bsoncxx::builder::basic::array task_queue;
+    for (const auto& task : taskQueue) {
+        task_queue.append(task);
+    };
+    bsoncxx::builder::basic::array robot_path;
+    for (const auto& step : path) {
+        robot_path.append(step);
+    };
     auto update_doc = make_document(
         kvp("$set", 
             make_document(
-                kvp("current_location", newLocation)
+                kvp("status", status),
+                kvp("current_location", currentLocation),
+                kvp("capacity", capacity),
+                kvp("task_queue", task_queue),
+                kvp("path", robot_path),
+                kvp("current_battery", curBattery)
+            )
+        ),
+        kvp("$inc", 
+            make_document(
+                kvp("total_battery_used", battery_changed)
             )
         )
     );
+    auto result = collection_.update_one(query_doc.view(), update_doc.view());
+    return result && result->modified_count() > 0;
+}
 
-    // execute the update operation
+
+bool RobotAdapter::updateRobotErrorCount(const std::string& id) {
+    auto query_doc = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("_id", id)
+    );
+
+    auto update_doc = make_document(
+        kvp("$inc", 
+            make_document(
+                kvp("error_count", 1)
+            )
+        )
+    );
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0; 
 }
 
-
-bool RobotAdapter::updateRobotCapacity(const std::string& robotId, const std::string& newCapacity) {
-    // build the query document to find the robot by ID
+bool RobotAdapter::updateRobotRoomsCleaned(const std::string& id) {
     auto query_doc = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("_id", robotId)
+        bsoncxx::builder::basic::kvp("_id", id)
     );
 
-    // build the update document for the current capacity
     auto update_doc = make_document(
-        kvp("$set", 
+        kvp("$inc", 
             make_document(
-                kvp("capacity", newCapacity)
+                kvp("rooms_cleaned", 1)
             )
         )
     );
-
-    // execute the update operation
     auto result = collection_.update_one(query_doc.view(), update_doc.view());
     return result && result->modified_count() > 0; 
 }

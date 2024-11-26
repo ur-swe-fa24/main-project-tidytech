@@ -58,6 +58,7 @@ void Simulator::simulate_robots() {
             switch (robot.get_status()) {
                 case RobotStatus::Available:
                     robot.consume_power();
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     if (!robot.tasks_empty()) {
                         // Set the path to task
                         robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
@@ -69,31 +70,42 @@ void Simulator::simulate_robots() {
                             robot.go_charge();
                         }
                     }
+                    update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Charging:
                     if (robot.at_base()) {
                         robot.charge(); // only charge if you reached base
+                        update_robot_db(robot, 0);
                     } else {
                         // Keep moving to base
                         robot.consume_power();
+                        check_out_of_battery(robot.get_id(), robot.get_battery());
                         robot.move_to_next_floor();
+                        update_robot_db(robot, 1);
                     }
+                    
                     break;
                 case RobotStatus::Traveling:
                     robot.consume_power(); // traveling power consumption
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     robot.move_to_next_task();
+                    update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Cleaning:
                     robot.consume_power(3); // Cleaning power consumption
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     robot.clean(); // lower capacity
                     if (robot.is_capacity_empty()) {
                         // Set the path to base
                         robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
                         robot.go_empty();
+                        update_robot_db(robot, 3);
                         break;
                     }
                     // Check if room is clean
                     if (floorplan_.access_floor(robot.get_curr()).is_clean()) {
+                        std::cout << "room got clean" << std::endl;
+                        notify(Event::UpdateNumFloorsClean, robot.get_id());
                         if (!robot.tasks_empty()) {
                             // Set the path to task
                             robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_first_task()));
@@ -102,18 +114,22 @@ void Simulator::simulate_robots() {
                             robot.set_status(RobotStatus::Available);
                         }
                     }
+                    update_robot_db(robot, 3);
                     break;
                 case RobotStatus::NeedEmpty:
+                    robot.consume_power();
+                    check_out_of_battery(robot.get_id(), robot.get_battery());
                     if (robot.at_base()) {
                         // Notify operator
                         // TODO: Add event to report error
                     } else {
-                        robot.consume_power();
                         robot.move_to_next_floor();
                     }
+                    update_robot_db(robot, 1);
                     break;
                 case RobotStatus::Unavailable:
-                    notify(Event::ErrorReport, "Needs Fixing: \n" + robot.to_string());
+                    update_robot_db(robot, 0);
+                    notify(Event::UpdateRobotError, robot.get_id(), ErrorType::RandomBreak, false);
                     break;
             }
         } else {
@@ -126,9 +142,12 @@ void Simulator::simulate_robots() {
             // Go back and charge
             if (robot.at_base()) {
                 robot.charge(); // only charge if you reached base
+                update_robot_db(robot, 0);
             } else {
                 robot.consume_power();
+                check_out_of_battery(robot.get_id(), robot.get_battery());
                 robot.move_to_next_floor();
+                update_robot_db(robot, 1);
             }
         }
     }
@@ -183,10 +202,22 @@ void Simulator::reset_simulation() {
 
 
 // Add robot to the vector of robots_
-void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status) {
-    Robot robot(id, name, size, type, base, curr, status);
+void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path, int current_battery, int total_battery_used, int error_count, int rooms_cleaned) {
+    Robot robot(id, name, size, type, base, curr, status, current_battery);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
+}
+
+// Update robot in db
+void Simulator::update_robot_db(Robot& robot, int powerUsed) {
+    // Update db
+    vector<int> curr_path;
+    queue<int> tmp_queue = robot.get_curr_path();
+    while (!tmp_queue.empty()) {
+        curr_path.push_back(tmp_queue.front());
+        tmp_queue.pop();
+    }
+    notify(Event::UpdateRobotParameters, std::to_string(robot.get_id()), std::to_string(robot.get_curr()), to_string(robot.get_status()), std::to_string(robot.get_remaining_capacity()), robot.get_task_queue(), curr_path, robot.get_battery(), powerUsed); // Consume 1 power unit
 }
 
 // Add floor to the vector of floors_
@@ -201,7 +232,23 @@ void Simulator::add_floor(int id, std::string name, FloorRoomType room, FloorTyp
                 neighbor_floors.push_back(floor);
             }
         }
-        floorplan_.add_floor(std::ref(new_floor), neighbor_floors); // Add the floor to floorplan
+
+        try {
+            floorplan_.add_floor(std::ref(new_floor), neighbor_floors); // Add the floor to floorplan
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            floorplan_.update_floor_neighbors(std::ref(new_floor), neighbor_floors); // Update the floor neighbors
+        }
+
+        // Update database push
+        for (const Floor& floor : neighbor_floors) {
+            std::vector<Floor> neighbors = floorplan_.get_neighbors(floor);
+            std::vector<int> neighbors_ids;
+            for (const Floor& floor : neighbors) {
+                neighbors_ids.push_back(floor.get_id());
+            }
+            notify(Event::UpdateFloorNeighbors, floor.get_id(), neighbors_ids);
+        }
     } else {
         spdlog::error("MAXIMUM NUMBER OF FLOORS REACHED! Current: {} floors", floorplan_.get_all_floor().size());
     }
@@ -215,6 +262,7 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
         if (robot.get_id() == robot_id) {
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_back(floor_ids);
+                update_robot_db(robot, 0);
                 return;
             } else {
                 throw std::invalid_argument("In compatible robot type to floor type");
@@ -231,6 +279,7 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
         if (robot.get_id() == robot_id) {
             if (check_compatibility(robot.get_type(), floor_ids)) {
                 robot.add_tasks_to_front(floor_ids);
+                update_robot_db(robot, 0);
                 return;
             } else {
                 throw std::invalid_argument("Incompatible robot type to floor type");
@@ -240,6 +289,14 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
     spdlog::error("Robot {} is not in Simulator", robot_id);
     throw std::runtime_error("Robot not found in Simulator");
 }
+
+// Check if robot battery is out
+void Simulator::check_out_of_battery(int id, int battery) {
+    if (battery < 1) {
+        notify(Event::UpdateRobotError, id, ErrorType::OutOfBattery, false);
+    }
+}
+
 
 // Check RobotType with floor types
 bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor_ids) {
@@ -356,6 +413,33 @@ void Simulator::unsubscribe(Subscriber* subscriber, const Event& event) {
 void Simulator::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
+    }
+}
+
+// Notify all the subscribers
+void Simulator::notify(const Event& event, const int id, const vector<int>& data) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, data);
+    }
+}
+
+void Simulator::notify(const types::Event& event, const int id) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id);
+    }
+}
+
+void Simulator::notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, error_type, resolved);
+    }
+}
+
+// Notify all the subscribers
+void Simulator::notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
+                    const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, currentLocation, status, capacity, taskQueue, path, currentBattery, totalBatteryUsed);
     }
 }
 
