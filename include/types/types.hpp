@@ -2,6 +2,7 @@
 #define TYPES_HPP
 
 #include <string>
+#include <iostream>
 using namespace std;
 
 namespace types {

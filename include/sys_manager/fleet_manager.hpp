@@ -39,6 +39,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void unsubscribe(const Event& event);
         void update(const Event& event, const std::string& data) override;
         void update(const types::Event& event, const int id) override;
+        void update(const types::Event& event, const int id, const int val) override;
         void update(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) override;
         void update(const Event& event, const int id, const std::vector<int>& data) override;
         void update(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
@@ -48,6 +49,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
         void notify(const Event& event, const std::string& data) override;
         void notify(const types::Event& event, const int id) override;
+        void notify(const types::Event& event, const int id, const int val) override;
         void notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) override;
         void notify(const Event& event, const int id, const std::vector<int>& data) override;
         void notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
@@ -67,6 +69,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& currentBattery, const int& totalBatteryUsed);
         void update_db_num_floors_clean(const int id);
         void update_db_robot_error(const int robotid, const ErrorType error_type, const bool resolved);
+        void alert_empty(const int robotid);
+        void update_db_num_floor_clean_level(const int id, const int clean_level);
 
         std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
         

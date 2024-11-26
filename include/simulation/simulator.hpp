@@ -56,6 +56,7 @@ class Simulator : public Publisher {
         void unsubscribe(Subscriber* subscriber, const Event& event) override;
         void notify(const Event& event, const std::string& data) override;
         void notify(const types::Event& event, const int id) override;
+        void notify(const types::Event& event, const int id, const int val) override;
         void notify(const types::Event& event, const int id, const ErrorType error_type, const bool resolved) override;
         void notify(const Event& event, const int id, const std::vector<int>& data) override;
         void notify(const types::Event& event, const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 

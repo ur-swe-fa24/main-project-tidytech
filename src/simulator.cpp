@@ -125,8 +125,7 @@ void Simulator::simulate_robots() {
                     robot.consume_power();
                     check_out_of_battery(robot.get_id(), robot.get_battery());
                     if (robot.at_base()) {
-                        // Notify operator
-                        // TODO: Add event to report error
+                        notify(Event::AlertEmpty, robot.get_id());
                     } else {
                         robot.move_to_next_floor();
                     }
@@ -178,6 +177,7 @@ void Simulator::simulate_floors() {
             // Update the floor in floorplan
             floorplan_.update_floor(floor);
         }
+        notify(Event::UpdateFloorCleanLevel, floor.get_id(), floor.get_clean_level());
     }
 }
 
@@ -208,7 +208,7 @@ void Simulator::reset_simulation() {
 
 // Add robot to the vector of robots_
 void Simulator::add_robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int remaining_capacity, std::vector<int> task_queue, std::vector<int> path, int current_battery, int total_battery_used, int error_count, int rooms_cleaned) {
-    Robot robot(id, name, size, type, base, curr, status, current_battery);
+    Robot robot(id, name, size, type, base, curr, status, current_battery, remaining_capacity);
     std::lock_guard<std::mutex> lock(robots_mutex_);
     robots_.push_back(std::ref(robot)); // Pass in the reference of robot object to be able to manipulate them
 }
@@ -418,6 +418,12 @@ void Simulator::unsubscribe(Subscriber* subscriber, const Event& event) {
 void Simulator::notify(const Event& event, const std::string& data) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, data);
+    }
+}
+
+void Simulator::notify(const Event& event, const int id, const int val) {
+    for (auto& subscriber : subscribers_[event]) {
+        subscriber->update(event, id, val);
     }
 }
 

@@ -12,7 +12,7 @@
 using namespace types;
 
 TEST_CASE("Testing Robot Unit Tests") {
-    Robot robo1 = Robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available, 100);
+    Robot robo1 = Robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available, 100, 100);
 
     SECTION("Initial Robot Properties") {
         REQUIRE(robo1.get_id() == 1);
