@@ -4,7 +4,7 @@ AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_na
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     num_added_ = num_added;
     // std::reverse(robot_names.begin(), robot_names.end());
-    std::reverse(floor_names.begin(), floor_names.end());
+    // std::reverse(floor_names.begin(), floor_names.end());
 
     // Robot radio buttons
     wxBoxSizer* robotSizer = new wxBoxSizer(wxVERTICAL);
