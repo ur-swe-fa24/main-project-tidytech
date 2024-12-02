@@ -44,6 +44,7 @@ TEST_CASE("Robot Adapter Unit Tests") {
         REQUIRE(updatedTotalBatteryUsed == 30);
     }
 
+    //testing updating robot error count
     SECTION("Update Robot Error Count") {
         robotAdapter.updateRobotErrorCount("1");
         auto foundRobot = robotAdapter.findDocumentById("1");
@@ -52,6 +53,7 @@ TEST_CASE("Robot Adapter Unit Tests") {
         REQUIRE(updatedErrorCount == 1);
     }
 
+    //testing updating robot rooms cleaned count
     SECTION("Update Robot Rooms_cleaned count") {
         robotAdapter.updateRobotRoomsCleaned("1");
         auto foundRobot = robotAdapter.findDocumentById("1");
@@ -66,6 +68,31 @@ TEST_CASE("Robot Adapter Unit Tests") {
         auto foundRobot = robotAdapter.findDocumentById("1");
         REQUIRE(!foundRobot);
     }
+
+    //testing getting all robots
+    SECTION("Get All Robots") {
+        robotAdapter.insertRobot("2", "robot2", "large", "typeA", "baseLocationB", "currentLocationB", "inactive", "100", {4, 5, 6}, {4, 5, 6}, 100, 0, 0, 0);
+        robotAdapter.insertRobot("3", "robot3", "small", "typeB", "baseLocationC", "currentLocationC", "active", "100", {7, 8}, {7, 8}, 100, 0, 0, 0);
+
+        auto allRobots = robotAdapter.getAllRobots();
+        REQUIRE(allRobots.size() >= 2);  // At least two robots should exist
+
+        bool foundRobot2 = false;
+        bool foundRobot3 = false;
+
+        for (const auto& robotDoc : allRobots) {
+            std::string robotJson = bsoncxx::to_json(robotDoc);
+            if (robotJson.find("robot2") != std::string::npos) {
+                foundRobot2 = true;
+            }
+            if (robotJson.find("robot3") != std::string::npos) {
+                foundRobot3 = true;
+            }
+        }
+        REQUIRE(foundRobot2);
+        REQUIRE(foundRobot3);
+    }
+
 }
 
 /**
@@ -103,11 +130,20 @@ TEST_CASE("Floor Adapter Unit Tests") {
         REQUIRE(bsoncxx::to_json(*foundFloor).find("true") != std::string::npos);
     }
 
-    SECTION("Update Floor neighbors") {
-        floorAdapter.updateNeighbors("1", {1, 2, 3});
+   //testing updating floor neighbors 
+    SECTION("Update Floor Neighbors") {
+        floorAdapter.updateNeighbors("1", {2,3});
         auto foundFloor = floorAdapter.findDocumentById("1");
         REQUIRE(foundFloor);
-        // REQUIRE(bsoncxx::to_json(*foundFloor).find("") != std::string::npos);
+
+        auto neighborsArray = foundFloor->view()["neighbors"].get_array().value;
+        std::vector<int> neighborsVec;
+        for (const auto& neighbor : neighborsArray) {
+            neighborsVec.push_back(neighbor.get_int32());
+        }
+
+        REQUIRE(std::find(neighborsVec.begin(), neighborsVec.end(), 2) != neighborsVec.end());
+        REQUIRE(std::find(neighborsVec.begin(), neighborsVec.end(), 3) != neighborsVec.end());
     }
 
     //testing delete floor
@@ -211,17 +247,17 @@ TEST_CASE("Error Adapter Unit Tests") {
         REQUIRE(foundError);
         REQUIRE(bsoncxx::to_json(*foundError).find("Out of Battery") != std::string::npos);
 
-        // Exception when trying to insert an error with a duplicate ID
+        // Check if an exception is throwed when inserting an error with a duplicate ID
         REQUIRE_THROWS(errorAdapter.insertError("1", "2", "Random Break", 0));
     }
 
     // Testing finding errors by robot ID
     SECTION("Find Error by Robot ID") {
-        errorAdapter.insertError("2", "2", "Random Break", 0);
+        errorAdapter.insertError("2", "2", "Random Break", 1);
         errorAdapter.insertError("3", "2", "Out of Battery", 1);
 
         auto errorsForRobot2 = errorAdapter.findErrorByRobotID("2");
-        REQUIRE(errorsForRobot2.size() == 2);  // Two errors associated with robot2
+        REQUIRE(errorsForRobot2.size() == 2);  
         REQUIRE(bsoncxx::to_json(errorsForRobot2[0]).find("Random Break") != std::string::npos);
         REQUIRE(bsoncxx::to_json(errorsForRobot2[1]).find("Out of Battery") != std::string::npos);
     }
@@ -264,5 +300,38 @@ TEST_CASE("Error Adapter Unit Tests") {
         REQUIRE(foundOutOfBattery);
         REQUIRE(foundRandomBreak);
     }
+
+   //testing if all errors are resolved
+    SECTION("All Errors Are Resolved") {
+        errorAdapter.insertError("6", "5", "Out of Battery", 1);
+        errorAdapter.insertError("7", "5", "Random Break", 1);
+        
+        //check all errors are resolved for the robot with ID "5"
+        REQUIRE(errorAdapter.allErrorIsResolved("5"));
+
+        //Add an unresolved error for the same robot
+        errorAdapter.insertError("8", "5", "Out of Battery", 0);
+        
+        //check that not all errors are resolved for the robot with ID "5"
+        REQUIRE(!errorAdapter.allErrorIsResolved("5"));
+    
+    }
+
+    //testing resolveError
+    SECTION("Resolve Error") {
+        //insert unresolved error for a robot
+        errorAdapter.insertError("9", "6", "Out of Battery", 0);
+        
+        auto unresolvedError = errorAdapter.findDocumentById("9");
+        REQUIRE(unresolvedError);
+        REQUIRE(unresolvedError->view()["resolved"].get_int32() == 0);
+
+        errorAdapter.resolveError("6");
+        
+        auto resolvedError = errorAdapter.findDocumentById("9");
+        REQUIRE(resolvedError);
+        REQUIRE(resolvedError->view()["resolved"].get_int32() == 1);
+    }
+
 }
 
