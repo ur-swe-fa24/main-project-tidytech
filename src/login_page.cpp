@@ -23,7 +23,7 @@ LoginPage::LoginPage(const wxString& title, FleetManager* fm) : wxFrame(nullptr,
     buttonSizer->Add(btn2, 0, wxALL, 5);
 
     wxButton* btn3 = new wxButton(panel, wxID_ANY, "Building Operator", wxDefaultPosition, wxSize(150, 45));
-    btn3->Bind(wxEVT_BUTTON, [this, fm](wxCommandEvent& evt){this->OnButtonClick(evt, fm);});
+    btn3->Bind(wxEVT_BUTTON, [this, fm](wxCommandEvent& evt){this->OnBuildingOperatorClick(evt, fm);});
     buttonSizer->Add(btn3, 0, wxALL, 5);
 
     wxButton* btn4 = new wxButton(panel, wxID_ANY, "Field Engineer", wxDefaultPosition, wxSize(150, 45));
@@ -55,4 +55,13 @@ void LoginPage::OnSeniorManagerClick(wxCommandEvent& evt, FleetManager* fm) {
     smp->SetClientSize(800, 600);
     smp->Center();
     smp->Show();
+}
+
+void LoginPage::OnBuildingOperatorClick(wxCommandEvent& evt, FleetManager* fm) {
+    this->Hide();
+
+    BuildingOperator* bop = new BuildingOperator("Building Operator", fm);
+    bop->SetClientSize(800, 600);
+    bop->Center();
+    bop->Show();
 }
