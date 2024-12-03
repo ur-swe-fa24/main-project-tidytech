@@ -445,3 +445,23 @@ unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_dat
     }
     return sol;
 }
+
+unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_data_fe() {
+    unordered_map<std::string, std::vector<std::string>> sol;
+    try {
+        auto robots = robot_adapter_.getAllRobots();
+        for (const auto& robot : robots) {
+            std::string id = robot.view()["_id"].get_utf8().value.to_string();
+            sol["id"].push_back(id);
+            std::string name = robot.view()["name"].get_utf8().value.to_string();
+            sol["name"].push_back(name);
+            std::string type = robot.view()["status"].get_utf8().value.to_string();
+            sol["status"].push_back(type);
+            std::string capacity = robot.view()["capacity"].get_utf8().value.to_string();
+            sol["capacity"].push_back(capacity);
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Error populating simulation from DB robot collection: " << e.what() << endl;
+    }
+    return sol;
+}

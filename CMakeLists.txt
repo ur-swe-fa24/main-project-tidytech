@@ -36,6 +36,7 @@ add_library(user_interface
     src/senior_manager_page.cpp
     src/add_task_window.cpp
     src/building_operator.cpp
+    src/field_engineer.cpp
 )
 
 add_library(types INTERFACE)

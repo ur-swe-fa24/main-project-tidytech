@@ -10,11 +10,6 @@ class SeniorManagerPage : public wxFrame {
     public:
         SeniorManagerPage(const wxString& title, FleetManager* fm);
     private:
-        void OnButtonClick(wxCommandEvent& evt);
-        void OnSeniorManagerClick(wxCommandEvent& evt);
-        DBManager& dbmanager_;
-        RobotAdapter robot_adapter_;
-        FloorAdapter floor_adapter_;
         FleetManager& fm_;
         void Logout(wxCommandEvent& evt);
 };

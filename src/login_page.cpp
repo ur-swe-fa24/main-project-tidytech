@@ -27,7 +27,7 @@ LoginPage::LoginPage(const wxString& title, FleetManager* fm) : wxFrame(nullptr,
     buttonSizer->Add(btn3, 0, wxALL, 5);
 
     wxButton* btn4 = new wxButton(panel, wxID_ANY, "Field Engineer", wxDefaultPosition, wxSize(150, 45));
-    btn4->Bind(wxEVT_BUTTON, [this, fm](wxCommandEvent& evt){this->OnButtonClick(evt, fm);});
+    btn4->Bind(wxEVT_BUTTON, [this, fm](wxCommandEvent& evt){this->OnFieldEngineerClick(evt, fm);});
     buttonSizer->Add(btn4, 0, wxALL, 5);
 
     // Add the buttons to the main sizer
@@ -64,4 +64,13 @@ void LoginPage::OnBuildingOperatorClick(wxCommandEvent& evt, FleetManager* fm) {
     bop->SetClientSize(800, 600);
     bop->Center();
     bop->Show();
+}
+
+void LoginPage::OnFieldEngineerClick(wxCommandEvent& evt, FleetManager* fm) {
+    this->Hide();
+
+    FieldEngineer* fep = new FieldEngineer("Field Engineer", fm);
+    fep->SetClientSize(800, 600);
+    fep->Center();
+    fep->Show();
 }
