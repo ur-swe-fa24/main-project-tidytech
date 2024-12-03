@@ -3,9 +3,7 @@
 #include <wx/grid.h>
 #include "ui/login_page.hpp"
 
-SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) 
-    : fm_(*fm), wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)), dbmanager_{DBManager::getInstance("mongodb://localhost:27017", "database")}, 
-                                robot_adapter_{dbmanager_.getDatabase()["robots"]}, floor_adapter_{dbmanager_.getDatabase()["floors"]} {
+SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : fm_(*fm), wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)) {
     wxPanel* panel = new wxPanel(this);
     wxGrid* grid = new wxGrid(panel, wxID_ANY, wxDefaultPosition, wxSize(800, 600));
 

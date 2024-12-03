@@ -4,6 +4,7 @@
 #include "ui/user_interface.hpp"
 #include "ui/senior_manager_page.hpp"
 #include "ui/building_operator.hpp"
+#include "ui/field_engineer.hpp"
 
 #include <wx/wx.h>
 
@@ -16,6 +17,7 @@ class LoginPage : public wxFrame {
         void OnButtonClick(wxCommandEvent& evt, FleetManager* fm);
         void OnSeniorManagerClick(wxCommandEvent& evt, FleetManager* fm);
         void OnBuildingOperatorClick(wxCommandEvent& evt, FleetManager* fm);
+        void OnFieldEngineerClick(wxCommandEvent& evt, FleetManager* fm);
         FleetManager* fm_;
         // UserInterface* userInterface;
 };
