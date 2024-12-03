@@ -37,10 +37,6 @@ class BuildingOperator : public wxFrame, public Publisher, public Subscriber {
         
     private:
         void OnClose(wxCloseEvent& event);
-        void OnStartSimulation(wxCommandEvent& evt);
-        void OnAddRobot(wxCommandEvent& event);
-        // void OnRobotAdded(wxCommandEvent& event); 
-        void OnAddFloor(wxCommandEvent& event);
         void OnAddTask(wxCommandEvent& event);
         void OnUpdateGrid(wxCommandEvent& evt);
         void handle_display_text(const std::string& data);
@@ -55,11 +51,11 @@ class BuildingOperator : public wxFrame, public Publisher, public Subscriber {
         void update_grid_floors(std::string cleanLevel);
         void OnUpdateGridFloors(wxCommandEvent& evt);
 
-
         void update_grid_neighbors();
 
         void update_grid(const std::vector<std::vector<std::string>>& new_data);
 
+        void RefreshRobotTable();
 
         std::vector<std::vector<std::string>> extract_five_ping(std::string str);
         // wxDECLARE_EVENT_TABLE();
@@ -68,6 +64,7 @@ class BuildingOperator : public wxFrame, public Publisher, public Subscriber {
         int num_added_ = 0;
         wxGrid* grid;
         wxGrid* grid2;
+        std::string selected_robot_;
 
         std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
 };

@@ -10,7 +10,7 @@ namespace types {
     enum class Event {FiveSecReport, FiveSecReportFloors, FinalReport, 
                         UpdateFloorNeighbors, UpdateFloorCleanLevel,
                         UpdateRobotParameters, UpdateRobotError, UpdateNumFloorsClean, AlertEmpty,
-                        AlertUiRobotError, AlertUiEmpty, DisplayText};
+                        AlertUiRobotError, AlertUiEmpty, DisplayText, FixRobot};
 
     // Error
     enum class ErrorType {OutOfBattery, RandomBreak};

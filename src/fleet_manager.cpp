@@ -200,7 +200,7 @@ void FleetManager::update(const types::Event& event, const int id) {
     } else if (event == Event::AlertEmpty) {
         alert_empty(id);
     } else if (event == Event::FixRobot) {
-        fix_robot_db(id);
+        // fix_robot_db(id);
     }
 }
 
