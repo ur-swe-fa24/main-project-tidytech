@@ -445,5 +445,40 @@ void BuildingOperator::OnClose(wxCloseEvent& event) {
 }
 
 void BuildingOperator::RefreshRobotTable() {
-    
+    // Ensure the `selected_robot_` is set before refreshing
+    if (selected_robot_.empty()) {
+        wxLogMessage("No robot selected.");
+        return;
+    }
+
+    // Retrieve robot data from the FleetManager
+    unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
+
+    // Find the index of the selected robot
+    auto it = std::find(robots["name"].begin(), robots["name"].end(), selected_robot_);
+    if (it == robots["name"].end()) {
+        wxLogMessage("Selected robot '%s' not found.", selected_robot_);
+        return;
+    }
+
+    // Clear the grid and refresh with new data
+    if (grid->GetNumberRows() > 0) {
+        grid->DeleteRows(0, grid->GetNumberRows());
+    }
+
+    size_t rowIndex = std::distance(robots["name"].begin(), it);
+
+    grid->AppendRows(1);
+    grid->SetCellValue(0, 0, robots["id"][rowIndex]);
+    grid->SetCellValue(0, 1, robots["name"][rowIndex]);
+    grid->SetCellValue(0, 2, robots["type"][rowIndex]);
+    // grid->SetCellValue(0, 3, robots["battery"][rowIndex]);
+    // grid->SetCellValue(0, 4, robots["capacity"][rowIndex]);
+    // grid->SetCellValue(0, 5, robots["status"][rowIndex]);
+    // grid->SetCellValue(0, 6, robots["cur_room"][rowIndex]);
+    // grid->SetCellValue(0, 7, robots["tasks"][rowIndex]);
+
+    grid->ForceRefresh(); // Refresh grid display
+
 }
+    
