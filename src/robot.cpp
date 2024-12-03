@@ -160,3 +160,8 @@ bool Robot::is_capacity_empty() {
     }
     return false;
 }
+
+void Robot::reset_capacity() {
+    status_ = RobotStatus::Available;
+    remaining_capacity_ = 100;
+}

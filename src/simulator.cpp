@@ -334,7 +334,8 @@ vector<int> Simulator::filter_tasks(int curr, vector<int> tasks) {
 
 // Fix all unavailable robots
 void Simulator::resolve_all_robots() {
-    for (Robot robot : robots_) {
+    std::lock_guard<std::mutex> lock(robots_mutex_);
+    for (Robot& robot : robots_) {
         if (robot.get_status() == RobotStatus::Unavailable) {
             robot.fix_error();
             update_robot_db(robot, 0);
@@ -345,10 +346,11 @@ void Simulator::resolve_all_robots() {
 
 // Reset capacity of all robots
 void Simulator::reset_capacity_all_robots() {
-    for (Robot robot : robots_) {
+    std::lock_guard<std::mutex> lock(robots_mutex_);
+    for (Robot& robot : robots_) {
         if ((robot.get_status() == RobotStatus::NeedEmpty) && (robot.at_base())) {
             robot.reset_capacity();
-            update_robot_db(robot, 0);
+            (robot, 0);
         }
     }
 }

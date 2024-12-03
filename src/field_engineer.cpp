@@ -59,9 +59,9 @@ FieldEngineer::FieldEngineer(const wxString& title, FleetManager* fm)
     // Add horizontal sizer for the bottom buttons
     wxBoxSizer* resetSizer = new wxBoxSizer(wxHORIZONTAL);
     wxButton* btn2 = new wxButton(panel, wxID_ANY, "Reset Errors", wxDefaultPosition, wxSize(150, 45));
-    btn2->Bind(wxEVT_BUTTON, &FieldEngineer::Logout, this);
+    btn2->Bind(wxEVT_BUTTON, [this, fm](wxCommandEvent& evt){fm_.resolve_all_robots();});
     wxButton* btn3 = new wxButton(panel, wxID_ANY, "Reset Capacity", wxDefaultPosition, wxSize(150, 45));
-    btn3->Bind(wxEVT_BUTTON, &FieldEngineer::Logout, this);
+    btn3->Bind(wxEVT_BUTTON, [this, fm](wxCommandEvent& evt){fm_.reset_capacity_for_robots();});
     resetSizer->Add(btn2, 0, wxALL, 5);
     resetSizer->Add(btn3, 0, wxALL, 5);
 

@@ -182,7 +182,9 @@ void UserInterface::OnAddRobot(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
     AddRobotWindow robotForm(this, names);
     if (robotForm.ShowModal() == wxID_OK) {
-        if (fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position(), 100, {}, {}, 0, 0, 0)) {
+        if (robotForm.get_charging_position() == "-1" || robotForm.get_size() == "Error" || robotForm.get_type() == "Error") {
+            // do nothing
+        } else if (fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position(), 100, {}, {}, 0, 0, 0)) {
             wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
             std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), robotForm.get_name(), robotForm.get_type(), "-", "-", "-"};
             AddRowToGrid(new_row_info);
@@ -199,7 +201,9 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     std::vector<std::string> names = fm_.get_all_floor_names();
     AddFloorWindow floorForm(this, names, names.size());
     if (floorForm.ShowModal() == wxID_OK) {
-        if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
+        if (floorForm.get_floor_room_type() == "Error" || floorForm.get_floor_type() == "Error" || floorForm.get_floor_size() == "Error" || floorForm.get_floor_interaction() == "Error") {
+            // do nothing
+        } else if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
             wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION); 
             std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(),floorForm.get_floor_interaction(), std::to_string(50), "Please Refresh"};
             AddRowToGridFloor(new_row_info);
@@ -215,7 +219,9 @@ void UserInterface::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
     AddTaskWindow taskForm(this, floor_names, robot_names, floor_names.size());
     if (taskForm.ShowModal() == wxID_OK) {
-        if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
+        if (taskForm.get_robot() == "-1" || taskForm.get_floor(floor_names.size()).size() == 0) {
+            // do nothing 
+        } else if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
             wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
