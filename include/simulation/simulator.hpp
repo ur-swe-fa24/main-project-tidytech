@@ -22,7 +22,7 @@ using namespace types;
 
 class Simulator : public Publisher {
     public:
-        static const int MAX_SIM_TIME = 2000; // Max simulation time
+        static const int MAX_SIM_TIME = 2000; //Max simulation time
         static const int MAX_NUM_FLOORS = 11; // Max num of floors in a floorplan
 
         Simulator(); // Default constructor
@@ -49,6 +49,8 @@ class Simulator : public Publisher {
         std::string status_report(int robot_id);
         void add_task_to_front(int robot_id, std::vector<int> floor_ids);
         void add_task_to_back(int robot_id, std::vector<int> floor_ids);
+        void resolve_all_robots();
+        void reset_capacity_all_robots();
         std::vector<std::string> get_all_floor_names();
         std::vector<std::string> get_all_robot_names();
 
@@ -76,6 +78,7 @@ class Simulator : public Publisher {
         bool check_robot_to_floor(RobotType robot_type, FloorType floor_type);
         void check_out_of_battery(int id, int battery);
         void update_robot_db(Robot& robot, int powerUsed);
+        vector<int> filter_tasks(int curr, vector<int> tasks);
         std::unordered_map<Event, std::vector<Subscriber*>> subscribers_;
 
 

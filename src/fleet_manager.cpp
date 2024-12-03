@@ -199,6 +199,8 @@ void FleetManager::update(const types::Event& event, const int id) {
         update_db_num_floors_clean(id);
     } else if (event == Event::AlertEmpty) {
         alert_empty(id);
+    } else if (event == Event::FixRobot) {
+        fix_robot_db(id);
     }
 }
 
@@ -386,6 +388,13 @@ std::vector<std::string> FleetManager::get_all_floor_names() {
 
 std::vector<std::string> FleetManager::get_all_robot_names() {
     return simulator_.get_all_robot_names();
+}
+
+void FleetManager::resolve_all_robots() {
+    simulator_.resolve_all_robots();
+}
+void FleetManager::reset_capacity_for_robots() {
+    simulator_.reset_capacity_all_robots();
 }
 
 bool FleetManager::add_task_to_back(int robot_id, std::vector<int> floor_ids) {

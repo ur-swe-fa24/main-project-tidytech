@@ -97,7 +97,11 @@ void Robot::charge() {
     }
     battery_ = std::min(100, battery_ + 5);
     if (battery_ == 100) {
+        if (remaining_capacity_ == 0) {
+            status_ = RobotStatus::NeedEmpty;
+        } else {
         status_ = RobotStatus::Available;
+        }
     }
 }
 
