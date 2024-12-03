@@ -49,6 +49,8 @@ class Simulator : public Publisher {
         std::string status_report(int robot_id);
         void add_task_to_front(int robot_id, std::vector<int> floor_ids);
         void add_task_to_back(int robot_id, std::vector<int> floor_ids);
+        void resolve_all_robots();
+        void reset_capacity_all_robots();
         std::vector<std::string> get_all_floor_names();
         std::vector<std::string> get_all_robot_names();
 

@@ -332,6 +332,27 @@ vector<int> Simulator::filter_tasks(int curr, vector<int> tasks) {
     return filtered;
 }
 
+// Fix all unavailable robots
+void Simulator::resolve_all_robots() {
+    for (Robot robot : robots_) {
+        if (robot.get_status() == RobotStatus::Unavailable) {
+            robot.fix_error();
+            update_robot_db(robot, 0);
+            notify(Event::UpdateRobotError, robot.get_id(), true);
+        }
+    }
+}
+
+// Reset capacity of all robots
+void Simulator::reset_capacity_all_robots() {
+    for (Robot robot : robots_) {
+        if ((robot.get_status() == RobotStatus::NeedEmpty) && (robot.at_base())) {
+            robot.reset_capacity();
+            update_robot_db(robot, 0);
+        }
+    }
+}
+
 // Check if robot battery is out
 void Simulator::check_out_of_battery(int id, int battery) {
     if (battery < 1) {

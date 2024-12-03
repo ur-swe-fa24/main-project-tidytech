@@ -26,6 +26,8 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         int add_floor(std::string name, std::string roomType, std::string type, std::string size, std::string interaction, std::vector<int> neighbors);
         bool add_task_to_front(int robot_id, std::vector<int> floor_ids);
         bool add_task_to_back(int robot_id, std::vector<int> floor_ids);
+        void resolve_all_robots();
+        void reset_capacity_for_robots();
         void write_output(std::string filepath, std::string message); // outputs to a file
 
         unordered_map<std::string, std::vector<std::string>> get_table_data();
