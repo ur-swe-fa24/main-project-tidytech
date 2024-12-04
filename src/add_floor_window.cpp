@@ -8,6 +8,7 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names,
     
     num_added_ = num_added;
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    Bind(wxEVT_CLOSE_WINDOW, &AddFloorWindow::OnClose, this);
 
     // Floor name
     floor_name_ = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250, 25));
@@ -70,4 +71,8 @@ AddFloorWindow::AddFloorWindow(wxWindow* parent, std::vector<std::string> names,
 
     SetSizer(sizer);
     Centre();
+}
+
+void AddFloorWindow::OnClose(wxCloseEvent& event) {
+    EndModal(wxID_CANCEL);
 }

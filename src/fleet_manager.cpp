@@ -199,8 +199,6 @@ void FleetManager::update(const types::Event& event, const int id) {
         update_db_num_floors_clean(id);
     } else if (event == Event::AlertEmpty) {
         alert_empty(id);
-    } else if (event == Event::FixRobot) {
-        fix_robot_db(id);
     }
 }
 
