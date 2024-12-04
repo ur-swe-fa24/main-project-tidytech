@@ -9,6 +9,7 @@
 
 UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(nullptr, wxID_ANY, title), fm_(*fm) {
     // To be able to change the main text on the panel
+    // comment
     subscribe(Event::DisplayText);
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
