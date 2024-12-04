@@ -482,11 +482,15 @@ unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_dat
             sol["id"].push_back(id);
             std::string name = robot.view()["name"].get_utf8().value.to_string();
             sol["name"].push_back(name);
-            std::string total_battery = robot.view()["total_battery_used"].get_utf8().value.to_string();
+            std::string size = robot.view()["size"].get_utf8().value.to_string();
+            sol["size"].push_back(size);
+            std::string type = robot.view()["type"].get_utf8().value.to_string();
+            sol["type"].push_back(type);
+            std::string total_battery = std::to_string(robot.view()["total_battery_used"].get_int32().value);
             sol["total_battery_used"].push_back(total_battery);
-            std::string error_count = robot.view()["error_count"].get_utf8().value.to_string();
+            std::string error_count = std::to_string(robot.view()["error_count"].get_int32().value);
             sol["error_count"].push_back(error_count);
-            std::string rooms_cleaned = robot.view()["rooms_cleaned"].get_utf8().value.to_string();
+            std::string rooms_cleaned = std::to_string(robot.view()["rooms_cleaned"].get_int32().value);
             sol["rooms_cleaned"].push_back(rooms_cleaned);
         }
     } catch (const std::exception& e){

@@ -7,11 +7,11 @@ SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : 
     wxPanel* panel = new wxPanel(this);
     wxGrid* grid = new wxGrid(panel, wxID_ANY, wxDefaultPosition, wxSize(800, 600));
 
-    unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
+    unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data_metrics();
     // std::cout << robots["name"].size() << std::endl;
     
     int rows = robots["name"].size();
-    int cols = 6;
+    int cols = 7;
     grid->CreateGrid(rows, cols);
 
     grid->SetDefaultColSize(90, true);
@@ -20,10 +20,11 @@ SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : 
 
     grid->SetColLabelValue(0, "ID");
     grid->SetColLabelValue(1, "Name");
-    grid->SetColLabelValue(2, "Type");
-    grid->SetColLabelValue(3, "Total Battery");
-    grid->SetColLabelValue(4, "Rooms Cleaned");
-    grid->SetColLabelValue(5, "Total Errors");
+    grid->SetColLabelValue(2, "Size");
+    grid->SetColLabelValue(3, "Type");
+    grid->SetColLabelValue(4, "Total Battery");
+    grid->SetColLabelValue(5, "Rooms Cleaned");
+    grid->SetColLabelValue(6, "Total Errors");
 
     for (int row = 0; row < rows; ++row) {
         grid->SetRowLabelValue(row, "Robot " + std::to_string(row + 1));
@@ -36,7 +37,15 @@ SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : 
             } else if (col == 1) {
                 grid->SetCellValue(row, col, robots["name"][row]);  
             } else if (col == 2) {
+                grid->SetCellValue(row, col, robots["size"][row]);  
+            } else if (col == 3) {
                 grid->SetCellValue(row, col, robots["type"][row]);  
+            } else if (col == 4) {
+                grid->SetCellValue(row, col, robots["total_battery_used"][row]);  
+            } else if (col == 5) {
+                grid->SetCellValue(row, col, robots["rooms_cleaned"][row]);  
+            } else if (col == 6) {
+                grid->SetCellValue(row, col, robots["error_count"][row]);  
             } else {
                 grid->SetCellValue(row, col, "-");  
             }
