@@ -19,6 +19,9 @@ Robot::Robot(int id, std::string name, RobotSize size, RobotType type, int base,
     error_count = 0;
     rooms_cleaned = 0;
 
+    // Seed the random number generator with the current time
+    srand(time(0)); 
+
 } 
 
 // to_string for robot object
