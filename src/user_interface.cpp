@@ -33,10 +33,6 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
     // Create a sizer for the three buttons and add the buttons
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    wxButton* btn = new wxButton(scrolledWindow, wxID_ANY, "Start Simulation", wxDefaultPosition, wxSize(150, 45));
-    btn->Bind(wxEVT_BUTTON, &UserInterface::OnStartSimulation, this);
-    buttonSizer->Add(btn, 0, wxALL, 5);
-
     wxButton* openAddRobot = new wxButton(scrolledWindow, wxID_ANY, "Add Robot", wxDefaultPosition, wxSize(150, 45));
     openAddRobot->Bind(wxEVT_BUTTON, &UserInterface::OnAddRobot, this);
     buttonSizer->Add(openAddRobot, 0, wxALL, 5);
