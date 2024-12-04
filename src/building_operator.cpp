@@ -199,7 +199,7 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
 void BuildingOperator::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> floor_names = fm_.get_all_floor_names();
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
-    AddTaskWindow taskForm(this, floor_names, robot_names, floor_names.size());
+    AddTaskWindow taskForm(this, floor_names, {selected_robot_}, floor_names.size());
     if (taskForm.ShowModal() == wxID_OK) {
         if (taskForm.get_robot() == "-1" || taskForm.get_floor(floor_names.size()).size() == 0) {
             // do nothing 
