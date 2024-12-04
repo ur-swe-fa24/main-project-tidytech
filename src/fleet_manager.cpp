@@ -472,3 +472,25 @@ unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_dat
     }
     return sol;
 }
+
+unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_data_metrics() {
+    unordered_map<std::string, std::vector<std::string>> sol;
+    try {
+        auto robots = robot_adapter_.getAllRobots();
+        for (const auto& robot : robots) {
+            std::string id = robot.view()["_id"].get_utf8().value.to_string();
+            sol["id"].push_back(id);
+            std::string name = robot.view()["name"].get_utf8().value.to_string();
+            sol["name"].push_back(name);
+            std::string total_battery = robot.view()["total_battery_used"].get_utf8().value.to_string();
+            sol["total_battery_used"].push_back(total_battery);
+            std::string error_count = robot.view()["error_count"].get_utf8().value.to_string();
+            sol["error_count"].push_back(error_count);
+            std::string rooms_cleaned = robot.view()["rooms_cleaned"].get_utf8().value.to_string();
+            sol["rooms_cleaned"].push_back(rooms_cleaned);
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Error fetching metrics from DB robot collection: " << e.what() << endl;
+    }
+    return sol;
+}

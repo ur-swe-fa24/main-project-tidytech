@@ -33,6 +33,7 @@ class FleetManager : public Subscriber, public wxApp, public Publisher {
         unordered_map<std::string, std::vector<std::string>> get_table_data();
         unordered_map<std::string, std::vector<std::string>> get_table_data_floors();
         unordered_map<std::string, std::vector<std::string>> get_table_data_fe();
+        unordered_map<std::string, std::vector<std::string>> get_table_data_metrics();
 
         std::vector<std::string> get_all_floor_names();
         std::vector<std::string> get_all_robot_names();
