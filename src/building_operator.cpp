@@ -29,35 +29,59 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
     btn1->Bind(wxEVT_BUTTON, &BuildingOperator::Logout, this);
     mainSizer->Add(btn1, 0, wxALIGN_RIGHT | wxALL, 5);
 
-    // Create a sizer for the three buttons and add the buttons
+    // Create a sizer for the the add task button and add the button
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-
-    wxButton* btn = new wxButton(scrolledWindow, wxID_ANY, "Start Simulation", wxDefaultPosition, wxSize(150, 45));
-    btn->Bind(wxEVT_BUTTON, &BuildingOperator::OnStartSimulation, this);
-    buttonSizer->Add(btn, 0, wxALL, 5);
-
-    wxButton* openAddRobot = new wxButton(scrolledWindow, wxID_ANY, "Add Robot", wxDefaultPosition, wxSize(150, 45));
-    openAddRobot->Bind(wxEVT_BUTTON, &BuildingOperator::OnAddRobot, this);
-    buttonSizer->Add(openAddRobot, 0, wxALL, 5);
-
-    wxButton* openAddFloor = new wxButton(scrolledWindow, wxID_ANY, "Add Floor", wxDefaultPosition, wxSize(150, 45));
-    openAddFloor->Bind(wxEVT_BUTTON, &BuildingOperator::OnAddFloor, this);
-    buttonSizer->Add(openAddFloor, 0, wxALL, 5);
 
     wxButton* openAddTask = new wxButton(scrolledWindow, wxID_ANY, "Add Task", wxDefaultPosition, wxSize(150, 45));
     openAddTask->Bind(wxEVT_BUTTON, &BuildingOperator::OnAddTask, this);
     buttonSizer->Add(openAddTask, 0, wxALL, 5);
 
+
+    // Add a horizontal sizer for the radio buttons
+    wxBoxSizer* radioButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+
+    // Retrieve the robot names
+    std::vector<std::string> robotNames = fm_.get_all_robot_names();
+    wxRadioButton* firstButton = nullptr; // To track the first button for default selection
+
+    for (size_t i = 0; i < robotNames.size(); ++i) {
+        wxRadioButton* radioButton = new wxRadioButton(
+            scrolledWindow,                 // Parent
+            wxID_ANY,                       // ID
+            robotNames[i],                  // Label
+            wxDefaultPosition,              // Position
+            wxDefaultSize,                  // Size
+            i == 0 ? wxRB_GROUP : 0         // Group the first button
+        );
+
+        // Set the first button as checked by default
+        if (i == 0) {
+            selected_robot_ = robotNames[i]; // Default selection
+            radioButton->SetValue(true);
+        }
+
+        // Bind event to handle selection
+        radioButton->Bind(wxEVT_RADIOBUTTON, [this, radioButton](wxCommandEvent& event) {
+            selected_robot_ = std::string(radioButton->GetLabel().mb_str());
+        });
+
+        // Add the radio button to the sizer
+        radioButtonSizer->Add(radioButton, 0, wxALL, 5);
+    }
+
     // Add the buttons to the main sizer
     mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
 
+    // Add the radio buttons to the main sizer
+    mainSizer->Add(radioButtonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
+
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
     // int tableHeight = 100 + 25 * robots["name"].size();
-    grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
+    grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 80));
 
     // std::cout << robots["name"].size() << std::endl;
     
-    int rows = robots["name"].size();
+    int rows = 1;
     int cols = 8;
     grid->CreateGrid(rows, cols);
 
@@ -75,7 +99,7 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
     grid->SetColLabelValue(7, "Tasks");
 
     for (int row = 0; row < rows; ++row) {
-        grid->SetRowLabelValue(row, "Robot " + std::to_string(row + 1));
+        grid->SetRowLabelValue(row, "Robot");
     }
 
     for (int row = 0; row < rows; ++row) {
@@ -172,50 +196,14 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
 }
 
 
-// Wrapper to just call the start sim from the fleet manager
-void BuildingOperator::OnStartSimulation(wxCommandEvent& evt) {
-    fm_.start_sim();
-}
-
-// Have a dialogue (form) for when you click the add robot
-void BuildingOperator::OnAddRobot(wxCommandEvent& event) {
-    std::vector<std::string> names = fm_.get_all_floor_names();
-    AddRobotWindow robotForm(this, names);
-    if (robotForm.ShowModal() == wxID_OK) {
-        if (fm_.add_robot(robotForm.get_name(), robotForm.get_size(), robotForm.get_type(), robotForm.get_charging_position(), robotForm.get_charging_position(), 100, {}, {}, 0, 0, 0)) {
-            wxMessageBox(wxT(""), wxT("Robot Added Successfully"), wxICON_INFORMATION);
-            std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), robotForm.get_name(), robotForm.get_type(), "-", "-", "-"};
-            AddRowToGrid(new_row_info);
-        } else {
-            wxMessageBox(wxT(""), wxT("Could Not Add Robot"), wxICON_INFORMATION);
-        }
-    }
-}
-
-
-
-// Have a dialogue (form) for when you click the add floor
-void BuildingOperator::OnAddFloor(wxCommandEvent& event) {
-    std::vector<std::string> names = fm_.get_all_floor_names();
-    AddFloorWindow floorForm(this, names, names.size());
-    if (floorForm.ShowModal() == wxID_OK) {
-        if (fm_.add_floor(floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(), floorForm.get_floor_size(), floorForm.get_floor_interaction(), floorForm.get_floor_neighbors())) {
-            wxMessageBox(wxT(""), wxT("Floor Added Successfully"), wxICON_INFORMATION); 
-            std::vector<std::string> new_row_info = {std::to_string(names.size() + 1), floorForm.get_floor_name(), floorForm.get_floor_room_type(), floorForm.get_floor_type(),floorForm.get_floor_interaction(), std::to_string(50), "Please Refresh"};
-            AddRowToGridFloor(new_row_info);
-            update_grid_neighbors();
-        } else {
-            wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
-        }
-    }
-}
-
 void BuildingOperator::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> floor_names = fm_.get_all_floor_names();
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
     AddTaskWindow taskForm(this, floor_names, robot_names, floor_names.size());
     if (taskForm.ShowModal() == wxID_OK) {
-        if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
+        if (taskForm.get_robot() == "-1" || taskForm.get_floor(floor_names.size()).size() == 0) {
+            // do nothing 
+        } else if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
             wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
@@ -321,7 +309,9 @@ void BuildingOperator::handle_display_text(const std::string& data) {
 
 void BuildingOperator::handle_five_sec(const std::string& data) {
     std::vector<std::vector<std::string>> updated_table_info = extract_five_ping(data);
-    update_grid(updated_table_info);
+    if (updated_table_info[0][1] == selected_robot_) {
+        update_grid(updated_table_info);
+    }
 }
 
 void BuildingOperator::handle_five_sec_floors(const std::string& data) {
@@ -404,7 +394,7 @@ void BuildingOperator::update_grid(const std::vector<std::vector<std::string>>& 
         // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
         wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, 1);
         event.SetString(value.c_str());
-        event.SetInt(std::stoi(robotData[0][0]) - 1);
+        event.SetInt(0);
         event.SetExtraLong(col);
         wxPostEvent(this, event);
     }
