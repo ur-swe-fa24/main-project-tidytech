@@ -147,8 +147,9 @@ void Robot::start_task() {
 // Robot breaks randomly
 void Robot::break_robot() {
     // Simulate 1% chance of breaking
-    if ((((double)rand()) / INT_MAX) < 0.001) {
-        spdlog::warn("Robot {} has broken. Status set to Unavailable.", id_);
+    auto prob = ((double)rand()) / INT_MAX;
+    if (prob < 0.001) {
+        spdlog::warn("Robot {} has broken. Status set to Unavailable. Prob: {}", id_, prob);
         status_ = RobotStatus::Unavailable;
     }
 }
@@ -159,4 +160,9 @@ bool Robot::is_capacity_empty() {
         return true;
     }
     return false;
+}
+
+void Robot::reset_capacity() {
+    status_ = RobotStatus::Available;
+    remaining_capacity_ = 100;
 }

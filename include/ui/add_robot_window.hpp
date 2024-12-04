@@ -33,13 +33,11 @@ class AddRobotWindow : public wxDialog {
         std::string get_charging_position() {
             int sol;
             for (int i = 0; i < 11; i++) {
-                try {
-                    if (boxes_[i]->GetValue()) {
-                        sol = i + 1;
-                        return std::to_string(sol);
-                    }
-                } catch (...) {
-                    continue;
+                if (boxes_[i] == NULL) {
+                    break;
+                } else if (boxes_[i]->GetValue()) {
+                    sol = i + 1;
+                    return std::to_string(sol);
                 }
             }
             return "-1";
@@ -70,6 +68,8 @@ class AddRobotWindow : public wxDialog {
         wxRadioButton* floor11;
         int num_added_;
         std::vector<wxRadioButton*> boxes_ = {floor1, floor2, floor3, floor4, floor5, floor6, floor7, floor8, floor9, floor10, floor11};
+
+        void OnClose(wxCloseEvent& event);
 };
 
 #endif

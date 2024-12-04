@@ -5,6 +5,7 @@ AddRobotWindow::AddRobotWindow(wxWindow* parent, std::vector<std::string> names)
 
     std::reverse(names.begin(), names.end());
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    Bind(wxEVT_CLOSE_WINDOW, &AddRobotWindow::OnClose, this);
 
     // Name text field
     robot_name_ = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250, 25));
@@ -37,7 +38,7 @@ AddRobotWindow::AddRobotWindow(wxWindow* parent, std::vector<std::string> names)
 
     // TODO: Store the information in the checkboxes
     wxBoxSizer* defaultPositionSizer = new wxBoxSizer(wxVERTICAL);
-    defaultPositionSizer->Add(new wxStaticText(this, wxID_ANY, "Charging Room:"), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+    defaultPositionSizer->Add(new wxStaticText(this, wxID_ANY, "Charging Room:"), 0, wxLEFT | wxRIGHT | wxTOP, 10); 
     defaultPositionSizer->Add(new wxRadioButton(this, wxID_ANY, "No Room", wxDefaultPosition, wxDefaultSize, wxRB_GROUP), 0, wxALL, 5);
     for (int i = names.size() - 1; i >= 0; i--) {
     // for (int i = 0; i < names.size(); i++) {
@@ -62,4 +63,8 @@ AddRobotWindow::AddRobotWindow(wxWindow* parent, std::vector<std::string> names)
 
     SetSizer(sizer);
     Centre();
+}
+
+void AddRobotWindow::OnClose(wxCloseEvent& event) {
+    EndModal(wxID_CANCEL);
 }

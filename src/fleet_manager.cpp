@@ -199,8 +199,6 @@ void FleetManager::update(const types::Event& event, const int id) {
         update_db_num_floors_clean(id);
     } else if (event == Event::AlertEmpty) {
         alert_empty(id);
-    } else if (event == Event::FixRobot) {
-        // fix_robot_db(id);
     }
 }
 
@@ -471,6 +469,32 @@ unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_dat
         }
     } catch (const std::exception& e){
         std::cerr << "Error populating simulation from DB robot collection: " << e.what() << endl;
+    }
+    return sol;
+}
+
+unordered_map<std::string, std::vector<std::string>> FleetManager::get_table_data_metrics() {
+    unordered_map<std::string, std::vector<std::string>> sol;
+    try {
+        auto robots = robot_adapter_.getAllRobots();
+        for (const auto& robot : robots) {
+            std::string id = robot.view()["_id"].get_utf8().value.to_string();
+            sol["id"].push_back(id);
+            std::string name = robot.view()["name"].get_utf8().value.to_string();
+            sol["name"].push_back(name);
+            std::string size = robot.view()["size"].get_utf8().value.to_string();
+            sol["size"].push_back(size);
+            std::string type = robot.view()["type"].get_utf8().value.to_string();
+            sol["type"].push_back(type);
+            std::string total_battery = std::to_string(robot.view()["total_battery_used"].get_int32().value);
+            sol["total_battery_used"].push_back(total_battery);
+            std::string error_count = std::to_string(robot.view()["error_count"].get_int32().value);
+            sol["error_count"].push_back(error_count);
+            std::string rooms_cleaned = std::to_string(robot.view()["rooms_cleaned"].get_int32().value);
+            sol["rooms_cleaned"].push_back(rooms_cleaned);
+        }
+    } catch (const std::exception& e){
+        std::cerr << "Error fetching metrics from DB robot collection: " << e.what() << endl;
     }
     return sol;
 }

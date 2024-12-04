@@ -3,6 +3,7 @@
 AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_names, std::vector<std::string> robot_names, int num_added) : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 450)) {
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     num_added_ = num_added;
+    Bind(wxEVT_CLOSE_WINDOW, &AddTaskWindow::OnClose, this);
     // std::reverse(robot_names.begin(), robot_names.end());
     // std::reverse(floor_names.begin(), floor_names.end());
 
@@ -30,4 +31,8 @@ AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_na
 
     SetSizer(sizer);
     Centre();
+}
+
+void AddTaskWindow::OnClose(wxCloseEvent& event) {
+    EndModal(wxID_CANCEL);
 }

@@ -92,7 +92,7 @@ class AddFloorWindow : public wxDialog {
         wxCheckBox* floor11;
         int num_added_;
         std::vector<wxCheckBox*> boxes_ = {floor1, floor2, floor3, floor4, floor5, floor6, floor7, floor8, floor9, floor10, floor11};
-
+        void OnClose(wxCloseEvent& event);
 
         
 };

@@ -9,13 +9,11 @@ class AddTaskWindow : public wxDialog {
         std::string get_robot() {
             int sol;
             for (int i = 0; i < 11; i++) {
-                try {
-                    if (robots_[i]->GetValue()) {
-                        sol = i + 1;
-                        return std::to_string(sol);
-                    }
-                } catch (...) {
-                    continue;
+                if (robots_[i] == NULL) {
+                    break;
+                } else if (robots_[i]->GetValue()) {
+                    sol = i + 1;
+                    return std::to_string(sol);
                 }
             }
             return "-1";
@@ -24,12 +22,10 @@ class AddTaskWindow : public wxDialog {
         std::vector<int> get_floor(int num_floors) {
             std::vector<int> sol;
             for (int i = 0; i < num_floors; i++) {
-                try {
-                    if (floors_[i]->GetValue()) {
-                        sol.push_back(i + 1);
-                    }
-                } catch (...) {
-                    continue;
+                if (floors_[i] == NULL) {
+                    break;
+                } else if (floors_[i]->GetValue()) {
+                    sol.push_back(i + 1);
                 }
             }
             return sol;
@@ -65,6 +61,8 @@ class AddTaskWindow : public wxDialog {
         int num_added_;
         std::vector<wxCheckBox*> floors_ = {floor1, floor2, floor3, floor4, floor5, floor6, floor7, floor8, floor9, floor10, floor11};
         std::vector<wxRadioButton*> robots_ = {robot1, robot2, robot3, robot4, robot5, robot6, robot7, robot8, robot9, robot10, robot11};
+
+        void OnClose(wxCloseEvent& event);
 };
 
 #endif
