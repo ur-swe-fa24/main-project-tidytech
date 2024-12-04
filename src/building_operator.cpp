@@ -63,7 +63,6 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
         // Bind event to handle selection
         radioButton->Bind(wxEVT_RADIOBUTTON, [this, radioButton](wxCommandEvent& event) {
             selected_robot_ = std::string(radioButton->GetLabel().mb_str());
-            RefreshRobotTable(); // Update the table based on selection
         });
 
         // Add the radio button to the sizer
@@ -78,11 +77,11 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
 
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
     // int tableHeight = 100 + 25 * robots["name"].size();
-    grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
+    grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 80));
 
     // std::cout << robots["name"].size() << std::endl;
     
-    int rows = robots["name"].size();
+    int rows = 1;
     int cols = 8;
     grid->CreateGrid(rows, cols);
 
@@ -100,7 +99,7 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
     grid->SetColLabelValue(7, "Tasks");
 
     for (int row = 0; row < rows; ++row) {
-        grid->SetRowLabelValue(row, "Robot " + std::to_string(row + 1));
+        grid->SetRowLabelValue(row, "Robot");
     }
 
     for (int row = 0; row < rows; ++row) {
@@ -202,7 +201,9 @@ void BuildingOperator::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
     AddTaskWindow taskForm(this, floor_names, robot_names, floor_names.size());
     if (taskForm.ShowModal() == wxID_OK) {
-        if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
+        if (taskForm.get_robot() == "-1" || taskForm.get_floor(floor_names.size()).size() == 0) {
+            // do nothing 
+        } else if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
             wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
         } else {
             wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
@@ -308,7 +309,9 @@ void BuildingOperator::handle_display_text(const std::string& data) {
 
 void BuildingOperator::handle_five_sec(const std::string& data) {
     std::vector<std::vector<std::string>> updated_table_info = extract_five_ping(data);
-    update_grid(updated_table_info);
+    if (updated_table_info[0][1] == selected_robot_) {
+        update_grid(updated_table_info);
+    }
 }
 
 void BuildingOperator::handle_five_sec_floors(const std::string& data) {
@@ -391,7 +394,7 @@ void BuildingOperator::update_grid(const std::vector<std::vector<std::string>>& 
         // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
         wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, 1);
         event.SetString(value.c_str());
-        event.SetInt(std::stoi(robotData[0][0]) - 1);
+        event.SetInt(0);
         event.SetExtraLong(col);
         wxPostEvent(this, event);
     }
@@ -443,42 +446,3 @@ void BuildingOperator::update_grid_neighbors() {
 void BuildingOperator::OnClose(wxCloseEvent& event) {
     // delete &fm_;
 }
-
-void BuildingOperator::RefreshRobotTable() {
-    // Ensure the `selected_robot_` is set before refreshing
-    if (selected_robot_.empty()) {
-        wxLogMessage("No robot selected.");
-        return;
-    }
-
-    // Retrieve robot data from the FleetManager
-    unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
-
-    // Find the index of the selected robot
-    auto it = std::find(robots["name"].begin(), robots["name"].end(), selected_robot_);
-    if (it == robots["name"].end()) {
-        wxLogMessage("Selected robot '%s' not found.", selected_robot_);
-        return;
-    }
-
-    // Clear the grid and refresh with new data
-    if (grid->GetNumberRows() > 0) {
-        grid->DeleteRows(0, grid->GetNumberRows());
-    }
-
-    size_t rowIndex = std::distance(robots["name"].begin(), it);
-
-    grid->AppendRows(1);
-    grid->SetCellValue(0, 0, robots["id"][rowIndex]);
-    grid->SetCellValue(0, 1, robots["name"][rowIndex]);
-    grid->SetCellValue(0, 2, robots["type"][rowIndex]);
-    // grid->SetCellValue(0, 3, robots["battery"][rowIndex]);
-    // grid->SetCellValue(0, 4, robots["capacity"][rowIndex]);
-    // grid->SetCellValue(0, 5, robots["status"][rowIndex]);
-    // grid->SetCellValue(0, 6, robots["cur_room"][rowIndex]);
-    // grid->SetCellValue(0, 7, robots["tasks"][rowIndex]);
-
-    grid->ForceRefresh(); // Refresh grid display
-
-}
-    
