@@ -27,6 +27,7 @@ public:
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery, const int& totalBatteryUsed);
     bool updateRobotErrorCount(const std::string& id);
     bool updateRobotRoomsCleaned(const std::string& id);
+    
     bool deleteRobot(const std::string& robotId);
     
     std::vector<bsoncxx::document::value> getAllRobots();
