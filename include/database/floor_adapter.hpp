@@ -26,6 +26,7 @@ public:
     bool updateCleanLevel(const std::string& floorId, const std::string& newCleanLevel);
     bool updateRestriction(const std::string& floorId, const std::string& restricted);
     bool updateNeighbors(const std::string& floorId, const std::vector<int>& neighbors);
+    
     bool deleteFloor(const std::string& floorId);
 
     std::vector<bsoncxx::document::value> getAllFloors();
