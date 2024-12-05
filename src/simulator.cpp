@@ -39,18 +39,7 @@ void Simulator::simulate() {
             ticking_ = false;
         }
     }
-    std::string data; // TODO: method to do this manual stuff
-    for (Robot& robot : robots_) {
-        data += robot.to_string() + "\n\u200B"; // TODO: create better fix for this
-    }
-    for (Floor& floor : floorplan_.get_all_floor()) {
-        data += "\n\u200B" + floorplan_.floor_to_string(floor) + "\n\u200B";
-    }
-
-    data += "\n\u200B" + floorplan_.to_string();
-    // Report the finished simulation result to an output file
-    spdlog::info("Simulation finished!");
-    notify(Event::FinalReport, data);
+    spdlog::info("MAX TIME REACHED! Simulation finished!");
 }
 
 // simulate the robots
@@ -112,6 +101,9 @@ void Simulator::simulate_robots() {
                     if (robot.is_capacity_empty()) {
                         // Set the path to base
                         try {
+                            if (!floorplan_.access_floor(robot.get_curr()).is_clean()) {
+                                robot.add_tasks_to_front({robot.get_curr()}); // attach the current room to the front of the task if floor is not cleaned when you need to reset capacity
+                            }
                             robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
                             robot.go_empty();
                             update_robot_db(robot, 3);
@@ -288,13 +280,9 @@ void Simulator::add_task_to_back(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
-            if (check_compatibility(robot.get_type(), floor_ids)) {
-                robot.add_tasks_to_back(filter_tasks(robot.get_curr(), floor_ids));
-                update_robot_db(robot, 0);
-                return;
-            } else {
-                throw std::invalid_argument("In compatible robot type to floor type");
-            }
+            robot.add_tasks_to_back(filter_tasks(robot, floor_ids));
+            update_robot_db(robot, 0);
+            return;
         }
     }
     throw std::runtime_error("Robot not found in Simulator");
@@ -305,13 +293,9 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
     std::lock_guard<std::mutex> lock(robots_mutex_);
     for (Robot& robot : robots_) {
         if (robot.get_id() == robot_id) {
-            if (check_compatibility(robot.get_type(), floor_ids)) {
-                robot.add_tasks_to_front(filter_tasks(robot.get_curr(), floor_ids));
-                update_robot_db(robot, 0);
-                return;
-            } else {
-                throw std::invalid_argument("Incompatible robot type to floor type");
-            }
+            robot.add_tasks_to_front(filter_tasks(robot, floor_ids));
+            update_robot_db(robot, 0);
+            return;
         }
     }
     spdlog::error("Robot {} is not in Simulator", robot_id);
@@ -319,17 +303,35 @@ void Simulator::add_task_to_front(int robot_id, std::vector<int> floor_ids) {
 }
 
 // Filter tasks so that you cannot add tasks that the robot cannot reach
-vector<int> Simulator::filter_tasks(int curr, vector<int> tasks) {
-    vector<int> filtered;
+vector<int> Simulator::filter_tasks(Robot& robot, vector<int> tasks) {
+
+    vector<int> filtered1;
+    vector<int> filtered2;
+    RobotType robot_type = robot.get_type();
+    int curr = robot.get_curr();
+
+    auto all_floors = floorplan_.get_all_floor();
+
+    // Removes all unreachable tasks
     for (const int t : tasks) {
         try {
             floorplan_.get_path(curr, t);
-            filtered.push_back(t);
+            filtered1.push_back(t);
         } catch (const std::exception& e) {
             std::cout << "Error: " << e.what() << std::endl;
         }
     }
-    return filtered;
+
+    // Removes all unmatched types
+    for (const int t : filtered1) {
+        for (auto floor : all_floors) {
+            if (t == floor.get_id() && check_robot_to_floor(robot_type, floor.get_floortype())) {
+                filtered2.push_back(t);
+            }
+        }
+    }
+
+    return filtered2;
 }
 
 // Fix all unavailable robots
@@ -360,24 +362,6 @@ void Simulator::check_out_of_battery(int id, int battery) {
     if (battery < 1) {
         notify(Event::UpdateRobotError, id, ErrorType::OutOfBattery, false);
     }
-}
-
-
-// Check RobotType with floor types
-bool Simulator::check_compatibility(RobotType robot_type, std::vector<int> floor_ids) {
-    auto all_floors = floorplan_.get_all_floor();
-    bool floor_not_found = true;
-    for (auto floor : all_floors) {
-        for (auto int_floor : floor_ids) {
-            if (floor.get_id() == int_floor) {
-                if (!check_robot_to_floor(robot_type, floor.get_floortype())) {
-                    return false;
-                }
-                floor_not_found = false;
-            }
-        }
-    }
-    return !floor_not_found;
 }
 
 // Check RobotType and Floortype
@@ -430,6 +414,7 @@ Floor Simulator::get_floor(int floor_id) {
     throw std::invalid_argument("Floor not found in Simulator");
 }
 
+// Get the neighbors of a given floor_id
 std::vector<Floor> Simulator::get_neighbors(int floor_id) {
     std::lock_guard<std::mutex> lock(floors_mutex);
     auto floors = floorplan_.get_all_floor();
@@ -463,6 +448,11 @@ bool Simulator::can_move(Robot& robot) {
     } catch (const std::exception& e) {
         std::cout << "Error: " << e.what() << std::endl;
     }
+    
+    if (robot.get_status() == RobotStatus::Cleaning) {
+        robot.add_tasks_to_front({robot.get_curr()}); // attach the current room to the front of the task
+    }
+
     return false;
 }
 
@@ -485,6 +475,7 @@ void Simulator::notify(const Event& event, const std::string& data) {
     }
 }
 
+// Notify all the subscribers
 void Simulator::notify(const Event& event, const int id, const int val) {
     for (auto& subscriber : subscribers_[event]) {
         subscriber->update(event, id, val);
