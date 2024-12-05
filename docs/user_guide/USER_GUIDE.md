@@ -29,7 +29,7 @@ Adding Tasks:
 
 The data is displayed in two tables, robot table and floor table. This information is updated in real time including battery, capacity and the tasks the robot has to completed/has completed. 
 
-Building operators should start by adding floors first, then robots, then tasks. Once all information has been added correctly, they can click "start simulation" and watch as their robots perform the tasks they assigned.
+Building managers should start by adding floors first, then robots, then tasks. Once all information has been added correctly, they can click "start simulation" and watch as their robots perform the tasks they assigned.
 
 ### Building Operator
 Building operator should login as "building operator", where their page will display radio buttons to switch between the currently available robots. They can only view the data for one robot at a time. There is also a floor table to show in real time the clean status. The building operator can also add tasks to one robot at a time by selecting the "Add Task" button and selecting the robot and room they want cleaned. 
