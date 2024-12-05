@@ -39,18 +39,7 @@ void Simulator::simulate() {
             ticking_ = false;
         }
     }
-    std::string data; // TODO: method to do this manual stuff
-    for (Robot& robot : robots_) {
-        data += robot.to_string() + "\n\u200B"; // TODO: create better fix for this
-    }
-    for (Floor& floor : floorplan_.get_all_floor()) {
-        data += "\n\u200B" + floorplan_.floor_to_string(floor) + "\n\u200B";
-    }
-
-    data += "\n\u200B" + floorplan_.to_string();
-    // Report the finished simulation result to an output file
-    spdlog::info("Simulation finished!");
-    notify(Event::FinalReport, data);
+    spdlog::info("MAX TIME REACHED! Simulation finished!");
 }
 
 // simulate the robots
@@ -112,6 +101,9 @@ void Simulator::simulate_robots() {
                     if (robot.is_capacity_empty()) {
                         // Set the path to base
                         try {
+                            if (!floorplan_.access_floor(robot.get_curr()).is_clean()) {
+                                robot.add_tasks_to_front({robot.get_curr()}); // attach the current room to the front of the task if floor is not cleaned when you need to reset capacity
+                            }
                             robot.set_curr_path(floorplan_.get_path(robot.get_curr(), robot.get_base()));
                             robot.go_empty();
                             update_robot_db(robot, 3);
@@ -456,6 +448,11 @@ bool Simulator::can_move(Robot& robot) {
     } catch (const std::exception& e) {
         std::cout << "Error: " << e.what() << std::endl;
     }
+    
+    if (robot.get_status() == RobotStatus::Cleaning) {
+        robot.add_tasks_to_front({robot.get_curr()}); // attach the current room to the front of the task
+    }
+
     return false;
 }
 

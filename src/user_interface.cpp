@@ -10,7 +10,6 @@
 UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(nullptr, wxID_ANY, title), fm_(*fm) {
     // To be able to change the main text on the panel
     // comment
-    subscribe(Event::DisplayText);
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
 
@@ -287,9 +286,7 @@ void UserInterface::unsubscribe(const Event& event) {
 
 void UserInterface::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
-    if (event == Event::DisplayText) {
-        handle_display_text(data);
-    } else if (event == Event::FiveSecReport) {
+    if (event == Event::FiveSecReport) {
         handle_five_sec(data);
     } else if (event == Event::FiveSecReportFloors) {
         handle_five_sec_floors(data);

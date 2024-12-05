@@ -16,7 +16,6 @@ FleetManager::FleetManager() : simulator_{}, dbmanager_{DBManager::getInstance("
     // Subscribe to these events upon initialization
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
-    subscribe(Event::FinalReport);
     subscribe(Event::UpdateFloorNeighbors);
     subscribe(Event::UpdateRobotParameters);
     subscribe(Event::UpdateRobotError);
@@ -187,10 +186,6 @@ void FleetManager::update(const Event& event, const std::string& data) {
         handle_five_sec_ping(data);
     } else if (event == Event::FiveSecReportFloors) {
         handle_five_sec_floors(data);
-    } else if (event == Event::FinalReport) {
-        handle_finished_ping(data);
-    } else if (event == Event::DisplayText) {
-        std::cout << "DisplayText Event" << std::endl;
     }
 }
 
@@ -280,11 +275,6 @@ void FleetManager::handle_five_sec_ping(const std::string& data) {
     // Prints data
     // std::cout << data << std::endl;
     notify(Event::FiveSecReport, data);
-}
-
-void FleetManager::handle_finished_ping(const std::string& data) {
-    // Calls write_output to write data to a file
-    notify(Event::DisplayText, data);
 }
 
 void FleetManager::handle_five_sec_floors(const std::string& data) {
