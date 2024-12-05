@@ -12,7 +12,6 @@ include(dependencies/dependencies.cmake)
 add_library(mongodb
     src/db_manager.cpp
     src/robot_adapter.cpp
-    src/task_adapter.cpp
     src/floor_adapter.cpp
     src/error_adapter.cpp
 )
