@@ -206,7 +206,7 @@ void BuildingOperator::OnAddTask(wxCommandEvent& event) {
         } else if (fm_.add_task_to_back(std::stoi(taskForm.get_robot()), taskForm.get_floor(floor_names.size()))) {
             wxMessageBox(wxT(""), wxT("Task Added Successfully"), wxICON_INFORMATION);
         } else {
-            wxMessageBox(wxT(""), wxT("Could Not Add Floor."), wxICON_INFORMATION);
+            wxMessageBox(wxT(""), wxT("Could Not Add Task."), wxICON_INFORMATION);
         }
     }
 }
