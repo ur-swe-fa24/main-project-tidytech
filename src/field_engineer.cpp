@@ -6,16 +6,22 @@
 FieldEngineer::FieldEngineer(const wxString& title, FleetManager* fm) 
     : fm_(*fm), wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)) {
 
+    // Subscribe to the report to update the robot grid live
     subscribe(Event::FiveSecReport);
 
+    // Create  panel for the whole page
     wxPanel* panel = new wxPanel(this);
+
+    // Create a grid to show informatoin about the robots that need maintenence
     grid = new wxGrid(panel, wxID_ANY, wxDefaultPosition, wxSize(800, 600));
 
+    // Updates grid each simulation tick
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &FieldEngineer::OnUpdateGrid, this, 1);
 
+    // Get data to fill in the table based on the database info when the window loads
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data_fe();
 
-
+    // Fill in the table
     int rows = robots["name"].size();
     int cols = 4;
     grid->CreateGrid(rows, cols);
@@ -47,13 +53,15 @@ FieldEngineer::FieldEngineer(const wxString& title, FleetManager* fm)
         }
     }
 
+    // Create the main sizer for the window
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
+    // Logout button to take the user back to the login page
     wxButton* btn1 = new wxButton(panel, wxID_ANY, "Logout", wxDefaultPosition, wxSize(150, 45));
     btn1->Bind(wxEVT_BUTTON, &FieldEngineer::Logout, this);
     mainSizer->Add(btn1, 0, wxALIGN_RIGHT | wxALL, 5);
 
-    // Make the grid stretch and take up most of the available space
+    // Make the grid stretch and take up the available space
     mainSizer->Add(grid, 1, wxEXPAND | wxALL, 20);
 
     // Add horizontal sizer for the bottom buttons
@@ -67,22 +75,24 @@ FieldEngineer::FieldEngineer(const wxString& title, FleetManager* fm)
 
     mainSizer->Add(resetSizer, 0, wxALIGN_CENTER | wxALL, 10);
 
+    // Set sizers
     panel->SetBackgroundColour(*wxWHITE);
     panel->SetSizer(mainSizer);
     mainSizer->SetSizeHints(this);
 }
 
 
+// Logout button takes the user back to the login page
 void FieldEngineer::Logout(wxCommandEvent& evt) {
     this->Hide();
 
-    // Show or create the UserInterface window
     LoginPage* login = new LoginPage("Login", &fm_);
     login->SetClientSize(800, 600);
     login->Center();
     login->Show();
 }
 
+// All the methods in the pubsub interface
 void FieldEngineer::subscribe(const Event& event) {
     // subscribe to an event
     fm_.subscribe(this, event);
@@ -126,10 +136,10 @@ void FieldEngineer::handle_five_sec(const std::string& data) {
     update_grid(updated_table_info);
 }
 
+// Updates the robot grid each simulation tick
 void FieldEngineer::update_grid(const std::vector<std::vector<std::string>>& robotData) {
     for (int col = 0; col < 4; col++) {
         std::string value = robotData[0][col];
-        // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
         wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, 1);
         event.SetString(value.c_str());
         event.SetInt(std::stoi(robotData[0][0]) - 1);
@@ -138,6 +148,7 @@ void FieldEngineer::update_grid(const std::vector<std::vector<std::string>>& rob
     }
 }
 
+// wxWidgets method to update the grid each simulation tick
 void FieldEngineer::OnUpdateGrid(wxCommandEvent& evt) {
     int row = evt.GetInt();
     int col = static_cast<int>(evt.GetExtraLong());
@@ -146,6 +157,7 @@ void FieldEngineer::OnUpdateGrid(wxCommandEvent& evt) {
     grid->ForceRefresh(); 
 }
 
+// Clean the information output in the robot.to_string method
 std::vector<std::vector<std::string>> FieldEngineer::extract_five_ping(std::string input) {
     // This function was heavily inspired by LLM output
     std::vector<std::vector<std::string>> robots;

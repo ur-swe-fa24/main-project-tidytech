@@ -43,7 +43,7 @@ class UserInterface : public wxFrame, public Publisher, public Subscriber {
         void OnAddFloor(wxCommandEvent& event);
         void OnAddTask(wxCommandEvent& event);
         void OnUpdateGrid(wxCommandEvent& evt);
-        void handle_display_text(const std::string& data);
+        // void handle_display_text(const std::string& data);
 
         void handle_five_sec(const std::string& data);
         void handle_five_sec_floors(const std::string& data);

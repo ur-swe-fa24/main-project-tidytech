@@ -8,13 +8,12 @@
 #include <sstream>
 
 BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wxFrame(nullptr, wxID_ANY, title), fm_(*fm) {
-    // To be able to change the main text on the panel
+    // Subscribe to the events pushed by the simulator to affect the UI
     subscribe(Event::DisplayText);
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
 
-    Bind(wxEVT_CLOSE_WINDOW, &BuildingOperator::OnClose, this);
-
+    // Bind these events to update the grid each simulation tick
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &BuildingOperator::OnUpdateGrid, this, 1);
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &BuildingOperator::OnUpdateGridFloors, this, 2);
 
@@ -22,28 +21,29 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
     scrolledWindow->SetScrollRate(5, 5);
 
     // Crate a panel for the whole window
-    // wxPanel* panel = new wxPanel(this);
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
+    // Logout button navigates back to the home page
     wxButton* btn1 = new wxButton(scrolledWindow, wxID_ANY, "Logout", wxDefaultPosition, wxSize(150, 45));
     btn1->Bind(wxEVT_BUTTON, &BuildingOperator::Logout, this);
     mainSizer->Add(btn1, 0, wxALIGN_RIGHT | wxALL, 5);
 
-    // Create a sizer for the the add task button and add the button
+    // Create a sizer for the the add task button
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
+    // Add task button to assign robots to rooms
     wxButton* openAddTask = new wxButton(scrolledWindow, wxID_ANY, "Add Task", wxDefaultPosition, wxSize(150, 45));
     openAddTask->Bind(wxEVT_BUTTON, &BuildingOperator::OnAddTask, this);
     buttonSizer->Add(openAddTask, 0, wxALL, 5);
 
-
     // Add a horizontal sizer for the radio buttons
     wxBoxSizer* radioButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    // Retrieve the robot names
+    // Retrieve the robot names from the fleet manager
     std::vector<std::string> robotNames = fm_.get_all_robot_names();
     wxRadioButton* firstButton = nullptr; // To track the first button for default selection
 
+    // Add a radio button for each robot currently in the simulation
     for (size_t i = 0; i < robotNames.size(); ++i) {
         wxRadioButton* radioButton = new wxRadioButton(
             scrolledWindow,                 // Parent
@@ -75,12 +75,11 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
     // Add the radio buttons to the main sizer
     mainSizer->Add(radioButtonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
 
+    // Get the information currently in the database to initialize the table with on the window opening
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
-    // int tableHeight = 100 + 25 * robots["name"].size();
     grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 80));
-
-    // std::cout << robots["name"].size() << std::endl;
     
+    // Fill in the table with the informatoin
     int rows = 1;
     int cols = 8;
     grid->CreateGrid(rows, cols);
@@ -116,19 +115,18 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
         }
     }
 
+    // Create a section to show the robot table
     display_text_ = new wxStaticText(scrolledWindow, wxID_ANY, "My Robots:",
                                      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     display_text_->SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     mainSizer->Add(display_text_, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
-
     mainSizer->Add(grid, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL | wxALL, 20);
 
-    // FLOORS
-
+    // Get the information currently in the database to initialize the table with on the window opening
     unordered_map<std::string, std::vector<std::string>> floors = fm_.get_table_data_floors();
-    // int tableHeight2 = 35 + 25 * floors["name"].size();
     grid2 = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
     
+    // Fill in table with information
     int rows2 = floors["name"].size();
     int cols2 = 7;
     grid2->CreateGrid(rows2, cols2);
@@ -171,17 +169,14 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
         }
     }
 
+    // Create a section to show information about the floors
     display_text_ = new wxStaticText(scrolledWindow, wxID_ANY, "My Floors:",
                                      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     display_text_->SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     mainSizer->Add(display_text_, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
-
     mainSizer->Add(grid2, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL | wxALL, 20);
 
-
-
-
-
+    // Set sizer
     scrolledWindow->SetSizer(mainSizer);
     mainSizer->SetSizeHints(scrolledWindow);
 
@@ -196,6 +191,7 @@ BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wx
 }
 
 
+// Method to handle clicking the "add task" button
 void BuildingOperator::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> floor_names = fm_.get_all_floor_names();
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
@@ -272,9 +268,7 @@ void BuildingOperator::unsubscribe(const Event& event) {
 
 void BuildingOperator::update(const Event& event, const std::string& data) {
     // Do a particular method depending on what type of event is being updated
-    if (event == Event::DisplayText) {
-        handle_display_text(data);
-    } else if (event == Event::FiveSecReport) {
+    if (event == Event::FiveSecReport) {
         handle_five_sec(data);
     } else if (event == Event::FiveSecReportFloors) {
         handle_five_sec_floors(data);
@@ -302,11 +296,7 @@ void BuildingOperator::update(const types::Event& event, const std::string& id, 
     // do nothing
 }
 
-// Method called after event "display_text" occurs
-void BuildingOperator::handle_display_text(const std::string& data) {
-    // setText(data);
-}
-
+// Method handles the pings sent from the simulation to update robots
 void BuildingOperator::handle_five_sec(const std::string& data) {
     std::vector<std::vector<std::string>> updated_table_info = extract_five_ping(data);
     if (updated_table_info[0][1] == selected_robot_) {
@@ -314,19 +304,21 @@ void BuildingOperator::handle_five_sec(const std::string& data) {
     }
 }
 
+// Method handles the pings sent from the simulation to update floors
 void BuildingOperator::handle_five_sec_floors(const std::string& data) {
     update_grid_floors(data);
 }
 
+// Method to handle the user clicking "logout," takes user back to login page
 void BuildingOperator::Logout(wxCommandEvent& evt) {
     this->Hide();
-    // Show or create the UserInterface window
     LoginPage* login = new LoginPage("Login", &fm_);
     login->SetClientSize(800, 600);
     login->Center();
     login->Show();
 }
 
+// Adds a row to the grid when the user adds a robot
 void BuildingOperator::AddRowToGrid(std::vector<std::string> row_info) {
     int row = grid->GetNumberRows();
     grid->AppendRows(1);
@@ -342,6 +334,7 @@ void BuildingOperator::AddRowToGrid(std::vector<std::string> row_info) {
     grid->Refresh();
 }
 
+// Adds a row to the grid when the user adds a floor
 void BuildingOperator::AddRowToGridFloor(std::vector<std::string> row_info) {
     int row = grid2->GetNumberRows();
     grid2->AppendRows(1);
@@ -358,6 +351,7 @@ void BuildingOperator::AddRowToGridFloor(std::vector<std::string> row_info) {
     grid2->Refresh();
 }
 
+// Cleans the to_string output from the simulation about each robot
 std::vector<std::vector<std::string>> BuildingOperator::extract_five_ping(std::string input) {
     // This function was heavily inspired by LLM output
     std::vector<std::vector<std::string>> robots;
@@ -388,10 +382,10 @@ std::vector<std::vector<std::string>> BuildingOperator::extract_five_ping(std::s
     return robots;
 }
 
+// Updates the grid for each robot on each simulation tick
 void BuildingOperator::update_grid(const std::vector<std::vector<std::string>>& robotData) {
     for (int col = 0; col < 8; col++) {
         std::string value = robotData[0][col];
-        // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
         wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, 1);
         event.SetString(value.c_str());
         event.SetInt(0);
@@ -400,6 +394,7 @@ void BuildingOperator::update_grid(const std::vector<std::vector<std::string>>& 
     }
 }
 
+// Necessary method for wxWidgets to update the grid live
 void BuildingOperator::OnUpdateGrid(wxCommandEvent& evt) {
     int row = evt.GetInt();
     int col = static_cast<int>(evt.GetExtraLong());
@@ -408,12 +403,9 @@ void BuildingOperator::OnUpdateGrid(wxCommandEvent& evt) {
     grid->ForceRefresh(); 
 }
 
+// Updates the grid for each floor on each simulation tick
 void BuildingOperator::update_grid_floors(std::string cleanLevel) {
-    // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
-    // Find the position of the comma
     size_t pos = cleanLevel.find(',');
-
-    // Extract the parts before and after the comma
     std::string id = cleanLevel.substr(0, pos);
     std::string level = cleanLevel.substr(pos + 1);
 
@@ -424,6 +416,7 @@ void BuildingOperator::update_grid_floors(std::string cleanLevel) {
     wxPostEvent(this, event2);
 }
 
+// Necessary method for wxWidgets to update the floor grid live
 void BuildingOperator::OnUpdateGridFloors(wxCommandEvent& evt) {
     int row = evt.GetInt();
     int col = 5;
@@ -432,7 +425,7 @@ void BuildingOperator::OnUpdateGridFloors(wxCommandEvent& evt) {
     grid2->ForceRefresh(); 
 }
 
-
+// Update the neigbors of the existing floors when a new neighbor to those floors are added
 void BuildingOperator::update_grid_neighbors() {
     unordered_map<std::string, std::vector<std::string>> updatedFloors = fm_.get_table_data_floors();
     int rows = updatedFloors["name"].size();
@@ -441,8 +434,4 @@ void BuildingOperator::update_grid_neighbors() {
         grid2->SetCellValue(row, 6, newNeighbors);
     }
     grid2->ForceRefresh();
-}
-
-void BuildingOperator::OnClose(wxCloseEvent& event) {
-    // delete &fm_;
 }
