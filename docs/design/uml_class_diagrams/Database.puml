@@ -15,13 +15,13 @@ package Database {
     }
     class FloorAdapter{
         + FloorAdapter(mongocxx::collection collection)
-        + void insertFloor(const ststring& id, const string& name, const string& roomType, const string& floortype, \
+        + void insertFloor(const ststring& id, const string& name, const string& roomType, const string& floortype, const string& size, \
             
-            const string& size, const string& interaction, const string& restricted, const string& clean_level)
+             const string& interaction, const string& restricted, const string& clean_level const std::vector<int>& neighbors)
         + optional<bsoncxx::document::value> findDocumentById(const string& floorId)
-        + bool updateCleanLevel(const string& floorId, const string& newCleanLevel)
-        + bool updateRestriction(const string& floorId, const string& restricted)
-        + bool deleteFloor(const string& floorId)
+        + bool updateCleanLevel(const std::string& floorId, const std::string& newCleanLevel);
+        + bool updateRestriction(const std::string& floorId, const std::string& restricted);
+        + bool updateNeighbors(const std::string& floorId, const std::vector<int>& neighbors);
         + vector<bsoncxx::document::value> getAllFloors()
         - mongocxx::collection collection_
     }
@@ -29,30 +29,22 @@ package Database {
         + RobotAdapter(mongocxx::collection collection)
         + void insertRobot(const ststring& id, const string& name, const string& size, const string& type, \
         
-            const string& baseLocation, const string& currentLocation, const string& status, const string& capacity)
+            const string& baseLocation, const string& currentLocation, const string& status, const string& capacity, \
+
+            const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery, \
+            
+            const int& totalBatteryUsed, const int& errorCount, const int& roomsCleaned)
         + optional<bsoncxx::document::value> findDocumentById(const string& robotId)
-        + bool updateRobotLocation(const string& robotId, const string& newLocation)
-        + bool updateRobotStatus(const string& robotId, const string& newStatus)
-        + bool updateRobotCapacity(const string& robotId, const string& newCapacity)
+        + bool updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, \
+
+            const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery, const int& totalBatteryUsed);
+        + bool updateRobotErrorCount(const std::string& id);
+        + bool updateRobotRoomsCleaned(const std::string& id);
         + bool deleteRobot(const string& robotId)
         + vector<bsoncxx::document::value> getAllRobots();
         - mongocxx::collection collection_
 
     } 
-    class TaskAdapter {
-        + TaskAdapter(mongocxx::collection collection)
-        + void insertTask(const string& id, const string& name, const string& description, const string& start_time, \
-            
-            const string& end_time, const string& status, const string& completion, const <string>& assigned_robots)
-        + optional<bsoncxx::document::value> findDocumentById(const string& taskId)
-        + bool updateTaskStartTime(const string& taskId, const string& start_time)
-        + bool updateTaskEndTime(const string& taskId, const string& end_time)
-        + bool updateTaskStatus(const string& taskId, const string& status)
-        + bool updateTaskCompletion(const string& taskId, const string& completion)
-        + bool updateTaskRobotAssignment(const string& taskId, const <string>& assigned_robots)
-        + bool deleteTask(const string& taskId)
-        - mongocxx::collection collection_
-    }
     class ErrorAdapter {
         + ErrorAdapter(mongocxx::collection collection)
         + void insertError(const string& id, const string& robotID, const string& errorType, const int& resolved)
@@ -61,12 +53,13 @@ package Database {
         + bool updateError(const string& id, const string& robotID, const string& errorType, const int& resolved)
         + bool deleteError(const string& errorId)
         + vector<bsoncxx::document::value> getAllErrors()
+        + bool allErrorIsResolved(const std::string& robotID);
+        + void resolveError(const std::string& robotID);
         - mongocxx::collection collection_
     }
 
     DBManager *-- FloorAdapter 
     DBManager *-- RobotAdapter 
-    DBManager *-- TaskAdapter
     DBManager *-- ErrorAdapter
 }
 
