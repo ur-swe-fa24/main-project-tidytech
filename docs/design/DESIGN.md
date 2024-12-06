@@ -3,7 +3,7 @@
 ## [Use Case Diagram](./use_case_diagram/use_cases.md)
 ![Use Case Diagram](./use_case_diagram/use_case_diagram.png)
 
-The use case diagram illustrates how the Senior Manager, Building Operator, Building Manager, and Field Engineer interact with the cleaning robot fleet management system. Each user has specific functionalities, such as assigning tasks to robots, setting a cleaning schedule or tracking robot location. Some functions are shared between roles.
+The use case diagram illustrates how the Senior Manager, Building Operator, Building Manager, and Field Engineer interact with the cleaning robot fleet management system. Each user has specific functionalities, such as assigning tasks to robots or resolving errors. Some functions are shared between roles.
 
 ## [Architectural Design](./architecture/ARCHITECTURE.md)
 ![Architectural Design](./architecture/architecture.png)
