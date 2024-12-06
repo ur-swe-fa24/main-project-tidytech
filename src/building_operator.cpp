@@ -9,7 +9,6 @@
 
 BuildingOperator::BuildingOperator(const wxString& title, FleetManager* fm) : wxFrame(nullptr, wxID_ANY, title), fm_(*fm) {
     // Subscribe to the events pushed by the simulator to affect the UI
-    subscribe(Event::DisplayText);
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
 

@@ -18,9 +18,10 @@ public:
     // Insert a new error document
     void insertError(const std::string& id, const std::string& robotID, const std::string& errorType, const int& resolved);
 
-    // Find a document by error ID
+    // Find a document by error ID or robot ID
     std::optional<bsoncxx::document::value> findDocumentById(const std::string& errorId);
     std::vector<bsoncxx::document::value> findErrorByRobotID(const std::string& robotId);
+
     bool updateError(const std::string& id, const std::string& robotID, const std::string& errorType, const int& resolved);
     bool deleteError(const std::string& errorId);
 

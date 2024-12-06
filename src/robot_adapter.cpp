@@ -71,25 +71,6 @@ std::optional<bsoncxx::document::value> RobotAdapter::findDocumentById(const std
     }
 }
 
-/*
-bool RobotAdapter::updateRobotStatus(const std::string& robotId, const std::string& newStatus) {
-    auto query_doc = make_document(
-        kvp("_id", robotId)
-    );
-
-    auto update_doc = make_document(
-        kvp("$set", 
-            make_document(
-                kvp("status", newStatus)
-            )
-        )
-    );
-
-    auto result = collection_.update_one(query_doc.view(), update_doc.view());
-    return result && result->modified_count() > 0;
-}
-*/
-
 bool RobotAdapter::updateRobot(const std::string& id, const std::string& currentLocation, const std::string& status, const std::string& capacity, 
                     const std::vector<int>& taskQueue, const std::vector<int>& path, const int& curBattery, const int& battery_changed) {
     auto query_doc = make_document(

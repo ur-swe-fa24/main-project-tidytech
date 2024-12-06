@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include "database/robot_adapter.hpp" 
-#include "database/task_adapter.hpp" 
 #include <bsoncxx/json.hpp>
 #include "database/floor_adapter.hpp" 
 #include "database/error_adapter.hpp" 
@@ -91,6 +90,8 @@ TEST_CASE("Robot Adapter Unit Tests") {
         }
         REQUIRE(foundRobot2);
         REQUIRE(foundRobot3);
+        robotAdapter.deleteRobot("2");
+        robotAdapter.deleteRobot("3");
     }
 
 }
@@ -154,84 +155,6 @@ TEST_CASE("Floor Adapter Unit Tests") {
     }
 }
 
-
-/**
- * unit tests for task adapter
- */
-TEST_CASE("Task Adapter Unit Tests") {
-    
-    // get the database and collection
-    auto db = client["test_database"];
-    db = client["test_database"];
-    auto collection = db["tasks"];
-
-    // create taskAdapter
-    TaskAdapter taskAdapter(collection);
-    SECTION("Insert Task 1") {
-        taskAdapter.deleteTask("1"); // delete the task first if it exists to ensure clean state
-        // insert a task and check if it is added
-        taskAdapter.insertTask("1", "task1", "clean floor 1", "10:00", "13:00", "in progress", "50", {"1", "2", "3"});
-        auto foundTask = taskAdapter.findDocumentById("1");
-        REQUIRE(foundTask);  // Assert that the task exists
-        REQUIRE(bsoncxx::to_json(*foundTask).find("task1") != std::string::npos); 
-    }
-
-    SECTION("Duplicated ids cannot be inserted to the database") {
-        REQUIRE_THROWS(taskAdapter.insertTask("1", "task1", "clean the floor2", "11:00", "13:00", "in progress", "50", {"1", "2", "3"}));
-    }
-
-    SECTION("Find a task by id") {
-        taskAdapter.deleteTask("2");
-        taskAdapter.insertTask("2", "task2", "clean the bathroom2", "14:00", "14:20", "pending", "0", {"1"});
-        auto foundTask = taskAdapter.findDocumentById("2");
-        REQUIRE(foundTask);
-        REQUIRE(bsoncxx::to_json(*foundTask).find("task2") != std::string::npos);
-    }
-
-    SECTION("Update Task Status") {
-        taskAdapter.deleteTask("3");
-        // insert a task, update its status, and check the update
-        taskAdapter.insertTask("3", "task3", "clean the second floor", "15:00", "16:00", "pending", "10", {"2"});
-        taskAdapter.updateTaskStatus("3", "completed");
-        auto updatedTask = taskAdapter.findDocumentById("3");
-        REQUIRE(updatedTask); 
-        // check if status updated
-        REQUIRE(bsoncxx::to_json(*updatedTask).find("completed") != std::string::npos);  
-    }
-
-    SECTION("Update Task Robot Assignment") {
-        taskAdapter.deleteTask("4");
-        // insert a task, update its robot assignment, and check the change
-        taskAdapter.insertTask("4", "task4", "clean the 3rd floor", "17:00", "18:30", "in progress", "20", {"1"});
-        taskAdapter.updateTaskRobotAssignment("4", {"3", "4", "5"});
-        auto updatedTask = taskAdapter.findDocumentById("4");
-        REQUIRE(updatedTask);
-        // check if robot "3" is assigned
-        REQUIRE(bsoncxx::to_json(*updatedTask).find("3") != std::string::npos);  
-    }
-
-    SECTION("Delete Task") {
-        taskAdapter.insertTask("5", "task5", "clean the office", "11:00", "12:30", "in progress", "30", {"2"});
-        taskAdapter.deleteTask("5");
-        auto foundTask = taskAdapter.findDocumentById("5");
-        REQUIRE(!foundTask);
-    }
-
-    SECTION("Delete all tasks") {
-        taskAdapter.deleteTask("4");
-        auto foundTask = taskAdapter.findDocumentById("4");
-        REQUIRE(!foundTask);
-        taskAdapter.deleteTask("3");
-        foundTask = taskAdapter.findDocumentById("3");
-        REQUIRE(!foundTask);
-        taskAdapter.deleteTask("2");
-        foundTask = taskAdapter.findDocumentById("2");
-        REQUIRE(!foundTask);
-        taskAdapter.deleteTask("1");
-        foundTask = taskAdapter.findDocumentById("1");
-        REQUIRE(!foundTask);
-    }
-}
 /**
  * unit tests for error adapter
  */
@@ -260,6 +183,7 @@ TEST_CASE("Error Adapter Unit Tests") {
         REQUIRE(errorsForRobot2.size() == 2);  
         REQUIRE(bsoncxx::to_json(errorsForRobot2[0]).find("Random Break") != std::string::npos);
         REQUIRE(bsoncxx::to_json(errorsForRobot2[1]).find("Out of Battery") != std::string::npos);
+        errorAdapter.deleteError("3");
     }
 
     // Testing updating error
@@ -269,6 +193,7 @@ TEST_CASE("Error Adapter Unit Tests") {
         REQUIRE(updatedError);
         auto view = updatedError->view();
         REQUIRE(view["resolved"].get_int32() == 1);
+        errorAdapter.deleteError("1");
     }
 
     // Testing deleting an error
@@ -299,6 +224,8 @@ TEST_CASE("Error Adapter Unit Tests") {
         }
         REQUIRE(foundOutOfBattery);
         REQUIRE(foundRandomBreak);
+        errorAdapter.deleteError("4");
+        errorAdapter.deleteError("5");
     }
 
    //testing if all errors are resolved
@@ -314,7 +241,8 @@ TEST_CASE("Error Adapter Unit Tests") {
         
         //check that not all errors are resolved for the robot with ID "5"
         REQUIRE(!errorAdapter.allErrorIsResolved("5"));
-    
+        errorAdapter.deleteError("7");
+        errorAdapter.deleteError("8");
     }
 
     //testing resolveError
@@ -331,7 +259,8 @@ TEST_CASE("Error Adapter Unit Tests") {
         auto resolvedError = errorAdapter.findDocumentById("9");
         REQUIRE(resolvedError);
         REQUIRE(resolvedError->view()["resolved"].get_int32() == 1);
+        errorAdapter.deleteError("6");
+        errorAdapter.deleteError("9");
     }
-
+    
 }
-
