@@ -3,13 +3,19 @@
 #include <wx/grid.h>
 #include "ui/login_page.hpp"
 
-SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : fm_(*fm), wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)) {
+SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm)
+    : fm_(*fm), wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600)) {
+
+    // Create a panel for the page
     wxPanel* panel = new wxPanel(this);
+
+    // Create a grid to show business analytics
     wxGrid* grid = new wxGrid(panel, wxID_ANY, wxDefaultPosition, wxSize(800, 600));
 
+    // Get data from the database (from the fleet manager) to initalize the table to on the window loading
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data_metrics();
-    // std::cout << robots["name"].size() << std::endl;
     
+    // Fill in the table
     int rows = robots["name"].size();
     int cols = 7;
     grid->CreateGrid(rows, cols);
@@ -54,10 +60,12 @@ SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : 
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
+    // Create a logout button to take the user back to the login page
     wxButton* btn1 = new wxButton(panel, wxID_ANY, "Logout", wxDefaultPosition, wxSize(150, 45));
     btn1->Bind(wxEVT_BUTTON, &SeniorManagerPage::Logout, this);
     sizer->Add(btn1, 0, wxALIGN_RIGHT | wxALL, 5);
 
+    // Add and set all sizers
     sizer->Add(grid, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL | wxALL, 20);
 
     panel->SetBackgroundColour(*wxWHITE);
@@ -66,6 +74,7 @@ SeniorManagerPage::SeniorManagerPage(const wxString& title, FleetManager* fm) : 
     sizer->SetSizeHints(this);
 }
 
+// Logout method takes the user back to the login page
 void SeniorManagerPage::Logout(wxCommandEvent& evt) {
     this->Hide();
 

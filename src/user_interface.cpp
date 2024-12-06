@@ -8,13 +8,11 @@
 #include <sstream>
 
 UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(nullptr, wxID_ANY, title), fm_(*fm) {
-    // To be able to change the main text on the panel
-    // comment
+    // Subscribe to the events pushed by the simulator to affect the UI
     subscribe(Event::FiveSecReport);
     subscribe(Event::FiveSecReportFloors);
 
-    Bind(wxEVT_CLOSE_WINDOW, &UserInterface::OnClose, this);
-
+    // Bind these events to update the grid each simulation tick
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &UserInterface::OnUpdateGrid, this, 1);
     Bind(wxEVT_COMMAND_BUTTON_CLICKED, &UserInterface::OnUpdateGridFloors, this, 2);
 
@@ -22,7 +20,6 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
     scrolledWindow->SetScrollRate(5, 5);
 
     // Crate a panel for the whole window
-    // wxPanel* panel = new wxPanel(this);
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
     wxButton* btn1 = new wxButton(scrolledWindow, wxID_ANY, "Logout", wxDefaultPosition, wxSize(150, 45));
@@ -32,14 +29,17 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
     // Create a sizer for the three buttons and add the buttons
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
+    // Add robot button
     wxButton* openAddRobot = new wxButton(scrolledWindow, wxID_ANY, "Add Robot", wxDefaultPosition, wxSize(150, 45));
     openAddRobot->Bind(wxEVT_BUTTON, &UserInterface::OnAddRobot, this);
     buttonSizer->Add(openAddRobot, 0, wxALL, 5);
 
+    // Add floor button
     wxButton* openAddFloor = new wxButton(scrolledWindow, wxID_ANY, "Add Floor", wxDefaultPosition, wxSize(150, 45));
     openAddFloor->Bind(wxEVT_BUTTON, &UserInterface::OnAddFloor, this);
     buttonSizer->Add(openAddFloor, 0, wxALL, 5);
 
+    // Add task button
     wxButton* openAddTask = new wxButton(scrolledWindow, wxID_ANY, "Add Task", wxDefaultPosition, wxSize(150, 45));
     openAddTask->Bind(wxEVT_BUTTON, &UserInterface::OnAddTask, this);
     buttonSizer->Add(openAddTask, 0, wxALL, 5);
@@ -47,12 +47,11 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
     // Add the buttons to the main sizer
     mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
 
+    // Get data from the database (throgh fleet manager) to initalize the table with upon window opening
     unordered_map<std::string, std::vector<std::string>> robots = fm_.get_table_data();
-    // int tableHeight = 100 + 25 * robots["name"].size();
     grid = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
 
-    // std::cout << robots["name"].size() << std::endl;
-    
+    // Fill in the table with the appropriate data
     int rows = robots["name"].size();
     int cols = 8;
     grid->CreateGrid(rows, cols);
@@ -88,6 +87,7 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
         }
     }
 
+    // Create a section to show information about the robots
     display_text_ = new wxStaticText(scrolledWindow, wxID_ANY, "My Robots:",
                                      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     display_text_->SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
@@ -95,12 +95,11 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
 
     mainSizer->Add(grid, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL | wxALL, 20);
 
-    // FLOORS
-
+    // Get data from the database (through the fleet manager) to get infromation about the floors to fill in the table with upon initailizaiton
     unordered_map<std::string, std::vector<std::string>> floors = fm_.get_table_data_floors();
-    // int tableHeight2 = 35 + 25 * floors["name"].size();
     grid2 = new wxGrid(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(630, 200));
     
+    // Fill in the table with the appropriate data
     int rows2 = floors["name"].size();
     int cols2 = 7;
     grid2->CreateGrid(rows2, cols2);
@@ -143,6 +142,7 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
         }
     }
 
+    // Create a section to show all the relevant information about the floors
     display_text_ = new wxStaticText(scrolledWindow, wxID_ANY, "My Floors:",
                                      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     display_text_->SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
@@ -150,10 +150,7 @@ UserInterface::UserInterface(const wxString& title, FleetManager* fm) : wxFrame(
 
     mainSizer->Add(grid2, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL | wxALL, 20);
 
-
-
-
-
+    // Add and set all sizers 
     scrolledWindow->SetSizer(mainSizer);
     mainSizer->SetSizeHints(scrolledWindow);
 
@@ -210,6 +207,7 @@ void UserInterface::OnAddFloor(wxCommandEvent& event) {
     }
 }
 
+// Form for task when the user tries to add a task
 void UserInterface::OnAddTask(wxCommandEvent& event) {
     std::vector<std::string> floor_names = fm_.get_all_floor_names();
     std::vector<std::string> robot_names = fm_.get_all_robot_names();
@@ -314,29 +312,28 @@ void UserInterface::update(const types::Event& event, const std::string& id, con
     // do nothing
 }
 
-// Method called after event "display_text" occurs
-void UserInterface::handle_display_text(const std::string& data) {
-    // setText(data);
-}
-
+// Method to handle the robot table updating on each simulator tick
 void UserInterface::handle_five_sec(const std::string& data) {
     std::vector<std::vector<std::string>> updated_table_info = extract_five_ping(data);
     update_grid(updated_table_info);
 }
 
+// Method to handle the floors table updating on each simulator tick
 void UserInterface::handle_five_sec_floors(const std::string& data) {
     update_grid_floors(data);
 }
 
+// Sends the user back to the login page
 void UserInterface::Logout(wxCommandEvent& evt) {
     this->Hide();
-    // Show or create the UserInterface window
+
     LoginPage* login = new LoginPage("Login", &fm_);
     login->SetClientSize(800, 600);
     login->Center();
     login->Show();
 }
 
+// Adds row to robot grid when a new robot is added to the simulator
 void UserInterface::AddRowToGrid(std::vector<std::string> row_info) {
     int row = grid->GetNumberRows();
     grid->AppendRows(1);
@@ -352,6 +349,7 @@ void UserInterface::AddRowToGrid(std::vector<std::string> row_info) {
     grid->Refresh();
 }
 
+// Add row to floor grid when a new floor is added to simulator
 void UserInterface::AddRowToGridFloor(std::vector<std::string> row_info) {
     int row = grid2->GetNumberRows();
     grid2->AppendRows(1);
@@ -368,6 +366,7 @@ void UserInterface::AddRowToGridFloor(std::vector<std::string> row_info) {
     grid2->Refresh();
 }
 
+// Clean the to_string method for each robot from the simulator
 std::vector<std::vector<std::string>> UserInterface::extract_five_ping(std::string input) {
     // This function was heavily inspired by LLM output
     std::vector<std::vector<std::string>> robots;
@@ -398,6 +397,7 @@ std::vector<std::vector<std::string>> UserInterface::extract_five_ping(std::stri
     return robots;
 }
 
+// Update the robot grid on each simulator tick
 void UserInterface::update_grid(const std::vector<std::vector<std::string>>& robotData) {
     for (int col = 0; col < 8; col++) {
         std::string value = robotData[0][col];
@@ -410,6 +410,7 @@ void UserInterface::update_grid(const std::vector<std::vector<std::string>>& rob
     }
 }
 
+// Necessary method for wxWidgets to update the robot grid
 void UserInterface::OnUpdateGrid(wxCommandEvent& evt) {
     int row = evt.GetInt();
     int col = static_cast<int>(evt.GetExtraLong());
@@ -418,12 +419,10 @@ void UserInterface::OnUpdateGrid(wxCommandEvent& evt) {
     grid->ForceRefresh(); 
 }
 
+// Update the floors grid on each simulator tick
 void UserInterface::update_grid_floors(std::string cleanLevel) {
-    // std::cout << "Updating Cell: " << row << ", " << col << " with value: " << value << std::endl;
-    // Find the position of the comma
     size_t pos = cleanLevel.find(',');
 
-    // Extract the parts before and after the comma
     std::string id = cleanLevel.substr(0, pos);
     std::string level = cleanLevel.substr(pos + 1);
 
@@ -434,6 +433,7 @@ void UserInterface::update_grid_floors(std::string cleanLevel) {
     wxPostEvent(this, event2);
 }
 
+// Necessary method for wxWidgets to update the robot grid
 void UserInterface::OnUpdateGridFloors(wxCommandEvent& evt) {
     int row = evt.GetInt();
     int col = 5;
@@ -442,7 +442,7 @@ void UserInterface::OnUpdateGridFloors(wxCommandEvent& evt) {
     grid2->ForceRefresh(); 
 }
 
-
+// Update the current floors in the grid with their new neighbors when a new floor is added
 void UserInterface::update_grid_neighbors() {
     unordered_map<std::string, std::vector<std::string>> updatedFloors = fm_.get_table_data_floors();
     int rows = updatedFloors["name"].size();
@@ -451,8 +451,4 @@ void UserInterface::update_grid_neighbors() {
         grid2->SetCellValue(row, 6, newNeighbors);
     }
     grid2->ForceRefresh();
-}
-
-void UserInterface::OnClose(wxCloseEvent& event) {
-    // delete &fm_;
 }

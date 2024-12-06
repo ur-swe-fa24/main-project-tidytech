@@ -1,11 +1,16 @@
 #include "ui/add_task_window.hpp"
 
-AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_names, std::vector<std::string> robot_names, int num_added) : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 450)) {
+AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_names, std::vector<std::string> robot_names, int num_added)
+    : wxDialog(parent, wxID_ANY, "Form Dialog", wxDefaultPosition, wxSize(300, 450)) {
+    
+    // Main sizer for the page
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+    // Num added is needed to keep track of total number of floors added, for get_floor_neighbors method
     num_added_ = num_added;
+
+    // Method is bound to the window closing, needed to throw wxID_CANCEL instead of wx_ID_OK
     Bind(wxEVT_CLOSE_WINDOW, &AddTaskWindow::OnClose, this);
-    // std::reverse(robot_names.begin(), robot_names.end());
-    // std::reverse(floor_names.begin(), floor_names.end());
 
     // Robot radio buttons
     wxBoxSizer* robotSizer = new wxBoxSizer(wxVERTICAL);
@@ -29,10 +34,12 @@ AddTaskWindow::AddTaskWindow(wxWindow* parent, std::vector<std::string> floor_na
     wxButton* submitButton = new wxButton(this, wxID_OK, "Submit");
     sizer->Add(submitButton, 0, wxALIGN_CENTER | wxALL, 10);
 
+    // Set sizer and center the dialogue
     SetSizer(sizer);
     Centre();
 }
 
+// Method is bound to the window closing, needed to throw wxID_CANCEL instead of wx_ID_OK
 void AddTaskWindow::OnClose(wxCloseEvent& event) {
     EndModal(wxID_CANCEL);
 }
