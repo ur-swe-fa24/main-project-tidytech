@@ -2,13 +2,16 @@
 #define UI_SENIOR_MANAGER_PAGE
 
 #include <wx/wx.h>
+#include <wx/grid.h>
+#include "sys_manager/fleet_manager.hpp"
+
  
 class SeniorManagerPage : public wxFrame {
     public:
-        SeniorManagerPage(const wxString& title);
+        SeniorManagerPage(const wxString& title, FleetManager* fm);
     private:
-        void OnButtonClick(wxCommandEvent& evt);
-        void OnSeniorManagerClick(wxCommandEvent& evt);
+        FleetManager& fm_;
+        void Logout(wxCommandEvent& evt);
 };
 
 #endif

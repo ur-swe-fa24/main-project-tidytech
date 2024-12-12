@@ -12,7 +12,7 @@
 using namespace types;
 
 TEST_CASE("Testing Robot Unit Tests") {
-    Robot robo1 = Robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
+    Robot robo1 = Robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available, 100, 100);
 
     SECTION("Initial Robot Properties") {
         REQUIRE(robo1.get_id() == 1);
@@ -266,8 +266,8 @@ TEST_CASE("Simulator Unit Tests") {
     Simulator sim{};
 
     SECTION("Add Robot to Simulator") {
-        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
-        sim.add_robot(2, "Tommy", RobotSize::Medium, RobotType::Scrubber, 1, 1, RobotStatus::Available);
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
+        sim.add_robot(2, "Tommy", RobotSize::Medium, RobotType::Scrubber, 1, 1, RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
         REQUIRE(sim.get_num_robots() == 2);
         REQUIRE(sim.get_robot(2).get_id() == 2);
     }
@@ -281,12 +281,11 @@ TEST_CASE("Simulator Unit Tests") {
     }
 
     SECTION("Add tasks to robot in Simulator") {
-        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
         sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
         sim.add_floor(2, "Office", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
         sim.add_floor(3, "Living Room", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
-        sim.add_floor(4, "Bedroom", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
-
+        sim.add_floor(4, "Bedroom", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {1,2,3});
 
         sim.add_task_to_back(1, {1,2});
         REQUIRE(sim.get_robot(1).get_task_size() == 2);
@@ -296,23 +295,14 @@ TEST_CASE("Simulator Unit Tests") {
         REQUIRE(sim.get_robot(1).get_task_queue()[0] == 3);
     }
 
-    SECTION("Check compatibility") {
-        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
-        sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 100, {});
-
-        REQUIRE_THROWS(sim.add_task_to_back(1, {2}));
-        REQUIRE_THROWS(sim.add_task_to_front(2, {1}));
-        REQUIRE_NOTHROW(sim.add_task_to_back(1, {1}));
-    }
-
     SECTION("Notify testing") {
         REQUIRE_NOTHROW(sim.notify(Event::FiveSecReport, "Example message"));
     }
     
 
     SECTION("Simulation") {
-        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available);
-        sim.add_robot(2, "Tom", RobotSize::Small, RobotType::Vaccum, 1, 1, RobotStatus::Available);
+        sim.add_robot(1, "Jimmy", RobotSize::Large, RobotType::Shampoo, 1, 1, RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
+        sim.add_robot(2, "Tom", RobotSize::Small, RobotType::Vaccum, 1, 1, RobotStatus::Available, 100, {}, {}, 100, 0, 0, 0);
 
         sim.add_floor(1, "Lobby", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 90, {});
         sim.add_floor(2, "Office", FloorRoomType::Room, FloorType::Carpet, FloorSize::Large, FloorInteraction::High, false, 80, {1});

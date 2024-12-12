@@ -8,11 +8,11 @@ actor "Field Engineer" as FE
 
 rectangle "Cleaning Robot System" {
     usecase "Task robots" as U1
-    usecase "Know business analytics" as U2
-    usecase "Restrict certain room access for robots" as U3
-    usecase "Set robot cleaning schedule" as U4
-    usecase "View robot location" as U5
-    usecase "Receive notifications/alerts" as U6
+    usecase "View robot analytics" as U2
+    usecase "Create robots/floors/tasks" as U3
+    usecase "Create floorplan" as U4
+    usecase "View/resolve errors" as U5
+    usecase "Refill/empty robot capacity" as U6
 }
 
 BO --> U1

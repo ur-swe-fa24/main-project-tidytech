@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <cstdlib>
+#include <ctime>
 #include "types/types.hpp"
 #include "pubsub/publisher.hpp"
 #include "pubsub/subscriber.hpp"
@@ -12,7 +14,7 @@ using namespace types;
 
 class Robot{
     public:
-        Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status); // Constructor
+        Robot(int id, std::string name, RobotSize size, RobotType type, int base, int curr, RobotStatus status, int battery, int remaining_capacity); // Constructor
         ~Robot() {}; // Destructor
 
         bool operator==(const Robot& other) const {return id_ == other.id_;} // Overriding Robot comparison
@@ -33,6 +35,7 @@ class Robot{
         int get_battery() const {return battery_;};
         std::vector<int> get_task_queue() const {return task_queue_;};
         int get_task_size() const {return task_queue_.size();};
+        std::queue<int> get_curr_path() const {return curr_path_;};
         int get_curr_path_size() const {return curr_path_.size();};
         std::string to_string() const;
 
@@ -52,8 +55,8 @@ class Robot{
         void clean() {remaining_capacity_ = max(0, remaining_capacity_-3);}; // Cleaning takes away 3 capacity unit
         bool is_capacity_empty();
         void consume_power(int amount = 1);
-        void fix_error() {status_ = RobotStatus::Available; battery_ = 100;}; // Error fix
-        void reset_capacity() {status_ = RobotStatus::Available; remaining_capacity_ = 100;}; // Reset Capacity
+        void fix_error() {status_ = RobotStatus::Available; battery_ = 100; remaining_capacity_ = 100;}; // Error fix
+        void reset_capacity(); // Reset Capacity
         void break_robot();
         
 
@@ -69,6 +72,9 @@ class Robot{
         std::vector<int> task_queue_;
         RobotStatus status_;
         std::queue<int> curr_path_; // Shortest path from one floor to another
+        int total_battery_used;
+        int error_count;
+        int rooms_cleaned;
         
 };
 

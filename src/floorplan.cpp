@@ -7,6 +7,12 @@ std::vector<Floor> FloorPlan::get_all_floor() const {
     for (const auto& pair : floorgraph_) {
         floors.push_back(pair.first);
     }
+
+    // Sort the floors based on their id
+    std::sort(floors.begin(), floors.end(), [](const Floor& a, const Floor& b) {
+        return a.get_id() < b.get_id();
+    });
+
     return floors;
 }
 

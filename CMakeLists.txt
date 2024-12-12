@@ -12,8 +12,8 @@ include(dependencies/dependencies.cmake)
 add_library(mongodb
     src/db_manager.cpp
     src/robot_adapter.cpp
-    src/task_adapter.cpp
     src/floor_adapter.cpp
+    src/error_adapter.cpp
 )
 
 add_library(fleet_manager
@@ -34,6 +34,8 @@ add_library(user_interface
     src/login_page.cpp
     src/senior_manager_page.cpp
     src/add_task_window.cpp
+    src/building_operator.cpp
+    src/field_engineer.cpp
 )
 
 add_library(types INTERFACE)

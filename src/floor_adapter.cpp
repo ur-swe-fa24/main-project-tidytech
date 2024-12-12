@@ -79,6 +79,17 @@ bool FloorAdapter::updateRestriction(const std::string& floorId, const std::stri
     return result && result->modified_count() > 0;
 }
 
+bool FloorAdapter::updateNeighbors(const std::string& floorId, const std::vector<int>& neighbors) {
+    auto query_doc = make_document(kvp("_id", floorId));
+    bsoncxx::builder::basic::array neighbors_array;
+    for (const auto& neighbor : neighbors) {
+        neighbors_array.append(neighbor);
+    };
+    auto update_doc = make_document(kvp("$set", make_document(kvp("neighbors", neighbors_array))));
+    auto result = collection_.update_one(query_doc.view(), update_doc.view());
+    return result && result->modified_count() > 0;
+}
+
 //delete floor
 bool FloorAdapter::deleteFloor(const std::string& floorId) {
     auto query_doc = make_document(kvp("_id", floorId));
